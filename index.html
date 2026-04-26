@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>NeurоNotepad</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#07090f;color:#e2e8f0;min-height:100vh;overflow-x:hidden}
+:root{--bg:#07090f;--card:#0d1220;--border:#1a2540;--accent:#6366f1;--text:#e2e8f0;--muted:#64748b;--dim:#2a3a55}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#07090f}::-webkit-scrollbar-thumb{background:#1a2540;border-radius:3px}
+input::placeholder,textarea::placeholder{color:#2a3a55}
+select option{background:#0d1220;color:#e2e8f0}
+.btn{display:inline-flex;align-items:center;gap:5px;border:none;border-radius:10px;padding:8px 18px;font-size:13px;color:#fff;cursor:pointer;font-weight:600;font-family:inherit;transition:opacity .15s}
+.btn:hover{opacity:.82}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:8px}
+.ghost{background:transparent;border:1px solid var(--border);border-radius:10px;padding:7px 14px;font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s}
+.ghost:hover{border-color:#334a6a;color:var(--text)}
+.inp{width:100%;background:#111827;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text);outline:none;font-family:inherit}
+.inp:focus{border-color:#334a6a}
+.tag{border-radius:6px;padding:2px 8px;font-size:11px;font-weight:500}
+.sec-title{font-family:'Syne',system-ui,sans-serif;font-size:11px;font-weight:700;color:#334a6a;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px}
+#topbar{background:#0d1220;border-bottom:1px solid #1a2540;padding:0 20px;height:56px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
+.logo{font-family:'Syne',system-ui,sans-serif;font-size:20px;font-weight:800;color:#fff;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap;user-select:none}
+.nav-btn{background:transparent;color:var(--muted);border:none;border-radius:8px;padding:6px 13px;font-size:13px;cursor:pointer;font-weight:400;transition:all .15s;white-space:nowrap;font-family:inherit}
+.nav-btn.active{background:rgba(99,102,241,.18);color:#a5b4fc;font-weight:600}
+#main{padding:22px 20px;max-width:1080px;width:100%;margin:0 auto}
+.note-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-bottom:22px}
+.note-list{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:22px}
+.card{background:var(--card);border-radius:13px;padding:15px;cursor:pointer;transition:all .18s;border-left-width:3px;border-left-style:solid;border-top:1px solid;border-right:1px solid;border-bottom:1px solid;position:relative}
+.card:hover{transform:translateY(-2px)}
+.card-title{font-family:'Syne',system-ui,sans-serif;font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-preview{font-size:12px;color:var(--muted);line-height:1.65;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-preview.list{-webkit-line-clamp:3}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center}
+.stat-val{font-family:'Syne',system-ui,sans-serif;font-size:26px;font-weight:800;color:#f1f5f9}
+.stat-label{font-size:12px;color:var(--muted);margin-top:3px}
+.side-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:15px;margin-bottom:12px}
+.label{font-size:12px;color:var(--muted);margin-bottom:5px;display:block;font-weight:500}
+.color-dot{width:20px;height:20px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:border .12s;flex-shrink:0}
+.color-dot.active{border:3px solid #fff}
+.flash-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:36px 28px;text-align:center;cursor:pointer;min-height:210px;display:flex;flex-direction:column;align-items:center;justify-content:center;user-select:none;transition:transform .1s}
+.flash-card:active{transform:scale(.98)}
+.toast{position:fixed;bottom:22px;right:22px;border-radius:12px;padding:11px 18px;font-size:13px;font-weight:600;z-index:999;animation:toastIn .25s ease;box-shadow:0 8px 28px rgba(0,0,0,.5);color:#fff}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:center;justify-content:center}
+.modal{background:#0d1220;border:1px solid #1a2540;border-radius:16px;padding:28px 32px;text-align:center;max-width:320px;width:90%}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.editor-wrap{display:grid;grid-template-columns:1fr 290px;gap:14px;height:calc(100vh - 130px)}
+.editor-left{background:var(--card);border-radius:14px;border-left-width:3px;border-left-style:solid;display:flex;flex-direction:column;overflow:hidden;border-top:1px solid;border-right:1px solid;border-bottom:1px solid}
+.editor-right{overflow-y:auto;padding-right:2px}
+.img-thumb{width:76px;height:60px;object-fit:cover;border-radius:7px;border:1px solid var(--border);display:block;cursor:zoom-in}
+.prog-bar{height:5px;background:var(--border);border-radius:5px;overflow:hidden;margin-bottom:12px}
+.prog-fill{height:100%;border-radius:5px;transition:width .4s}
+@media(max-width:700px){
+  .editor-wrap{grid-template-columns:1fr;height:auto}
+  .editor-right{max-height:400px}
+  #topbar{padding:0 12px;gap:6px}
+  #main{padding:14px 12px}
+  .note-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="logo" onclick="nav('home')">🧠 NeurоNotepad</div>
+  <div style="display:flex;gap:4px;margin-left:6px">
+    <button class="nav-btn active" id="nb-home" onclick="nav('home')">🏠 Bosh sahifa</button>
+    <button class="nav-btn" id="nb-flash" onclick="nav('flashcards')">🃏 Flashcards</button>
+    <button class="nav-btn" id="nb-stats" onclick="nav('stats')">📊 Statistika</button>
+  </div>
+  <div style="flex:1"></div>
+  <button class="ghost" onclick="exportData()" style="font-size:12px;padding:6px 12px">⬇ Eksport</button>
+  <input type="file" accept=".json" id="import-file" style="display:none" onchange="importData(event)"/>
+  <button class="ghost" onclick="document.getElementById('import-file').click()" style="font-size:12px;padding:6px 12px">⬆ Import</button>
+  <button class="btn" style="background:#6366f1" onclick="newNote()">+ Yangi</button>
+</div>
+
+<div id="main"></div>
+
+<div id="toast-el" class="toast" style="display:none"></div>
+
+<div id="modal-overlay" class="overlay" style="display:none">
+  <div class="modal">
+    <div style="font-size:36px;margin-bottom:12px">🗑</div>
+    <div style="font-family:'Syne',system-ui,sans-serif;font-size:17px;font-weight:700;margin-bottom:8px">O'chirishni tasdiqlang</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:22px">Bu konspekt butunlay o'chib ketadi.</div>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="ghost" onclick="closeModal()">Bekor qilish</button>
+      <button class="btn" style="background:#ef4444" id="modal-confirm-btn">Ha, o'chir</button>
+    </div>
+  </div>
+</div>
+
+<div id="img-lightbox" class="overlay" style="display:none" onclick="document.getElementById('img-lightbox').style.display='none'">
+  <img id="lb-img" style="max-width:90vw;max-height:90vh;border-radius:12px;object-fit:contain"/>
+</div>
+
+<script>
+const SUBJECTS=['Anatomiya','Fiziologiya','Nevrologiya','Biokimyo','Farmakologiya','Patologiya','Mikrobiologiya','Immunologiya','Terapiya','Jarrohlik'];
+const COLORS=['#6366f1','#22d3ee','#10b981','#f59e0b','#ef4444','#ec4899','#8b5cf6','#14b8a6','#f97316','#84cc16'];
+
+let notes=JSON.parse(localStorage.getItem('nn3_notes')||'[]');
+let customSubjects=JSON.parse(localStorage.getItem('nn3_subj')||'[]');
+let currentView='home';
+let editingNote=null;
+let pendingDeleteId=null;
+let flashIdx=0;
+let flashFlipped=false;
+let filterSubj='all';
+let filterColor='all';
+let sortBy='date';
+let gridMode=true;
+let searchQ='';
+
+function save(){localStorage.setItem('nn3_notes',JSON.stringify(notes));localStorage.setItem('nn3_subj',JSON.stringify(customSubjects));}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
+function allSubjects(){return[...SUBJECTS,...customSubjects];}
+function wordCount(t){return(t||'').split(/\s+/).filter(Boolean).length;}
+function fmtDate(ts){return new Date(ts).toLocaleDateString('uz-UZ',{day:'2-digit',month:'short',year:'numeric'});}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function toast$(msg,type){
+  const el=document.getElementById('toast-el');
+  el.textContent=msg;el.style.background=type==='err'?'#ef4444':'#10b981';
+  el.style.display='block';clearTimeout(window._tt);
+  window._tt=setTimeout(()=>el.style.display='none',2600);
+}
+
+function nav(v,noteId){
+  currentView=v;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const nb=document.getElementById('nb-'+v);if(nb)nb.classList.add('active');
+  if(v==='home')renderHome();
+  else if(v==='editor'&&editingNote)renderEditor();
+  else if(v==='detail'&&noteId)renderDetail(noteId);
+  else if(v==='flashcards')renderFlashcards();
+  else if(v==='stats')renderStats();
+}
+
+function newNote(){
+  const n={id:uid(),title:'',content:'',subject:allSubjects()[0],color:COLORS[0],images:[],tags:[],pinned:false,starred:false,createdAt:Date.now(),updatedAt:Date.now()};
+  notes.unshift(n);save();editingNote={...n};nav('editor');
+}
+
+function saveNote(){
+  if(!editingNote)return;
+  editingNote.updatedAt=Date.now();
+  const idx=notes.findIndex(x=>x.id===editingNote.id);
+  if(idx>=0)notes[idx]={...editingNote};
+  save();toast$('Saqlandi ✓');
+}
+
+function deleteNote(id){
+  notes=notes.filter(x=>x.id!==id);save();
+  closeModal();nav('home');toast$('O\'chirildi','err');
+}
+
+function togglePin(id){const n=notes.find(x=>x.id===id);if(n){n.pinned=!n.pinned;save();}}
+function toggleStar(id){const n=notes.find(x=>x.id===id);if(n){n.starred=!n.starred;save();}}
+function duplicateNote(n){
+  const c={...n,id:uid(),title:n.title+' (nusxa)',createdAt:Date.now(),updatedAt:Date.now(),pinned:false,images:[...(n.images||[])],tags:[...(n.tags||[])]};
+  notes.unshift(c);save();toast$('Nusxa yaratildi 📋');renderHome();
+}
+
+function showModal(id){pendingDeleteId=id;document.getElementById('modal-overlay').style.display='flex';document.getElementById('modal-confirm-btn').onclick=()=>deleteNote(id);}
+function closeModal(){pendingDeleteId=null;document.getElementById('modal-overlay').style.display='none';}
+function showLightbox(src){document.getElementById('lb-img').src=src;document.getElementById('img-lightbox').style.display='flex';}
+
+function getFiltered(){
+  return notes.filter(n=>{
+    const q=searchQ.toLowerCase();
+    const ms=!q||[n.title,n.content,n.subject,...(n.tags||[])].some(t=>(t||'').toLowerCase().includes(q));
+    const mj=filterSubj==='all'||n.subject===filterSubj;
+    const mc=filterColor==='all'||n.color===filterColor;
+    return ms&&mj&&mc;
+  }).sort((a,b)=>{
+    if(a.pinned!==b.pinned)return a.pinned?-1:1;
+    if(sortBy==='date')return b.updatedAt-a.updatedAt;
+    if(sortBy==='title')return(a.title||'').localeCompare(b.title||'');
+    if(sortBy==='words')return wordCount(b.content)-wordCount(a.content);
+    return 0;
+  });
+}
+
+function renderNoteCard(n,list){
+  const bc=n.color+'30';
+  return `<div class="card ${list?'card-list':''}" style="border-color:${bc};border-left-color:${n.color};${n.pinned?'box-shadow:0 0 0 1px '+n.color+'40':''}" onclick="nav('detail','${n.id}')" onmouseenter="this.style.borderColor='${n.color}80'" onmouseleave="this.style.borderColor='${bc}'">
+    <div style="position:absolute;top:10px;right:10px;display:flex;gap:4px">
+      ${n.pinned?'<span style="font-size:11px">📌</span>':''}
+      ${n.starred?'<span style="font-size:11px">⭐</span>':''}
+    </div>
+    <div class="card-title">${esc(n.title)||'Nomsiz'}</div>
+    <div class="card-preview${list?' list':''}">${esc(n.content)||'Kontent yo\'q...'}</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <span class="tag" style="background:${n.color}1a;color:${n.color}">${esc(n.subject)}</span>
+      ${(n.images||[]).length>0?`<span class="tag" style="background:#334a6a1a;color:#64748b">📸${n.images.length}</span>`:''}
+      ${(n.tags||[]).slice(0,2).map(t=>`<span class="tag" style="background:#2a3a551a;color:#64748b">#${esc(t)}</span>`).join('')}
+    </div>
+    <div style="font-size:10px;color:var(--dim);margin-top:8px;display:flex;gap:10px"><span>${fmtDate(n.updatedAt)}</span><span>${wordCount(n.content)} so'z</span></div>
+  </div>`;
+}
+
+function renderHome(){
+  const filtered=getFiltered();
+  const pinned=filtered.filter(n=>n.pinned);
+  const starred=filtered.filter(n=>n.starred&&!n.pinned);
+  const rest=filtered.filter(n=>!n.pinned&&(!n.starred||searchQ||filterSubj!=='all'));
+  const subs=allSubjects();
+
+  document.getElementById('main').innerHTML=`
+  <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center">
+    <div style="position:relative;flex:1;max-width:360px">
+      <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px">🔍</span>
+      <input class="inp" style="padding-left:34px;width:100%" placeholder="Qidirish..." value="${esc(searchQ)}" oninput="searchQ=this.value;renderHome()" />
+    </div>
+    <select class="inp" style="width:auto;min-width:130px" onchange="filterSubj=this.value;renderHome()">
+      <option value="all" ${filterSubj==='all'?'selected':''}>Barcha fanlar</option>
+      ${subs.map(s=>`<option value="${esc(s)}" ${filterSubj===s?'selected':''}>${esc(s)}</option>`).join('')}
+    </select>
+    <select class="inp" style="width:auto" onchange="sortBy=this.value;renderHome()">
+      <option value="date" ${sortBy==='date'?'selected':''}>Sana bo'yicha</option>
+      <option value="title" ${sortBy==='title'?'selected':''}>Sarlavha bo'yicha</option>
+      <option value="words" ${sortBy==='words'?'selected':''}>So'z soni bo'yicha</option>
+    </select>
+    <div style="display:flex;gap:5px;align-items:center">
+      ${COLORS.map(c=>`<div class="color-dot ${filterColor===c?'active':''}" style="background:${c}" onclick="filterColor=filterColor==='${c}'?'all':'${c}';renderHome()" title="${c}"></div>`).join('')}
+      ${filterColor!=='all'?`<button class="ghost" onclick="filterColor='all';renderHome()" style="font-size:11px;padding:3px 8px;border-radius:6px">✕</button>`:''}
+    </div>
+    <button class="ghost" onclick="gridMode=!gridMode;renderHome()" style="font-size:18px;padding:6px 10px" title="Ko'rinish">${gridMode?'☰':'▦'}</button>
+    <button class="btn btn-sm" style="background:#6366f1" onclick="newNote()">+ Yangi konspekt</button>
+  </div>
+
+  ${notes.length===0?`<div style="text-align:center;padding:70px 20px">
+    <div style="font-size:52px;margin-bottom:14px">📓</div>
+    <div style="font-family:'Syne',system-ui,sans-serif;font-size:19px;font-weight:700;color:#334a6a;margin-bottom:8px">Hech qanday konspekt yo'q</div>
+    <div style="font-size:13px;color:var(--dim);margin-bottom:20px">Dars konspektlaringizni shu yerda saqlang</div>
+    <button class="btn" style="background:#6366f1" onclick="newNote()">📝 Birinchi konspektni yaratish</button>
+  </div>`:''}
+
+  ${notes.length>0&&filtered.length===0?`<div style="text-align:center;padding:40px;color:var(--dim)">"${esc(searchQ)}" bo'yicha hech narsa topilmadi</div>`:''}
+
+  ${pinned.length>0?`<div class="sec-title">📌 Pinlangan (${pinned.length})</div><div class="${gridMode?'note-grid':'note-list'}">${pinned.map(n=>renderNoteCard(n,!gridMode)).join('')}</div>`:''}
+  ${starred.length>0&&!searchQ&&filterSubj==='all'?`<div class="sec-title">⭐ Sevimlilar (${starred.length})</div><div class="${gridMode?'note-grid':'note-list'}">${starred.map(n=>renderNoteCard(n,!gridMode)).join('')}</div>`:''}
+  ${rest.length>0?`<div class="sec-title">📚 Konspektlar (${rest.length})</div><div class="${gridMode?'note-grid':'note-list'}">${rest.map(n=>renderNoteCard(n,!gridMode)).join('')}</div>`:''}
+  `;
+}
+
+function renderEditor(){
+  if(!editingNote)return;
+  const n=editingNote;
+  const subs=allSubjects();
+  document.getElementById('main').innerHTML=`
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+    <button class="ghost" onclick="saveNote();nav('home')">← Orqaga</button>
+    <input id="e-title" class="inp" value="${esc(n.title)}" placeholder="Mavzu sarlavhasi..." style="flex:1;font-size:17px;font-weight:700;font-family:'Syne',system-ui,sans-serif;background:transparent;border:none;padding:4px 0;min-width:140px" oninput="editingNote.title=this.value"/>
+    <button class="btn" style="background:${n.color}" onclick="saveNote()">💾 Saqlash</button>
+    <button class="ghost" onclick="saveNote();nav('detail','${n.id}')" title="Ko'rish" style="padding:7px 10px">👁</button>
+    <button class="ghost" style="color:#ef4444;border-color:#ef444433" onclick="showModal('${n.id}')">🗑</button>
+  </div>
+  <div class="editor-wrap">
+    <div class="editor-left" style="border-color:${n.color}30;border-left-color:${n.color}">
+      <textarea id="e-content" style="flex:1;background:transparent;border:none;outline:none;padding:18px 20px;font-size:14px;color:var(--text);font-family:'DM Sans',system-ui,sans-serif;line-height:1.85;resize:none" placeholder="Dars konspektini yozing...&#10;&#10;• Asosiy tushunchalar&#10;• Formulalar va ta'riflar&#10;• Eslatmalar&#10;&#10;Ctrl+S — saqlash" oninput="editingNote.content=this.value;updateEditorStats()">${esc(n.content)}</textarea>
+      <div id="e-stats" style="padding:6px 16px;font-size:11px;color:var(--dim);border-top:1px solid var(--border);display:flex;gap:16px">
+        <span id="es-words">📝 ${wordCount(n.content)} so'z</span>
+        <span id="es-chars">🔤 ${(n.content||'').length} belgi</span>
+        <span id="es-lines">📄 ${(n.content||'').split('\n').length} qator</span>
+      </div>
+      <div id="e-imgs" style="padding:${(n.images||[]).length?'10px 14px':'0'};${(n.images||[]).length?'border-top:1px solid var(--border)':''}display:flex;gap:8px;flex-wrap:wrap">
+        ${(n.images||[]).map(img=>`<div style="position:relative;flex-shrink:0"><img src="${img.url}" class="img-thumb" onclick="showLightbox('${img.url}')" title="${esc(img.name)}"/><button onclick="removeImg('${img.id}')" style="position:absolute;top:-5px;right:-5px;background:#ef4444;border:none;border-radius:50%;width:16px;height:16px;color:#fff;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">×</button></div>`).join('')}
+      </div>
+    </div>
+    <div class="editor-right">
+      <div class="side-card">
+        <span class="label">📚 Fan</span>
+        <select class="inp" style="margin-bottom:8px" onchange="editingNote.subject=this.value;saveNote()">
+          ${subs.map(s=>`<option value="${esc(s)}" ${n.subject===s?'selected':''}>${esc(s)}</option>`).join('')}
+        </select>
+        <div id="add-subj-wrap">
+          <button class="ghost" style="font-size:12px;width:100%;border-radius:8px;padding:6px" onclick="showAddSubject()">+ Yangi fan</button>
+        </div>
+      </div>
+      <div class="side-card">
+        <span class="label">🎨 Rang</span>
+        <div style="display:flex;gap:7px;flex-wrap:wrap" id="color-dots">
+          ${COLORS.map(c=>`<div class="color-dot ${n.color===c?'active':''}" style="background:${c}" onclick="pickColor('${c}')"></div>`).join('')}
+        </div>
+      </div>
+      <div class="side-card">
+        <span class="label">🏷 Teglar <span style="color:var(--dim);font-size:10px">(Enter bosing)</span></span>
+        <input class="inp" id="tag-input" placeholder="Teg qo'shish..." style="margin-bottom:8px" onkeydown="onTagKey(event)"/>
+        <div id="tags-wrap" style="display:flex;gap:6px;flex-wrap:wrap">
+          ${(n.tags||[]).map(t=>`<span class="tag" style="background:${n.color}1a;color:${n.color};cursor:pointer" onclick="removeTag('${esc(t)}')">#${esc(t)} ×</span>`).join('')}
+        </div>
+      </div>
+      <div class="side-card">
+        <span class="label">📸 Dars rasmlari</span>
+        <input type="file" id="img-input" accept="image/*" multiple style="display:none" onchange="addImages(event)"/>
+        <button class="btn" style="background:${n.color};width:100%;justify-content:center" onclick="document.getElementById('img-input').click()">📷 Rasm yuklash</button>
+        <p style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center">Doskadagi yozuvlar, diagrammalar...</p>
+      </div>
+      <div class="side-card">
+        <span class="label">⚙️ Opsiyalar</span>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;color:#94a3b8;margin-bottom:8px">
+          <input type="checkbox" ${n.pinned?'checked':''} onchange="editingNote.pinned=this.checked"/> 📌 Yuqoriga pin
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;color:#94a3b8">
+          <input type="checkbox" ${n.starred?'checked':''} onchange="editingNote.starred=this.checked"/> ⭐ Sevimlilar
+        </label>
+      </div>
+      <div style="font-size:11px;color:var(--dim);text-align:center">
+        Yaratilgan: ${fmtDate(n.createdAt)}<br/>Tahrirlangan: ${fmtDate(n.updatedAt)}
+      </div>
+    </div>
+  </div>`;
+
+  // keyboard shortcut
+  document.getElementById('e-content').addEventListener('keydown',e=>{
+    if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveNote();}
+  });
+}
+
+function updateEditorStats(){
+  const c=editingNote.content||'';
+  const ws=document.getElementById('es-words');
+  const cs=document.getElementById('es-chars');
+  const ls=document.getElementById('es-lines');
+  if(ws)ws.textContent='📝 '+wordCount(c)+' so\'z';
+  if(cs)cs.textContent='🔤 '+c.length+' belgi';
+  if(ls)ls.textContent='📄 '+c.split('\n').length+' qator';
+}
+
+function pickColor(c){
+  editingNote.color=c;
+  document.querySelectorAll('#color-dots .color-dot').forEach(d=>{d.classList.toggle('active',d.style.background===c);});
+  const el=document.querySelector('.editor-left');
+  if(el){el.style.borderColor=c+'30';el.style.borderLeftColor=c;}
+}
+
+function onTagKey(e){
+  if((e.key==='Enter'||e.key===',')&&e.target.value.trim()){
+    e.preventDefault();
+    const t=e.target.value.trim();
+    editingNote.tags=[...new Set([...(editingNote.tags||[]),t])];
+    e.target.value='';
+    refreshTags();
+  }
+}
+
+function refreshTags(){
+  const n=editingNote;
+  const wrap=document.getElementById('tags-wrap');
+  if(wrap)wrap.innerHTML=(n.tags||[]).map(t=>`<span class="tag" style="background:${n.color}1a;color:${n.color};cursor:pointer" onclick="removeTag('${esc(t)}')">#${esc(t)} ×</span>`).join('');
+}
+
+function removeTag(t){
+  editingNote.tags=(editingNote.tags||[]).filter(x=>x!==t);
+  refreshTags();
+}
+
+function showAddSubject(){
+  const wrap=document.getElementById('add-subj-wrap');
+  if(wrap)wrap.innerHTML=`<div style="display:flex;gap:6px"><input class="inp" id="new-subj-inp" placeholder="Fan nomi..." style="flex:1;font-size:12px"/><button class="btn btn-sm" style="background:#6366f1" onclick="addSubject()">+</button></div>`;
+}
+
+function addSubject(){
+  const inp=document.getElementById('new-subj-inp');
+  if(!inp||!inp.value.trim())return;
+  const s=inp.value.trim();
+  customSubjects.push(s);save();
+  editingNote.subject=s;
+  renderEditor();
+}
+
+function addImages(e){
+  Array.from(e.target.files).forEach(file=>{
+    const r=new FileReader();
+    r.onload=ev=>{
+      const img={id:uid(),url:ev.target.result,name:file.name,ts:Date.now()};
+      editingNote.images=[...(editingNote.images||[]),img];
+      refreshImages();
+    };
+    r.readAsDataURL(file);
+  });
+}
+
+function removeImg(id){
+  editingNote.images=(editingNote.images||[]).filter(i=>i.id!==id);
+  refreshImages();
+}
+
+function refreshImages(){
+  const wrap=document.getElementById('e-imgs');
+  if(!wrap)return;
+  const imgs=editingNote.images||[];
+  wrap.style.padding=imgs.length?'10px 14px':'0';
+  wrap.style.borderTop=imgs.length?'1px solid var(--border)':'none';
+  wrap.innerHTML=imgs.map(img=>`<div style="position:relative;flex-shrink:0"><img src="${img.url}" class="img-thumb" onclick="showLightbox('${img.url}')" title="${esc(img.name)}"/><button onclick="removeImg('${img.id}')" style="position:absolute;top:-5px;right:-5px;background:#ef4444;border:none;border-radius:50%;width:16px;height:16px;color:#fff;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">×</button></div>`).join('');
+}
+
+function renderDetail(noteId){
+  const n=notes.find(x=>x.id===noteId);
+  if(!n){nav('home');return;}
+  document.getElementById('main').innerHTML=`
+  <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+    <button class="ghost" onclick="nav('home')">← Orqaga</button>
+    <div style="flex:1">
+      <h1 style="font-family:'Syne',system-ui,sans-serif;font-size:22px;font-weight:800;color:${n.color};margin-bottom:6px">${esc(n.title)||'Nomsiz konspekt'}</h1>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <span class="tag" style="background:${n.color}1a;color:${n.color}">${esc(n.subject)}</span>
+        ${(n.tags||[]).map(t=>`<span class="tag" style="background:#2a3a551a;color:#64748b">#${esc(t)}</span>`).join('')}
+        <span style="font-size:11px;color:var(--dim)">${fmtDate(n.updatedAt)}</span>
+        <span style="font-size:11px;color:var(--dim)">· ${wordCount(n.content)} so'z</span>
+        ${(n.images||[]).length>0?`<span style="font-size:11px;color:var(--dim)">· 📸 ${n.images.length} rasm</span>`:''}
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-sm" style="background:${n.color}" onclick="editingNote={...notes.find(x=>x.id==='${n.id}')};nav('editor')">✏️ Tahrirlash</button>
+      <button onclick="toggleStar('${n.id}');renderDetail('${n.id}')" style="background:transparent;border:1px solid ${n.starred?'#f59e0b':'var(--border)'};border-radius:10px;padding:6px 10px;font-size:16px;cursor:pointer">${n.starred?'⭐':'☆'}</button>
+      <button onclick="togglePin('${n.id}');renderDetail('${n.id}')" style="background:transparent;border:1px solid ${n.pinned?'#6366f1':'var(--border)'};border-radius:10px;padding:6px 10px;font-size:16px;cursor:pointer">${n.pinned?'📌':'📍'}</button>
+      <button class="ghost" onclick="duplicateNote(notes.find(x=>x.id==='${n.id}'))">📋 Nusxa</button>
+    </div>
+  </div>
+  <div style="background:var(--card);border:1px solid ${n.color}30;border-left:4px solid ${n.color};border-radius:14px;padding:24px 28px;margin-bottom:16px;min-height:120px">
+    ${n.content?`<pre style="font-family:'DM Sans',system-ui,sans-serif;font-size:14px;color:#cbd5e1;line-height:1.9;white-space:pre-wrap;word-break:break-word;margin:0">${esc(n.content)}</pre>`:'<span style="color:var(--dim)">Kontent yo\'q</span>'}
+  </div>
+  ${(n.images||[]).length>0?`
+    <div class="sec-title">Rasmlar (${n.images.length})</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:20px">
+      ${n.images.map(img=>`<div style="border-radius:10px;overflow:hidden;border:1px solid var(--border);cursor:zoom-in" onclick="showLightbox('${img.url}')">
+        <img src="${img.url}" style="width:100%;height:130px;object-fit:cover;display:block"/>
+        <div style="padding:5px 9px;font-size:10px;color:var(--muted);background:var(--card);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(img.name)}</div>
+      </div>`).join('')}
+    </div>
+  `:''}`;
+}
+
+function renderFlashcards(){
+  const deck=notes.filter(n=>n.title&&n.content);
+  if(deck.length===0){
+    document.getElementById('main').innerHTML=`<div style="text-align:center;padding:80px"><div style="font-size:48px;margin-bottom:14px">🃏</div><div style="color:var(--dim);font-size:16px">Flashcard uchun sarlavha va kontent bor konspekt kerak</div><button class="btn" style="background:#6366f1;margin-top:16px" onclick="newNote()">+ Konspekt yaratish</button></div>`;
+    return;
+  }
+  const idx=flashIdx%deck.length;
+  const n=deck[idx];
+  document.getElementById('main').innerHTML=`
+  <div style="max-width:580px;margin:0 auto">
+    <h2 style="font-family:'Syne',system-ui,sans-serif;font-size:20px;font-weight:800;margin-bottom:8px;text-align:center">🃏 Flashcards</h2>
+    <div style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:18px">${idx+1} / ${deck.length} karta</div>
+    <div class="flash-card" style="border-left-color:${n.color}" onclick="flashFlipped=!flashFlipped;renderFlashcards()">
+      ${!flashFlipped?`
+        <div style="font-size:12px;color:${n.color};font-weight:600;letter-spacing:1px;margin-bottom:10px">${esc(n.subject)}</div>
+        <div style="font-family:'Syne',system-ui,sans-serif;font-size:19px;font-weight:700;color:#f1f5f9;margin-bottom:16px">${esc(n.title)}</div>
+        ${(n.tags||[]).length>0?`<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:12px">${(n.tags||[]).slice(0,3).map(t=>`<span class="tag" style="background:${n.color}1a;color:${n.color}">#${esc(t)}</span>`).join('')}</div>`:''}
+        <div style="font-size:12px;color:var(--dim)">👆 Bosib javobni ko'ring</div>
+      `:`
+        <div style="font-size:11px;color:${n.color};font-weight:700;letter-spacing:1px;margin-bottom:12px">JAVOB</div>
+        <div style="font-size:13px;color:#94a3b8;line-height:1.85;text-align:left;max-width:100%">${esc(n.content.slice(0,320)+(n.content.length>320?'...':''))}</div>
+      `}
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:18px">
+      <button class="ghost" onclick="flashFlipped=false;flashIdx=(flashIdx-1+${deck.length})%${deck.length};renderFlashcards()">← Oldingi</button>
+      <button class="ghost" style="color:#ef4444" onclick="flashFlipped=false;flashIdx=Math.floor(Math.random()*${deck.length});renderFlashcards()">🔀 Tasodifiy</button>
+      <button class="btn" style="background:${n.color}" onclick="flashFlipped=false;flashIdx=(flashIdx+1)%${deck.length};renderFlashcards()">Keyingi →</button>
+    </div>
+    <div style="display:flex;justify-content:center;gap:5px;margin-top:14px;flex-wrap:wrap">
+      ${deck.slice(0,24).map((_,i)=>`<div onclick="flashIdx=${i};flashFlipped=false;renderFlashcards()" style="width:7px;height:7px;border-radius:50%;background:${i===idx?'#6366f1':'var(--border)'};cursor:pointer;transition:background .15s"></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderStats(){
+  const subs=allSubjects().map(s=>({s,c:notes.filter(n=>n.subject===s).length})).filter(x=>x.c>0).sort((a,b)=>b.c-a.c);
+  const recent=[...notes].sort((a,b)=>b.updatedAt-a.updatedAt).slice(0,6);
+  const totalImg=notes.reduce((a,n)=>a+(n.images||[]).length,0);
+  const totalW=notes.reduce((a,n)=>a+wordCount(n.content),0);
+  document.getElementById('main').innerHTML=`
+  <h2 style="font-family:'Syne',system-ui,sans-serif;font-size:20px;font-weight:800;margin-bottom:20px">📊 Statistika</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:26px">
+    ${[['📓',notes.length,'Jami konspekt'],['📸',totalImg,'Jami rasm'],['📝',totalW,'Jami so\'z'],['⭐',notes.filter(n=>n.starred).length,'Sevimlilar'],['📌',notes.filter(n=>n.pinned).length,'Pinlangan'],['📚',subs.length,'Fanlar']].map(([ic,v,l])=>`
+    <div class="stat-card"><div style="font-size:22px;margin-bottom:8px">${ic}</div><div class="stat-val">${v}</div><div class="stat-label">${l}</div></div>`).join('')}
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px">
+      <div class="sec-title">Fanlar bo'yicha</div>
+      ${subs.length===0?'<div style="color:var(--dim);font-size:13px">Ma\'lumot yo\'q</div>':subs.map(({s,c},i)=>{
+        const col=COLORS[i%COLORS.length];
+        const pct=Math.round((c/notes.length)*100);
+        return`<div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text)">${esc(s)}</span><span style="color:${col}">${c} ta · ${pct}%</span></div>
+          <div class="prog-bar"><div class="prog-fill" style="background:${col};width:${pct}%"></div></div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px">
+      <div class="sec-title">So'nggi tahrirlangan</div>
+      ${recent.length===0?'<div style="color:var(--dim);font-size:13px">Hali konspekt yo\'q</div>':recent.map(n=>`
+      <div onclick="renderDetail('${n.id}');currentView='detail'" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer">
+        <div style="width:8px;height:8px;border-radius:50%;background:${n.color};flex-shrink:0"></div>
+        <div style="flex:1;overflow:hidden">
+          <div style="font-size:13px;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(n.title)||'Nomsiz'}</div>
+          <div style="font-size:11px;color:var(--dim)">${esc(n.subject)} · ${fmtDate(n.updatedAt)}</div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function exportData(){
+  const blob=new Blob([JSON.stringify({notes,customSubjects},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='neuronotepad_backup.json';a.click();
+  toast$('Eksport qilindi ⬇');
+}
+
+function importData(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(Array.isArray(d.notes)){notes=[...d.notes,...notes];if(d.customSubjects)customSubjects=[...new Set([...customSubjects,...d.customSubjects])];save();toast$(d.notes.length+' ta konspekt yuklandi ⬆');renderHome();}
+      else if(Array.isArray(d)){notes=[...d,...notes];save();toast$(d.length+' ta yuklandi ⬆');renderHome();}
+    }catch{toast$('Format xato!','err');}
+  };
+  r.readAsText(file);e.target.value='';
+}
+
+// Init
+renderHome();
+</script>
+</body>
+</html>
