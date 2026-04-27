@@ -1,9 +1,22 @@
+
 <!DOCTYPE html>
 <html lang="uz">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
 <title>NeurоNotepad</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#06080f"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="NeurоNote"/>
+<link rel="apple-touch-icon" href="icons/icon-192.png"/>
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"/>
+<meta name="description" content="Tibbiy dars konspektlari uchun aqlli bloknot"/>
+
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -375,6 +388,36 @@ a{color:inherit;text-decoration:none}
   margin-bottom:4px;overflow:hidden;
 }
 .wpm-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width .4s}
+
+/* ── AUTOSAVE INDICATOR ── */
+#autosave-indicator{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:500;
+  padding:3px 9px;border-radius:20px;
+  transition:all .3s;user-select:none;
+}
+#autosave-indicator.idle{color:var(--text3);background:transparent}
+#autosave-indicator.typing{color:var(--warn);background:rgba(240,160,74,.1)}
+#autosave-indicator.saving{color:var(--accent2);background:rgba(91,141,239,.1)}
+#autosave-indicator.saved{color:var(--accent3);background:rgba(78,203,164,.1)}
+#autosave-indicator.error{color:var(--danger);background:rgba(232,80,80,.1)}
+.as-dot{
+  width:6px;height:6px;border-radius:50%;flex-shrink:0;transition:background .3s;
+}
+.idle .as-dot{background:var(--text3)}
+.typing .as-dot{background:var(--warn);animation:pulse 1s infinite}
+.saving .as-dot{background:var(--accent2);animation:spin-dot .6s linear infinite}
+.saved .as-dot{background:var(--accent3)}
+.error .as-dot{background:var(--danger)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes spin-dot{0%{transform:scale(1)}50%{transform:scale(1.6)}100%{transform:scale(1)}}
+
+/* ── UNSAVED BADGE ── */
+.unsaved-badge{
+  display:none;width:8px;height:8px;border-radius:50%;
+  background:var(--warn);position:absolute;top:8px;right:8px;
+}
+.unsaved-badge.show{display:block}
 </style>
 </head>
 <body>
@@ -468,13 +511,66 @@ let gridMode=true;
 let searchQ='';
 let mobileEditorTab='write'; // 'write' | 'settings'
 
-function save(){localStorage.setItem('nn4_notes',JSON.stringify(notes));localStorage.setItem('nn4_subj',JSON.stringify(customSubjects));}
+// ─── AUTOSAVE STATE ───
+let _autosaveTimer=null;
+let _hasUnsaved=false;
+const AUTOSAVE_DELAY=1200; // 1.2 soniya
+
+function save(){
+  try{
+    localStorage.setItem('nn4_notes',JSON.stringify(notes));
+    localStorage.setItem('nn4_subj',JSON.stringify(customSubjects));
+    return true;
+  }catch(e){
+    // localStorage to'lgan bo'lishi mumkin
+    console.warn('localStorage save error:',e);
+    return false;
+  }
+}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
 function allSubjects(){return[...SUBJECTS,...customSubjects];}
 function wc(t){return(t||'').split(/\s+/).filter(Boolean).length;}
 function fmtDate(ts){return new Date(ts).toLocaleDateString('uz-UZ',{day:'2-digit',month:'short',year:'numeric'});}
 function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
 function isMobile(){return window.innerWidth<=720;}
+
+// ─── AUTOSAVE INDICATOR ───
+function setAutoSaveStatus(status){
+  const el=document.getElementById('autosave-indicator');
+  if(!el)return;
+  const labels={idle:'',typing:'Yozilmoqda...',saving:'Saqlanmoqda...',saved:'Saqlandi ✓',error:'Xato!'};
+  el.className='';el.classList.add(status);
+  el.innerHTML=`<span class="as-dot"></span><span>${labels[status]}</span>`;
+}
+
+// Debounced avto-saqlash — foydalanuvchi to'xtaganida 1.2s keyin saqlanadi
+function triggerAutosave(){
+  _hasUnsaved=true;
+  setAutoSaveStatus('typing');
+  clearTimeout(_autosaveTimer);
+  _autosaveTimer=setTimeout(()=>{
+    if(!editingNote||!_hasUnsaved)return;
+    setAutoSaveStatus('saving');
+    editingNote.updatedAt=Date.now();
+    const idx=notes.findIndex(x=>x.id===editingNote.id);
+    if(idx>=0)notes[idx]={...editingNote};
+    const ok=save();
+    _hasUnsaved=false;
+    setAutoSaveStatus(ok?'saved':'error');
+    if(!ok)toast('Saqlashda xato — xotira to\'lgan bo\'lishi mumkin','err');
+    // 3 soniyadan keyin "idle" ga qaytadi
+    setTimeout(()=>setAutoSaveStatus('idle'),3000);
+  },AUTOSAVE_DELAY);
+}
+
+// Sahifa yopilishda ogohlantirish
+window.addEventListener('beforeunload',e=>{
+  if(_hasUnsaved&&currentView==='editor'){
+    e.preventDefault();
+    e.returnValue='Saqlanmagan o\'zgarishlar bor. Chiqishni xohlaysizmi?';
+    return e.returnValue;
+  }
+});
 
 // ─── TOAST ───
 function toast(msg,type){
@@ -519,10 +615,17 @@ function newNote(){
 
 function saveNote(){
   if(!editingNote)return;
+  clearTimeout(_autosaveTimer);
+  setAutoSaveStatus('saving');
   editingNote.updatedAt=Date.now();
   const idx=notes.findIndex(x=>x.id===editingNote.id);
   if(idx>=0)notes[idx]={...editingNote};
-  save();toast('Saqlandi ✓');
+  const ok=save();
+  _hasUnsaved=false;
+  setAutoSaveStatus(ok?'saved':'error');
+  if(ok)toast('Saqlandi ✓');
+  else toast('Saqlashda xato!','err');
+  setTimeout(()=>setAutoSaveStatus('idle'),3000);
   refreshEditorLeft();
 }
 
@@ -644,8 +747,9 @@ function renderEditor(){
   </div>`:''}
   <div class="view" style="padding-bottom:${mobile?'80px':'20px'}">
     <div class="editor-toolbar" style="background:var(--surface);border-radius:var(--r) var(--r) 0 0;border:1px solid var(--border);border-bottom:none;margin-bottom:0">
-      <button class="btn-ghost" onclick="saveNote();nav('home')" style="flex-shrink:0">← Orqaga</button>
-      <input id="e-title" placeholder="Mavzu sarlavhasi..." value="${esc(n.title)}" oninput="editingNote.title=this.value"/>
+      <button class="btn-ghost" onclick="if(_hasUnsaved){if(!confirm('Saqlanmagan o\\'zgarishlar bor. Chiqasizmi?'))return;_hasUnsaved=false;clearTimeout(_autosaveTimer);}saveNote();nav('home')" style="flex-shrink:0">← Orqaga</button>
+      <input id="e-title" placeholder="Mavzu sarlavhasi..." value="${esc(n.title)}" oninput="editingNote.title=this.value;triggerAutosave()"/>
+      <span id="autosave-indicator" class="idle"><span class="as-dot"></span><span></span></span>
       <button class="btn-primary" style="background:${n.color};flex-shrink:0" onclick="saveNote()">💾 Saqlash</button>
       <button class="icon-btn" onclick="showModal('${n.id}')" style="color:var(--danger);border-color:var(--danger)44;flex-shrink:0">🗑</button>
     </div>
@@ -653,7 +757,7 @@ function renderEditor(){
       <div class="editor-main" id="editor-main-panel" style="border-left-color:${n.color};border-radius:0 0 var(--r) var(--r);${mobile&&mobileEditorTab!=='write'?'display:none':''}">
         <div class="editor-body">
           <textarea id="e-content" placeholder="Dars konspektini yozing...\n\n• Asosiy tushunchalar\n• Formulalar va ta'riflar\n• Eslatmalar\n\nCtrl+S — saqlash"
-            oninput="editingNote.content=this.value;updateStats()">${esc(n.content)}</textarea>
+            oninput="editingNote.content=this.value;updateStats();triggerAutosave()">${esc(n.content)}</textarea>
         </div>
         <div class="editor-status" id="e-stats">
           <span>📝 ${wc(n.content)} so'z</span>
@@ -678,6 +782,12 @@ function renderEditor(){
     });
     if(mobile&&mobileEditorTab==='write'){ta.focus();}
   }
+  // Indikatorni boshlang'ich holatga keltir
+  _hasUnsaved=false;
+  clearTimeout(_autosaveTimer);
+  setAutoSaveStatus('idle');
+  // Storage metrni yangilash
+  setTimeout(updateStorageMeter,50);
 }
 
 function renderEditorSide(n){
@@ -685,7 +795,7 @@ function renderEditorSide(n){
   return`
   <div class="side-card">
     <span class="side-label">📚 Fan</span>
-    <select class="inp" id="e-subj" style="margin-bottom:8px" onchange="editingNote.subject=this.value">
+    <select class="inp" id="e-subj" style="margin-bottom:8px" onchange="editingNote.subject=this.value;triggerAutosave()">
       ${subs.map(s=>`<option value="${esc(s)}" ${n.subject===s?'selected':''}>${esc(s)}</option>`).join('')}
     </select>
     <div id="add-subj-area">
@@ -709,12 +819,13 @@ function renderEditorSide(n){
     <span class="side-label">📸 Rasmlar</span>
     <input type="file" id="img-inp" accept="image/*" multiple style="display:none" onchange="addImages(event)"/>
     <button class="btn-primary" style="background:${n.color};width:100%;justify-content:center" onclick="document.getElementById('img-inp').click()">📷 Rasm yuklash</button>
-    <p style="font-size:11px;color:var(--text3);margin-top:6px;text-align:center">Doskadagi yozuvlar, diagrammalar...</p>
+    <p style="font-size:11px;color:var(--text3);margin-top:6px;text-align:center">Avtomatik siqiladi • max 350KB/rasm</p>
+    <div id="storage-meter" style="margin-top:10px"></div>
   </div>
   <div class="side-card">
     <span class="side-label">⚙️ Opsiyalar</span>
-    <label class="check-row"><input type="checkbox" ${n.pinned?'checked':''} onchange="editingNote.pinned=this.checked"/> 📌 Yuqoriga pin</label>
-    <label class="check-row"><input type="checkbox" ${n.starred?'checked':''} onchange="editingNote.starred=this.checked"/> ⭐ Sevimlilar</label>
+    <label class="check-row"><input type="checkbox" ${n.pinned?'checked':''} onchange="editingNote.pinned=this.checked;triggerAutosave()"/> 📌 Yuqoriga pin</label>
+    <label class="check-row"><input type="checkbox" ${n.starred?'checked':''} onchange="editingNote.starred=this.checked;triggerAutosave()"/> ⭐ Sevimlilar</label>
   </div>
   <div style="font-size:11px;color:var(--text3);text-align:center;padding:4px 0 8px">
     Yaratilgan: ${fmtDate(n.createdAt)}<br/>Tahrirlangan: ${fmtDate(n.updatedAt)}
@@ -722,10 +833,16 @@ function renderEditorSide(n){
 }
 
 function renderImgThumbs(imgs){
-  return imgs.map(img=>`<div class="img-wrap">
-    <img src="${img.url}" class="img-thumb" onclick="showLightbox('${img.url}')" title="${esc(img.name)}"/>
-    <button class="img-del" onclick="removeImg('${img.id}')">×</button>
-  </div>`).join('');
+  return imgs.map(img=>{
+    const sizeInfo=img.newKB?`${img.newKB}KB`:'';
+    const savedInfo=img.origKB&&img.newKB&&img.origKB>img.newKB
+      ?` <span style="color:var(--accent3)">-${Math.round((1-img.newKB/img.origKB)*100)}%</span>`:'';
+    return`<div class="img-wrap" title="${esc(img.name)}${img.origKB?' ('+img.origKB+'KB → '+img.newKB+'KB)':''}">
+      <img src="${img.url}" class="img-thumb" onclick="showLightbox('${img.url}')"/>
+      <button class="img-del" onclick="removeImg('${img.id}')">×</button>
+      ${sizeInfo?`<div style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,.65);border-radius:3px;padding:1px 4px;font-size:9px;color:#fff;pointer-events:none">${sizeInfo}${savedInfo}</div>`:''}
+    </div>`;
+  }).join('');
 }
 
 function refreshMobTab(){
@@ -749,8 +866,8 @@ function pickColor(c){
   document.querySelectorAll('.color-dot').forEach(d=>d.classList.toggle('active',d.style.background===c));
   const em=document.getElementById('editor-main-panel');
   if(em)em.style.borderLeftColor=c;
-  const sp=document.getElementById('img-inp');
   document.querySelectorAll('[onclick*="img-inp"]').forEach(b=>b.style.background=c);
+  triggerAutosave();
 }
 
 function onTagKey(e){
@@ -760,6 +877,7 @@ function onTagKey(e){
     editingNote.tags=[...new Set([...(editingNote.tags||[]),t])];
     e.target.value='';
     refreshTags();
+    triggerAutosave();
   }
 }
 function refreshTags(){
@@ -770,6 +888,7 @@ function refreshTags(){
 function removeTag(t){
   editingNote.tags=(editingNote.tags||[]).filter(x=>x!==t);
   refreshTags();
+  triggerAutosave();
 }
 
 function showAddSubj(){
@@ -785,20 +904,132 @@ function addSubj(){
   renderEditor();
 }
 
-function addImages(e){
-  Array.from(e.target.files).forEach(file=>{
-    const r=new FileReader();
-    r.onload=ev=>{
-      const img={id:uid(),url:ev.target.result,name:file.name,ts:Date.now()};
-      editingNote.images=[...(editingNote.images||[]),img];
-      refreshImgs();
+// ─── IMAGE COMPRESSION ───
+const IMG_MAX_W=1280;   // max kenglik px
+const IMG_MAX_H=1280;   // max balandlik px
+const IMG_QUALITY=0.72; // JPEG sifati (0–1)
+const IMG_MAX_KB=350;   // bitta rasm uchun maksimal KB
+const STORAGE_MAX=4.5*1024*1024; // 4.5MB — xavfsiz limit
+
+function getStorageUsedBytes(){
+  let total=0;
+  try{for(const k in localStorage)if(Object.prototype.hasOwnProperty.call(localStorage,k))total+=localStorage[k].length*2;}catch{}
+  return total;
+}
+function fmtKB(bytes){
+  if(bytes<1024)return bytes+'B';
+  if(bytes<1024*1024)return Math.round(bytes/1024)+'KB';
+  return(bytes/1024/1024).toFixed(1)+'MB';
+}
+
+function compressImage(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onerror=reject;
+    reader.onload=ev=>{
+      const img=new Image();
+      img.onerror=reject;
+      img.onload=()=>{
+        let {width:w,height:h}=img;
+        // O'lchamni kamaytir
+        const ratio=Math.min(1,IMG_MAX_W/w,IMG_MAX_H/h);
+        w=Math.round(w*ratio);h=Math.round(h*ratio);
+
+        const canvas=document.createElement('canvas');
+        canvas.width=w;canvas.height=h;
+        const ctx=canvas.getContext('2d');
+        ctx.drawImage(img,0,0,w,h);
+
+        // Avval JPEG bilan siqib ko'r, kerak bo'lsa sifatni pasayt
+        let quality=IMG_QUALITY;
+        let dataUrl=canvas.toDataURL('image/jpeg',quality);
+
+        // Agar hali ham katta bo'lsa, sifatni pasaytir
+        while(dataUrl.length*0.75>IMG_MAX_KB*1024&&quality>0.3){
+          quality-=0.1;
+          dataUrl=canvas.toDataURL('image/jpeg',quality);
+        }
+
+        const origKB=Math.round(file.size/1024);
+        const newKB=Math.round(dataUrl.length*0.75/1024);
+        resolve({dataUrl,origKB,newKB,w,h});
+      };
+      img.src=ev.target.result;
     };
-    r.readAsDataURL(file);
+    reader.readAsDataURL(file);
   });
 }
+
+function updateStorageMeter(){
+  const el=document.getElementById('storage-meter');
+  if(!el)return;
+  const used=getStorageUsedBytes();
+  const pct=Math.min(100,Math.round((used/STORAGE_MAX)*100));
+  const color=pct>85?'var(--danger)':pct>65?'var(--warn)':'var(--accent3)';
+  el.innerHTML=`
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px">
+      <span>💾 Xotira</span>
+      <span style="color:${color}">${fmtKB(used)} / ${fmtKB(STORAGE_MAX)} (${pct}%)</span>
+    </div>
+    <div style="height:4px;background:var(--border);border-radius:4px;overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:${color};border-radius:4px;transition:width .4s"></div>
+    </div>
+    ${pct>85?`<div style="font-size:10px;color:var(--danger);margin-top:4px">⚠ Xotira deyarli to'ldi! Ba'zi rasmlarni o'chiring.</div>`:''}
+  `;
+}
+
+async function addImages(e){
+  const files=Array.from(e.target.files);
+  if(!files.length)return;
+
+  // Yuklanish ko'rsatkichi
+  const imgWrap=document.getElementById('e-imgs');
+  const loadId='img-loading-'+uid();
+  if(imgWrap){
+    const loader=document.createElement('div');
+    loader.id=loadId;
+    loader.style.cssText='display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);padding:4px 0';
+    loader.innerHTML=`<span style="animation:pulse 1s infinite;display:inline-block">⏳</span> ${files.length} ta rasm siqilmoqda...`;
+    imgWrap.appendChild(loader);
+  }
+
+  const results=[];
+  for(const file of files){
+    // Storage limitini tekshir
+    const usedNow=getStorageUsedBytes();
+    if(usedNow>STORAGE_MAX*0.92){
+      toast('Xotira to\'ldi! Avval ba\'zi rasmlarni o\'chiring.','err');
+      break;
+    }
+    try{
+      const {dataUrl,origKB,newKB,w,h}=await compressImage(file);
+      const img={id:uid(),url:dataUrl,name:file.name,ts:Date.now(),origKB,newKB,w,h};
+      editingNote.images=[...(editingNote.images||[]),img];
+      results.push({name:file.name,origKB,newKB});
+    }catch(err){
+      toast(`"${file.name}" yuklashda xato`,'err');
+    }
+  }
+
+  refreshImgs();
+  triggerAutosave();
+  updateStorageMeter();
+
+  // Natija xabar
+  if(results.length){
+    const saved=results.reduce((a,r)=>a+(r.origKB-r.newKB),0);
+    const msg=results.length===1
+      ?`📸 ${results[0].origKB}KB → ${results[0].newKB}KB (${Math.round((1-results[0].newKB/results[0].origKB)*100)}% tejandi)`
+      :`📸 ${results.length} rasm yuklandi · ${saved}KB tejandi`;
+    toast(msg);
+  }
+}
+
 function removeImg(id){
   editingNote.images=(editingNote.images||[]).filter(i=>i.id!==id);
   refreshImgs();
+  triggerAutosave();
+  updateStorageMeter();
 }
 function refreshImgs(){
   const w=document.getElementById('e-imgs');
@@ -984,8 +1215,116 @@ document.querySelectorAll('.overlay').forEach(o=>{
   });
 });
 
+// ─── PWA: SERVICE WORKER ───
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg=>{
+        console.log('SW registered:', reg.scope);
+        // Yangi versiya kelsa — foydalanuvchiga xabar
+        reg.addEventListener('updatefound',()=>{
+          const newSW=reg.installing;
+          newSW.addEventListener('statechange',()=>{
+            if(newSW.state==='installed'&&navigator.serviceWorker.controller){
+              showUpdateBanner();
+            }
+          });
+        });
+      })
+      .catch(err=>console.log('SW error:',err));
+  });
+}
+
+// ─── PWA: A2HS (Add to Home Screen) ───
+let _deferredInstallPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  _deferredInstallPrompt=e;
+  // 3 soniyadan keyin install bannerini ko'rsat
+  setTimeout(showInstallBanner,3000);
+});
+
+window.addEventListener('appinstalled',()=>{
+  _deferredInstallPrompt=null;
+  hideInstallBanner();
+  toast('Ilova o\'rnatildi! 🎉');
+});
+
+function showInstallBanner(){
+  if(!_deferredInstallPrompt)return;
+  const b=document.getElementById('install-banner');
+  if(b)b.style.display='flex';
+}
+function hideInstallBanner(){
+  const b=document.getElementById('install-banner');
+  if(b)b.style.display='none';
+  _deferredInstallPrompt=null;
+}
+async function triggerInstall(){
+  if(!_deferredInstallPrompt)return;
+  _deferredInstallPrompt.prompt();
+  const {outcome}=await _deferredInstallPrompt.userChoice;
+  if(outcome==='accepted')toast('O\'rnatilmoqda... ⬇');
+  hideInstallBanner();
+}
+
+function showUpdateBanner(){
+  const b=document.getElementById('update-banner');
+  if(b)b.style.display='flex';
+}
+function applyUpdate(){
+  if(navigator.serviceWorker.controller){
+    navigator.serviceWorker.controller.postMessage('skipWaiting');
+  }
+  window.location.reload();
+}
+
+// ─── OFFLINE / ONLINE STATUS ───
+function updateNetworkStatus(){
+  const el=document.getElementById('network-status');
+  if(!el)return;
+  if(navigator.onLine){
+    el.style.display='none';
+  }else{
+    el.style.display='flex';
+  }
+}
+window.addEventListener('online',()=>{updateNetworkStatus();toast('Internet tiklandi 🌐');});
+window.addEventListener('offline',()=>{updateNetworkStatus();toast('Offline rejim — ma\'lumotlar saqlanadi','warn');});
+
+// ─── URL SHORTCUT: ?action=new ───
+if(location.search.includes('action=new')){
+  setTimeout(newNote,300);
+  history.replaceState(null,'',location.pathname);
+}
+
 // ─── INIT ───
 renderHome();
+updateNetworkStatus();
 </script>
+
+<!-- PWA: Install Banner -->
+<div id="install-banner" style="display:none;position:fixed;bottom:calc(var(--bottom-nav) + 10px);left:12px;right:12px;z-index:150;background:#0c1019;border:1px solid #7c6af733;border-radius:14px;padding:14px 16px;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.6)">
+  <img src="icons/icon-192.png" style="width:40px;height:40px;border-radius:10px;flex-shrink:0" onerror="this.style.display='none'"/>
+  <div style="flex:1">
+    <div style="font-size:13px;font-weight:600;color:#eef2f7">NeurоNotepad ni o'rnating</div>
+    <div style="font-size:11px;color:#3d4f6a;margin-top:2px">Offline ishlaydi • Tezroq ochiladi</div>
+  </div>
+  <button onclick="triggerInstall()" style="background:#7c6af7;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;color:#fff;cursor:pointer;flex-shrink:0">O'rnatish</button>
+  <button onclick="hideInstallBanner()" style="background:transparent;border:none;color:#3d4f6a;font-size:18px;cursor:pointer;flex-shrink:0;padding:0 2px">×</button>
+</div>
+
+<!-- PWA: Update Banner -->
+<div id="update-banner" style="display:none;position:fixed;top:calc(var(--topbar) + 8px);left:12px;right:12px;z-index:150;background:#0c1019;border:1px solid #4ecba433;border-radius:12px;padding:12px 16px;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.5)">
+  <span style="font-size:16px">🔄</span>
+  <div style="flex:1;font-size:13px;color:#eef2f7">Yangi versiya mavjud</div>
+  <button onclick="applyUpdate()" style="background:#4ecba4;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:#06080f;cursor:pointer">Yangilash</button>
+  <button onclick="document.getElementById('update-banner').style.display='none'" style="background:transparent;border:none;color:#3d4f6a;font-size:16px;cursor:pointer">×</button>
+</div>
+
+<!-- Offline status bar -->
+<div id="network-status" style="display:none;position:fixed;top:var(--topbar);left:0;right:0;z-index:90;background:#f0a04a;padding:5px 16px;font-size:12px;font-weight:600;color:#06080f;align-items:center;justify-content:center;gap:6px">
+  <span>📵</span> Offline rejim — barcha o'zgarishlar qurilmada saqlanadi
+</div>
 </body>
 </html>
