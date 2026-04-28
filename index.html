@@ -1,1330 +1,1286 @@
-
 <!DOCTYPE html>
 <html lang="uz">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
 <title>NeurоNotepad</title>
-
-<!-- PWA -->
-<link rel="manifest" href="manifest.json"/>
-<meta name="theme-color" content="#06080f"/>
-<meta name="mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="NeurоNote"/>
-<link rel="apple-touch-icon" href="icons/icon-192.png"/>
-<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"/>
-<meta name="description" content="Tibbiy dars konspektlari uchun aqlli bloknot"/>
-
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#06080f;
-  --surface:#0c1019;
-  --surface2:#111827;
-  --border:#1c2535;
-  --border2:#253045;
-  --accent:#7c6af7;
-  --accent2:#5b8def;
-  --accent3:#4ecba4;
-  --text:#eef2f7;
-  --text2:#8898b3;
-  --text3:#3d4f6a;
-  --danger:#e85050;
-  --warn:#f0a04a;
-  --r:12px;
-  --r2:8px;
-  --topbar:56px;
-  --bottom-nav:60px;
+  --bg:#060810;--surface:#0c1018;--card:#111620;--border:#1c2535;--border2:#253045;
+  --accent:#5b8dee;--accent2:#7c5cbf;--green:#22c97a;--amber:#f0a500;--red:#e05555;--pink:#d966a8;
+  --text:#dce6f5;--muted:#6a7f9a;--dim:#2d3f58;
+  --r:14px;--rs:8px;
+  --font:'Space Grotesk',system-ui,sans-serif;
 }
-html,body{height:100%;overflow:hidden}
-body{font-family:'Space Grotesk',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;font-size:14px;line-height:1.6}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
-input,textarea,select,button{font-family:inherit;font-size:inherit;color:inherit}
-input::placeholder,textarea::placeholder{color:var(--text3)}
-select option{background:var(--surface2)}
-a{color:inherit;text-decoration:none}
+::-webkit-scrollbar-thumb{background:var(--dim);border-radius:2px}
+input,textarea,select{font-family:var(--font)}
+input::placeholder,textarea::placeholder{color:var(--dim)}
+select option{background:#111620}
+button{font-family:var(--font);cursor:pointer;transition:opacity .15s,transform .1s}
+button:active{transform:scale(.97)}
 
-/* ── TOPBAR ── */
-#topbar{
-  position:fixed;top:0;left:0;right:0;z-index:100;
-  height:var(--topbar);
-  background:rgba(6,8,15,0.92);
-  backdrop-filter:blur(16px);
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;padding:0 16px;gap:10px;
-}
-.logo{
-  font-family:'Instrument Serif',Georgia,serif;
-  font-size:19px;font-style:italic;
-  background:linear-gradient(135deg,#7c6af7,#5b8def);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  cursor:pointer;user-select:none;white-space:nowrap;flex-shrink:0;
-}
-.logo em{font-style:normal;font-size:11px;vertical-align:super;opacity:.7;-webkit-text-fill-color:#7c6af7}
-.topbar-actions{display:flex;align-items:center;gap:6px;margin-left:auto}
-.icon-btn{
-  width:34px;height:34px;border-radius:var(--r2);border:1px solid var(--border);
-  background:var(--surface);color:var(--text2);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;
-  transition:all .15s;
-}
-.icon-btn:active{background:var(--border);transform:scale(.94)}
-.btn-primary{
-  height:34px;padding:0 14px;border-radius:var(--r2);border:none;
-  background:var(--accent);color:#fff;font-weight:600;font-size:13px;
-  cursor:pointer;white-space:nowrap;transition:all .15s;display:flex;align-items:center;gap:5px;
-}
-.btn-primary:active{opacity:.82;transform:scale(.97)}
-.btn-ghost{
-  height:34px;padding:0 12px;border-radius:var(--r2);
-  border:1px solid var(--border);background:transparent;
-  color:var(--text2);font-size:13px;cursor:pointer;white-space:nowrap;
-  transition:all .15s;display:flex;align-items:center;gap:5px;
-}
-.btn-ghost:active{background:var(--border)}
+#topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;height:54px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:200}
+.logo{font-family:'Instrument Serif',serif;font-size:22px;font-style:italic;color:#fff;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap;user-select:none;flex-shrink:0}
+.logo-box{background:linear-gradient(135deg,var(--accent),var(--accent2));width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.nav-area{display:flex;gap:3px;overflow-x:auto;scrollbar-width:none;flex:1;margin-left:4px}
+.nav-area::-webkit-scrollbar{display:none}
+.nb{background:transparent;color:var(--muted);border:none;border-radius:var(--rs);padding:6px 12px;font-size:13px;font-weight:500;white-space:nowrap;transition:all .15s}
+.nb:hover{color:var(--text);background:rgba(255,255,255,.05)}
+.nb.on{background:rgba(91,141,238,.15);color:var(--accent);font-weight:600}
+.top-r{display:flex;gap:6px;align-items:center;flex-shrink:0}
 
-/* ── BOTTOM NAV (mobile) ── */
-#bottom-nav{
-  position:fixed;bottom:0;left:0;right:0;z-index:100;
-  height:var(--bottom-nav);
-  background:rgba(6,8,15,0.94);
-  backdrop-filter:blur(16px);
-  border-top:1px solid var(--border);
-  display:none;align-items:center;justify-content:space-around;padding:0 4px;
-}
-.bnav-btn{
-  flex:1;display:flex;flex-direction:column;align-items:center;
-  gap:3px;padding:6px 4px;border:none;background:transparent;
-  color:var(--text3);cursor:pointer;transition:color .15s;border-radius:var(--r2);
-  font-size:10px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;
-}
-.bnav-btn .bicon{font-size:20px;line-height:1}
-.bnav-btn.active{color:var(--accent)}
+.btn{display:inline-flex;align-items:center;gap:5px;border:none;border-radius:10px;padding:8px 16px;font-size:13px;color:#fff;font-weight:600;line-height:1}
+.btn:hover{opacity:.85}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:var(--rs)}
+.btn-xs{padding:3px 9px;font-size:11px;border-radius:6px}
+.btn-p{background:var(--accent)}
+.btn-s{background:rgba(91,141,238,.15);color:var(--accent)}
+.ghost{background:transparent;border:1px solid var(--border);border-radius:10px;padding:7px 14px;font-size:13px;color:var(--muted)}
+.ghost:hover{border-color:var(--border2);color:var(--text)}
+.ibtn{background:transparent;border:1px solid var(--border);border-radius:var(--rs);padding:6px 9px;font-size:15px;color:var(--muted);display:inline-flex;align-items:center}
+.ibtn:hover{border-color:var(--border2);color:var(--text)}
 
-/* ── DESKTOP NAV ── */
-#desktop-nav{display:flex;gap:2px;align-items:center}
-.dnav-btn{
-  height:32px;padding:0 12px;border-radius:var(--r2);border:none;
-  background:transparent;color:var(--text2);font-size:13px;
-  cursor:pointer;transition:all .15s;font-weight:500;
-}
-.dnav-btn.active{background:rgba(124,106,247,.15);color:#a394fa}
+.inp{width:100%;background:#0e1520;border:1px solid var(--border);border-radius:var(--rs);padding:8px 12px;font-size:13px;color:var(--text);outline:none}
+.inp:focus{border-color:var(--accent)}
+.lbl{font-size:11px;color:var(--muted);margin-bottom:5px;display:block;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
 
-/* ── MAIN SCROLL ── */
-#main{
-  position:fixed;top:var(--topbar);bottom:0;left:0;right:0;
-  overflow-y:auto;-webkit-overflow-scrolling:touch;
-}
-.view{padding:16px;max-width:900px;margin:0 auto;padding-bottom:20px}
+#main{padding:20px 16px;max-width:1100px;width:100%;margin:0 auto}
+.stitle{font-size:11px;font-weight:700;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px}
+.ngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:20px}
+.nlist{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:20px}
 
-/* ── CARDS ── */
-.note-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
-.note-card{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--r);padding:14px 15px;cursor:pointer;
-  transition:all .18s;border-left:3px solid transparent;
-  position:relative;overflow:hidden;
-}
-.note-card:active{transform:scale(.985)}
-.note-card::before{
-  content:'';position:absolute;top:0;right:0;
-  width:60px;height:60px;border-radius:50%;
-  background:radial-gradient(circle,var(--card-color,transparent) 0%,transparent 70%);
-  opacity:.08;transform:translate(20px,-20px);pointer-events:none;
-}
-.note-title{
-  font-size:15px;font-weight:600;color:var(--text);
-  margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  padding-right:40px;
-}
-.note-preview{
-  font-size:12px;color:var(--text2);line-height:1.65;margin-bottom:10px;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-}
-.note-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.tag{
-  border-radius:6px;padding:2px 7px;font-size:11px;font-weight:500;
-  display:inline-block;line-height:1.5;
-}
-.note-footer{font-size:10px;color:var(--text3);margin-top:8px;display:flex;gap:12px}
-.card-pins{position:absolute;top:10px;right:10px;display:flex;gap:3px;font-size:13px}
+.nc{background:var(--card);border-radius:var(--r);padding:14px;cursor:pointer;transition:transform .18s,box-shadow .18s;border:1px solid var(--border);border-left:3px solid;position:relative;overflow:hidden}
+.nc:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.nc-t{font-size:14px;font-weight:600;color:#ecf2ff;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nc-p{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nc-p.lc{-webkit-line-clamp:3}
+.nc-f{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.chip{border-radius:20px;padding:2px 9px;font-size:11px;font-weight:600;white-space:nowrap}
+.nc-d{font-size:10px;color:var(--dim);margin-top:7px}
 
-/* ── SECTION TITLE ── */
-.sec{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1.2px;text-transform:uppercase;margin:18px 0 10px}
+.pbadge{display:inline-flex;align-items:center;gap:3px;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;letter-spacing:.4px}
+.pb-new{background:rgba(45,63,88,.5);color:var(--muted)}
+.pb-learning{background:rgba(240,165,0,.15);color:var(--amber)}
+.pb-review{background:rgba(91,141,238,.15);color:var(--accent)}
+.pb-done{background:rgba(34,201,122,.15);color:var(--green)}
 
-/* ── SEARCH BAR ── */
-.search-wrap{position:relative;margin-bottom:14px}
-.search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.4;pointer-events:none}
-.search-inp{
-  width:100%;background:var(--surface);border:1px solid var(--border);
-  border-radius:10px;padding:9px 12px 9px 38px;font-size:14px;color:var(--text);
-  outline:none;transition:border .15s;
-}
-.search-inp:focus{border-color:var(--border2)}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.stt{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center}
+.stv{font-size:28px;font-weight:700;color:#ecf2ff;font-family:'Instrument Serif',serif}
+.stl{font-size:11px;color:var(--muted);margin-top:2px}
 
-/* ── FILTER ROW ── */
-.filter-row{display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap}
-.filter-select{
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);
-  padding:6px 10px;font-size:13px;color:var(--text);outline:none;cursor:pointer;
-}
-.color-dot{
-  width:18px;height:18px;border-radius:50%;cursor:pointer;flex-shrink:0;
-  border:2px solid transparent;transition:all .15s;
-}
-.color-dot.active{border-color:#fff;transform:scale(1.2)}
-.sort-btn{
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);
-  padding:6px 10px;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap;
-}
-.sort-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(124,106,247,.08)}
+.ewrap{display:grid;grid-template-columns:1fr 280px;gap:14px;min-height:calc(100vh - 115px)}
+.emain{background:var(--card);border-radius:var(--r);border:1px solid;display:flex;flex-direction:column;overflow:hidden}
+.eside{display:flex;flex-direction:column;overflow-y:auto;padding-bottom:20px}
+.etxt{flex:1;background:transparent;border:none;outline:none;padding:18px 20px;font-size:14px;color:#dce6f5;line-height:1.9;resize:none;font-family:var(--font)}
+.efoot{padding:6px 16px;font-size:11px;color:var(--dim);border-top:1px solid var(--border);display:flex;gap:14px;flex-wrap:wrap}
+.imgrow{padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap}
+.imt{width:72px;height:58px;object-fit:cover;border-radius:6px;border:1px solid var(--border);cursor:zoom-in;display:block}
+.cdot{width:20px;height:20px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:border .12s;flex-shrink:0}
+.cdot.on{border:3px solid #fff}
 
-/* ── EMPTY STATE ── */
-.empty{text-align:center;padding:60px 20px}
-.empty-icon{font-size:48px;margin-bottom:14px}
-.empty-title{font-size:18px;font-weight:600;color:var(--text2);margin-bottom:6px}
-.empty-sub{font-size:13px;color:var(--text3);margin-bottom:20px}
+.pbar{height:5px;background:var(--border);border-radius:5px;overflow:hidden}
+.pbf{height:100%;border-radius:5px;transition:width .4s ease}
 
-/* ── EDITOR ── */
-.editor-layout{display:grid;grid-template-columns:1fr 280px;gap:14px;min-height:calc(100vh - var(--topbar) - 60px)}
-.editor-main{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--r);display:flex;flex-direction:column;
-  border-left:3px solid var(--accent);min-height:400px;
-}
-.editor-toolbar{
-  padding:10px 14px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
-}
-#e-title{
-  flex:1;background:transparent;border:none;outline:none;
-  font-size:17px;font-weight:600;color:var(--text);
-  font-family:'Space Grotesk',system-ui,sans-serif;min-width:100px;
-}
-.editor-body{
-  flex:1;display:flex;flex-direction:column;min-height:320px;
-}
-#e-content{
-  flex:1;background:transparent;border:none;outline:none;
-  padding:16px 18px;font-size:14px;color:var(--text2);
-  font-family:'JetBrains Mono',monospace;line-height:1.85;
-  resize:none;min-height:300px;
-}
-.editor-status{
-  padding:6px 14px;border-top:1px solid var(--border);
-  font-size:11px;color:var(--text3);display:flex;gap:14px;
-}
-.editor-imgs{
-  padding:10px 14px;border-top:1px solid var(--border);
-  display:flex;gap:8px;flex-wrap:wrap;
-}
-.img-thumb{
-  width:72px;height:58px;border-radius:7px;object-fit:cover;
-  border:1px solid var(--border);cursor:zoom-in;display:block;
-}
-.img-wrap{position:relative;flex-shrink:0}
-.img-del{
-  position:absolute;top:-5px;right:-5px;
-  width:17px;height:17px;border-radius:50%;
-  background:var(--danger);border:none;color:#fff;
-  font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;
-}
-.side-card{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--r);padding:14px;margin-bottom:10px;
-}
-.side-label{font-size:11px;color:var(--text3);margin-bottom:7px;display:block;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
-.inp{
-  width:100%;background:var(--surface2);border:1px solid var(--border);
-  border-radius:var(--r2);padding:7px 10px;font-size:13px;color:var(--text);outline:none;
-  transition:border .15s;
-}
-.inp:focus{border-color:var(--border2)}
-.check-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);cursor:pointer;margin-bottom:6px}
-.check-row input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;cursor:pointer}
-.editor-side{overflow-y:auto}
+.fcard{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px 28px;text-align:center;cursor:pointer;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;user-select:none}
+.fcard:active{transform:scale(.99)}
 
-/* ── DETAIL VIEW ── */
-.detail-header{margin-bottom:18px}
-.detail-title{font-size:22px;font-weight:700;margin-bottom:8px;line-height:1.3}
-.detail-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
-.detail-actions{display:flex;gap:8px;flex-wrap:wrap}
-.detail-content{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--r);padding:20px 22px;margin-bottom:16px;
-  border-left:4px solid var(--accent);
-}
-.detail-content pre{
-  font-family:'JetBrains Mono',monospace;font-size:13px;
-  color:var(--text2);line-height:1.9;white-space:pre-wrap;word-break:break-word;margin:0;
-}
+.ti{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);margin-bottom:6px;cursor:default;transition:all .15s}
+.ti:hover{border-color:var(--border2);background:#141d2b}
+.tidot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.tname{flex:1;font-size:13px;font-weight:500;color:#dce6f5;min-width:0}
+.tmeta{font-size:11px;color:var(--muted)}
 
-/* ── FLASHCARDS ── */
-.flash-wrap{max-width:560px;margin:0 auto;padding:10px 0}
-.flash-card{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:16px;padding:36px 28px;text-align:center;
-  cursor:pointer;min-height:220px;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;user-select:none;
-  transition:transform .1s;border-left:4px solid var(--accent);
-}
-.flash-card:active{transform:scale(.97)}
-.flash-btns{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap}
-.flash-dots{display:flex;justify-content:center;gap:5px;margin-top:14px;flex-wrap:wrap}
-.f-dot{width:7px;height:7px;border-radius:50%;cursor:pointer;transition:all .15s}
+.tmpl{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer;transition:all .15s}
+.tmpl:hover{border-color:var(--accent);transform:translateY(-1px)}
+.tmi{font-size:22px;margin-bottom:8px}
+.tmn{font-size:13px;font-weight:600;color:#ecf2ff;margin-bottom:3px}
+.tmd{font-size:11px;color:var(--muted);line-height:1.5}
+.tmgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-height:65vh;overflow-y:auto}
 
-/* ── STATS ── */
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:22px}
-.stat-card{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--r);padding:16px;text-align:center;
-}
-.stat-icon{font-size:20px;margin-bottom:8px}
-.stat-val{font-size:24px;font-weight:700;color:var(--text)}
-.stat-lbl{font-size:11px;color:var(--text3);margin-top:3px}
-.prog-bar{height:5px;background:var(--border);border-radius:5px;overflow:hidden;margin-top:5px}
-.prog-fill{height:100%;border-radius:5px;transition:width .5s}
+.ovl{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px}
+.mdl{background:#0e1520;border:1px solid var(--border2);border-radius:18px;padding:22px;width:100%;max-width:320px;text-align:center}
+.toast-e{position:fixed;bottom:20px;right:16px;border-radius:12px;padding:10px 18px;font-size:13px;font-weight:600;z-index:999;animation:tIn .25s ease;box-shadow:0 8px 28px rgba(0,0,0,.5);color:#fff;display:none;max-width:calc(100vw - 32px)}
+@keyframes tIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
-/* ── MODAL ── */
-.overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;
-  display:none;align-items:center;justify-content:center;padding:20px;
-}
-.overlay.open{display:flex}
-.modal{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:16px;padding:28px 24px;text-align:center;max-width:300px;width:100%;
-}
-.modal-icon{font-size:36px;margin-bottom:12px}
-.modal-title{font-size:17px;font-weight:700;margin-bottom:8px}
-.modal-sub{font-size:13px;color:var(--text2);margin-bottom:22px}
-.modal-btns{display:flex;gap:10px;justify-content:center}
+#mbar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:6px 0 max(6px,env(safe-area-inset-bottom));z-index:300;justify-content:space-around;align-items:center;display:none}
+.mb{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;color:var(--muted);padding:4px 10px;font-size:10px;font-weight:500}
+.mb .mi{font-size:19px;line-height:1}
+.mb.on{color:var(--accent)}
+#fab{position:fixed;bottom:70px;right:16px;z-index:400;width:52px;height:52px;border-radius:50%;background:var(--accent);border:none;font-size:24px;color:#fff;box-shadow:0 4px 18px rgba(91,141,238,.45);align-items:center;justify-content:center;display:none}
 
-/* ── LIGHTBOX ── */
-#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:300;display:none;align-items:center;justify-content:center;padding:20px}
-#lightbox.open{display:flex}
-#lb-img{max-width:90vw;max-height:90vh;border-radius:10px;object-fit:contain}
+@media(max-width:700px){
+  .nav-area,.top-r .ghost,.top-r .exp-btn{display:none}
+  #mbar{display:flex}
+  #fab{display:flex}
+  #main{padding:14px 12px;padding-bottom:120px}
+  .ewrap{grid-template-columns:1fr}
+  .eside{max-height:none}
+  .ewrap{min-height:auto}
+  .etxt{min-height:200px}
+  .ngrid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:9px}
+  .tmgrid{grid-template-columns:1fr}
+}
+@media(min-width:701px){#mbar,#fab{display:none!important}}
 
-/* ── TOAST ── */
-.toast{
-  position:fixed;bottom:calc(var(--bottom-nav) + 12px);right:16px;
-  border-radius:10px;padding:10px 16px;font-size:13px;font-weight:600;
-  z-index:400;box-shadow:0 8px 24px rgba(0,0,0,.5);color:#fff;
-  animation:toastIn .25s ease;pointer-events:none;
-}
-@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.fio{font-size:20px;cursor:pointer;padding:4px 6px;border-radius:6px;border:2px solid transparent;transition:.12s}
+.fio:hover{border-color:var(--border2)}
+.fio.on{border-color:var(--accent);background:rgba(91,141,238,.15)}
+.fcdot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:.12s;flex-shrink:0}
+.fcdot.on{border:3px solid #fff}
 
-/* ── MOBILE EDITOR ── */
-.mobile-editor-tabs{
-  display:none;
-  position:sticky;top:0;z-index:10;
-  background:var(--surface);border-bottom:1px solid var(--border);
-  padding:0 16px;
+/* autosave indicator */
+#autosave-bar{
+  position:fixed;top:54px;left:0;right:0;height:2px;background:transparent;z-index:190;
+  transition:background .3s;
 }
-.mob-tab{
-  background:transparent;border:none;color:var(--text2);
-  padding:10px 14px;font-size:13px;font-weight:500;cursor:pointer;
-  border-bottom:2px solid transparent;transition:all .15s;
-}
-.mob-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-.mobile-side-panel{display:none}
+#autosave-bar.saving{background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:sweepBar 1s ease;}
+#autosave-bar.saved{background:var(--green);animation:fadeBar 1.5s ease forwards;}
+#autosave-bar.unsaved{background:var(--amber);}
+@keyframes sweepBar{0%{opacity:0}50%{opacity:1}100%{opacity:0}}
+@keyframes fadeBar{0%{opacity:1}80%{opacity:1}100%{opacity:0}}
 
-/* ── RESPONSIVE ── */
-@media(max-width:720px){
-  :root{--topbar:52px}
-  #desktop-nav{display:none}
-  #bottom-nav{display:flex}
-  #main{bottom:var(--bottom-nav)}
-  .view{padding:12px;padding-bottom:10px}
-  .note-grid{grid-template-columns:1fr}
-  .editor-layout{grid-template-columns:1fr;gap:0;min-height:auto}
-  .editor-side{display:none}
-  .mobile-editor-tabs{display:flex}
-  .mobile-side-panel{display:block}
-  .editor-main{border-radius:0;border-left-width:3px;min-height:auto}
-  .detail-title{font-size:18px}
-  .flash-card{padding:24px 18px;min-height:180px}
-  .stat-grid{grid-template-columns:repeat(2,1fr)}
-  .topbar-actions .btn-ghost{display:none}
-  .logo{font-size:17px}
-  .toast{bottom:calc(var(--bottom-nav) + 10px);right:12px;left:12px;text-align:center}
-  .filter-row{gap:6px}
-  .filter-select{font-size:12px;padding:5px 8px}
+#autosave-hint{
+  position:fixed;bottom:70px;left:50%;transform:translateX(-50%);
+  background:rgba(13,18,32,.95);border:1px solid var(--border2);
+  border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;
+  color:var(--muted);z-index:190;display:none;white-space:nowrap;
+  box-shadow:0 4px 16px rgba(0,0,0,.4);
+  transition:opacity .2s;
 }
-@media(min-width:721px){
-  .mobile-editor-tabs,.mobile-side-panel{display:none!important}
-  .editor-side{display:block!important}
-}
-
-/* ── COLOR PICKER ── */
-.color-pick-row{display:flex;gap:7px;flex-wrap:wrap}
-
-/* ── SUBJECT TAG LIST ── */
-.subj-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
-.subj-chip{
-  padding:4px 10px;border-radius:20px;border:1px solid var(--border);
-  font-size:11px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s;
-}
-.subj-chip:active{background:var(--border)}
-
-/* ── RECENT LIST ── */
-.recent-item{
-  display:flex;align-items:center;gap:10px;
-  padding:9px 0;border-bottom:1px solid var(--border);cursor:pointer;
-}
-.recent-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.recent-info{flex:1;overflow:hidden}
-.recent-title{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.recent-sub{font-size:11px;color:var(--text3)}
-
-/* ── PROGRESS ── */
-.wpm-bar{
-  height:3px;background:var(--border);border-radius:3px;
-  margin-bottom:4px;overflow:hidden;
-}
-.wpm-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width .4s}
-
-/* ── AUTOSAVE INDICATOR ── */
-#autosave-indicator{
-  display:inline-flex;align-items:center;gap:5px;
-  font-size:11px;font-weight:500;
-  padding:3px 9px;border-radius:20px;
-  transition:all .3s;user-select:none;
-}
-#autosave-indicator.idle{color:var(--text3);background:transparent}
-#autosave-indicator.typing{color:var(--warn);background:rgba(240,160,74,.1)}
-#autosave-indicator.saving{color:var(--accent2);background:rgba(91,141,239,.1)}
-#autosave-indicator.saved{color:var(--accent3);background:rgba(78,203,164,.1)}
-#autosave-indicator.error{color:var(--danger);background:rgba(232,80,80,.1)}
-.as-dot{
-  width:6px;height:6px;border-radius:50%;flex-shrink:0;transition:background .3s;
-}
-.idle .as-dot{background:var(--text3)}
-.typing .as-dot{background:var(--warn);animation:pulse 1s infinite}
-.saving .as-dot{background:var(--accent2);animation:spin-dot .6s linear infinite}
-.saved .as-dot{background:var(--accent3)}
-.error .as-dot{background:var(--danger)}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-@keyframes spin-dot{0%{transform:scale(1)}50%{transform:scale(1.6)}100%{transform:scale(1)}}
-
-/* ── UNSAVED BADGE ── */
-.unsaved-badge{
-  display:none;width:8px;height:8px;border-radius:50%;
-  background:var(--warn);position:absolute;top:8px;right:8px;
-}
-.unsaved-badge.show{display:block}
+#autosave-hint.show{display:block;}
+#autosave-hint .dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle;}
 </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
 <div id="topbar">
-  <div class="logo" onclick="nav('home')">Neuro<em>N</em>otepad</div>
-  <div id="desktop-nav">
-    <button class="dnav-btn active" id="dn-home" onclick="nav('home')">🏠 Bosh sahifa</button>
-    <button class="dnav-btn" id="dn-flashcards" onclick="nav('flashcards')">🃏 Flashcards</button>
-    <button class="dnav-btn" id="dn-stats" onclick="nav('stats')">📊 Statistika</button>
+  <div class="logo" onclick="go('home')">
+    <div class="logo-box">🧠</div>NeurоNotepad
   </div>
-  <div class="topbar-actions">
-    <button class="btn-ghost" onclick="exportData()" title="Eksport">⬇</button>
-    <input type="file" accept=".json" id="import-file" style="display:none" onchange="importData(event)"/>
-    <button class="btn-ghost" onclick="document.getElementById('import-file').click()" title="Import">⬆</button>
-    <button class="btn-primary" onclick="newNote()"><span>+</span> Yangi</button>
+  <div class="nav-area" id="nav-area">
+    <button class="nb on" id="nb-home" onclick="go('home')">🏠 Bosh sahifa</button>
+    <button class="nb" id="nb-neuro" onclick="go('neuro')">🧠 Nevrologiya</button>
+    <button class="nb" id="nb-flash" onclick="go('flash')">🃏 Flashcards</button>
+    <button class="nb" id="nb-prog" onclick="go('prog')">📈 Progress</button>
+    <button class="nb" id="nb-stats" onclick="go('stats')">📊 Statistika</button>
+    <!-- dynamic fan buttons inserted here by JS -->
+    <div id="dyn-fans" style="display:contents"></div>
+    <button class="nb" id="nb-addfan" onclick="showAddFan()" style="color:var(--accent);border:1px dashed rgba(91,141,238,.4);border-radius:var(--rs);padding:5px 11px">＋ Fan</button>
+  </div>
+  <div class="top-r">
+    <button class="ghost exp-btn" onclick="exportData()" style="font-size:12px;padding:6px 11px">⬇</button>
+    <input type="file" accept=".json" id="impf" style="display:none" onchange="importData(event)"/>
+    <button class="ghost exp-btn" onclick="document.getElementById('impf').click()" style="font-size:12px;padding:6px 11px">⬆</button>
+    <button class="btn btn-p btn-sm" onclick="newNote()">+ Yangi</button>
   </div>
 </div>
 
-<!-- BOTTOM NAV (mobile) -->
-<div id="bottom-nav">
-  <button class="bnav-btn active" id="bn-home" onclick="nav('home')">
-    <span class="bicon">🏠</span>Asosiy
-  </button>
-  <button class="bnav-btn" id="bn-flashcards" onclick="nav('flashcards')">
-    <span class="bicon">🃏</span>Flash
-  </button>
-  <button class="bnav-btn" id="bn-new" onclick="newNote()">
-    <span class="bicon" style="background:var(--accent);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;margin-bottom:1px">＋</span>
-  </button>
-  <button class="bnav-btn" id="bn-stats" onclick="nav('stats')">
-    <span class="bicon">📊</span>Statistika
-  </button>
-  <button class="bnav-btn" id="bn-more" onclick="toggleMobileMenu()">
-    <span class="bicon">⋯</span>Ko'proq
-  </button>
+<div id="autosave-bar"></div>
+<div id="autosave-hint"></div>
+<div id="mbar">
+  <button class="mb on" id="mb-home" onclick="go('home')"><span class="mi">🏠</span>Bosh</button>
+  <button class="mb" id="mb-neuro" onclick="go('neuro')"><span class="mi">🧠</span>Nevro</button>
+  <button class="mb" id="mb-flash" onclick="go('flash')"><span class="mi">🃏</span>Flash</button>
+  <button class="mb" id="mb-prog" onclick="go('prog')"><span class="mi">📈</span>Progress</button>
+  <button class="mb" id="mb-stats" onclick="go('stats')"><span class="mi">📊</span>Stat</button>
 </div>
-
-<!-- MAIN CONTENT -->
+<button id="fab" onclick="newNote()">＋</button>
 <div id="main"></div>
+<div class="toast-e" id="te"></div>
 
-<!-- DELETE MODAL -->
-<div id="del-modal" class="overlay">
-  <div class="modal">
-    <div class="modal-icon">🗑</div>
-    <div class="modal-title">O'chirishni tasdiqlang</div>
-    <div class="modal-sub">Bu konspekt butunlay yo'qoladi.</div>
-    <div class="modal-btns">
-      <button class="btn-ghost" onclick="closeModal()">Bekor</button>
-      <button class="btn-primary" style="background:var(--danger)" id="del-confirm">Ha, o'chir</button>
+<div class="ovl" id="del-modal" style="display:none">
+  <div class="mdl">
+    <div style="font-size:34px;margin-bottom:10px">🗑</div>
+    <div style="font-size:16px;font-weight:700;color:#ecf2ff;margin-bottom:6px">O'chirishni tasdiqlang</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px">Konspekt o'chib ketadi.</div>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="ghost" onclick="cm('del-modal')">Bekor</button>
+      <button class="btn" style="background:#e05555" id="del-ok">Ha, o'chir</button>
     </div>
   </div>
 </div>
 
-<!-- MOBILE MENU MODAL -->
-<div id="mobile-menu" class="overlay">
-  <div class="modal" style="max-width:260px">
-    <div style="font-weight:700;margin-bottom:14px;font-size:15px">Menyu</div>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <button class="btn-ghost" style="justify-content:flex-start;gap:10px;width:100%" onclick="exportData();closeMobileMenu()">⬇ Eksport qilish</button>
-      <button class="btn-ghost" style="justify-content:flex-start;gap:10px;width:100%" onclick="document.getElementById('import-file').click();closeMobileMenu()">⬆ Import qilish</button>
-      <button class="btn-ghost" style="justify-content:flex-start;gap:10px;width:100%;color:var(--text2)" onclick="closeMobileMenu()">✕ Yopish</button>
+<div class="ovl" id="tmpl-modal" style="display:none">
+  <div class="mdl" style="max-width:520px;text-align:left;padding:18px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-size:16px;font-weight:700;color:#ecf2ff">📋 Shablon tanlang</div>
+      <button class="ibtn" onclick="cm('tmpl-modal')" style="font-size:13px;padding:4px 8px">✕</button>
     </div>
+    <div class="tmgrid" id="tlist"></div>
   </div>
 </div>
 
-<!-- LIGHTBOX -->
-<div id="lightbox" onclick="this.classList.remove('open')">
-  <img id="lb-img" src="" alt=""/>
+<div class="ovl" id="lb" style="display:none">
+  <div style="position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%" onclick="cm('lb')">
+    <img id="lbimg" style="max-width:90vw;max-height:90vh;border-radius:12px;object-fit:contain;touch-action:pinch-zoom;cursor:zoom-out" onclick="event.stopPropagation()"/>
+    <button onclick="cm('lb')" style="position:fixed;top:16px;right:16px;background:rgba(0,0,0,.7);border:1px solid #334;border-radius:50%;width:36px;height:36px;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10">✕</button>
+    <div id="lb-info" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);border-radius:8px;padding:6px 14px;font-size:12px;color:#94a3b8;white-space:nowrap"></div>
+  </div>
 </div>
 
-<!-- TOAST -->
-<div id="toast-el" class="toast" style="display:none"></div>
+<!-- ADD FAN MODAL -->
+<div class="ovl" id="addfan-modal" style="display:none">
+  <div class="mdl" style="max-width:380px;text-align:left;padding:22px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-size:16px;font-weight:700;color:#ecf2ff">&#128218; Fan qo'shish / boshqarish</div>
+      <button class="ibtn" onclick="cm('addfan-modal')" style="font-size:13px;padding:4px 8px">&#x2715;</button>
+    </div>
+    <div style="margin-bottom:12px">
+      <span class="lbl">Fan nomi</span>
+      <input class="inp" id="fan-name-inp" placeholder="Masalan: Anatomiya, Fiziologiya..." onkeydown="if(event.key==='Enter')addFanConfirm()"/>
+    </div>
+    <div style="margin-bottom:14px">
+      <span class="lbl">Icon (emoji)</span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px" id="fan-icon-picker">
+        <span onclick="selFI('&#128218;')" class="fio">&#128218;</span>
+        <span onclick="selFI('&#128300;')" class="fio">&#128300;</span>
+        <span onclick="selFI('&#128138;')" class="fio">&#128138;</span>
+        <span onclick="selFI('&#129514;')" class="fio">&#129514;</span>
+        <span onclick="selFI('&#129728;')" class="fio">&#129728;</span>
+        <span onclick="selFI('&#129397;')" class="fio">&#129397;</span>
+        <span onclick="selFI('&#128065;')" class="fio">&#128065;</span>
+        <span onclick="selFI('&#129460;')" class="fio">&#129460;</span>
+        <span onclick="selFI('&#129518;')" class="fio">&#129518;</span>
+        <span onclick="selFI('&#129401;')" class="fio">&#129401;</span>
+        <span onclick="selFI('&#128299;')" class="fio">&#128299;</span>
+        <span onclick="selFI('&#9877;')" class="fio">&#9877;</span>
+        <span onclick="selFI('&#127973;')" class="fio">&#127973;</span>
+        <span onclick="selFI('&#129659;')" class="fio">&#129659;</span>
+        <span onclick="selFI('&#128137;')" class="fio">&#128137;</span>
+      </div>
+      <input class="inp" id="fan-icon-inp" placeholder="Emoji..." value="&#128218;" style="font-size:18px;width:80px"/>
+    </div>
+    <div style="margin-bottom:16px">
+      <span class="lbl">Rang</span>
+      <div style="display:flex;gap:7px;flex-wrap:wrap" id="fan-cdots">
+        <div onclick="selFC('#5b8dee')" class="fcdot" style="background:#5b8dee"></div>
+        <div onclick="selFC('#22c97a')" class="fcdot" style="background:#22c97a"></div>
+        <div onclick="selFC('#f0a500')" class="fcdot" style="background:#f0a500"></div>
+        <div onclick="selFC('#e05555')" class="fcdot" style="background:#e05555"></div>
+        <div onclick="selFC('#7c5cbf')" class="fcdot" style="background:#7c5cbf"></div>
+        <div onclick="selFC('#d966a8')" class="fcdot" style="background:#d966a8"></div>
+        <div onclick="selFC('#06b6d4')" class="fcdot" style="background:#06b6d4"></div>
+        <div onclick="selFC('#f97316')" class="fcdot" style="background:#f97316"></div>
+        <div onclick="selFC('#84cc16')" class="fcdot" style="background:#84cc16"></div>
+        <div onclick="selFC('#20b2aa')" class="fcdot" style="background:#20b2aa"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="ghost" style="flex:1" onclick="cm('addfan-modal')">Bekor</button>
+      <button class="btn btn-p" style="flex:1;justify-content:center" onclick="addFanConfirm()">&#10003; Qo'shish</button>
+    </div>
+    <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+      <div class="lbl" style="margin-bottom:8px">Mavjud qo'shilgan fanlar</div>
+      <div id="existing-fans-list"></div>
+    </div>
+  </div>
+</div>
 
 <script>
-// ─── DATA ───
-const SUBJECTS=['Anatomiya','Fiziologiya','Nevrologiya','Biokimyo','Farmakologiya','Patologiya','Mikrobiologiya','Immunologiya','Terapiya','Jarrohlik'];
-const COLORS=['#7c6af7','#5b8def','#4ecba4','#f0a04a','#e85050','#d46ef5','#3bb8c0','#e878a0','#a3c44a','#6dd6e8'];
+const COLORS=['#5b8dee','#7c5cbf','#22c97a','#f0a500','#e05555','#d966a8','#20b2aa','#f97316','#06b6d4','#84cc16'];
+const PS=['new','learning','review','done'];
+const PL={new:'Yangi',learning:"O'rganilmoqda",review:'Takrorlash',done:"O'rganildi"};
+const PI={new:'○',learning:'◑',review:'◕',done:'●'};
+const PC={new:'pb-new',learning:'pb-learning',review:'pb-review',done:'pb-done'};
+
+const NEURO=[
+  {sec:'🧠 Umumiy nevrologiya',col:'#5b8dee',topics:[
+    {id:'n1',name:'Nervlar tizimi anatomiyasi',d:'Markaziy va periferik NS'},
+    {id:'n2',name:'Neyron va sinaps fiziologiyasi',d:'AP, mediatorlar'},
+    {id:'n3',name:"Miyelin qobig'i",d:'Demielinizatsiya'},
+    {id:'n4',name:'Nevrolog muoyenasi',d:'Status neurologicus'},
+  ]},
+  {sec:"🫀 Qon-tomir kasalliklari",col:'#e05555',topics:[
+    {id:'n5',name:'Insult (ONMK)',d:'Ishemik va gemorragik'},
+    {id:'n6',name:"TIA — o'tkinchi ishemiya",d:'Klinika, diagnostika'},
+    {id:'n7',name:'Subaraknoid qon quyilish',d:'SAK sabablari'},
+    {id:'n8',name:'Venoz sinuslar trombozi',d:'Diagnostika'},
+  ]},
+  {sec:'⚡ Epilepsiya',col:'#f0a500',topics:[
+    {id:'n9',name:'Epilepsiya tasnifi',d:'ILAE 2017'},
+    {id:'n10',name:'Fokal tutilmalar',d:'Simptomlari, EEG'},
+    {id:'n11',name:'Generalizatsiyalangan tutilmalar',d:'Absence, tonik-klonik'},
+    {id:'n12',name:'Epileptik status',d:'Davolash taktikasi'},
+  ]},
+  {sec:'🧩 Harakatlar buzilishi',col:'#7c5cbf',topics:[
+    {id:'n13',name:'Parkinson kasalligi',d:'Patofizologiya, davolash'},
+    {id:'n14',name:'Esansial tremor',d:'Farqlash, beta-blokator'},
+    {id:'n15',name:'Huntington xastaligi',d:'Genetika, xoreya'},
+    {id:'n16',name:'Dystonia',d:'Fokus, generalizatsiya'},
+  ]},
+  {sec:"🦠 Infektsion kasalliklar",col:'#22c97a',topics:[
+    {id:'n17',name:'Bakterial meningit',d:'CSF, antibiotiklar'},
+    {id:'n18',name:'Viral ensefalit',d:'HSV, Arbovirus'},
+    {id:'n19',name:'Tuberkulyoz meningit',d:'Diagnostika'},
+    {id:'n20',name:'Neyrosifilis',d:'Tasnif, davolash'},
+  ]},
+  {sec:'🔄 Demensiya',col:'#d966a8',topics:[
+    {id:'n21',name:'Alzheimer kasalligi',d:'Patofizologiya'},
+    {id:'n22',name:'Lewy tana demensiyasi',d:'Klinik xususiyatlar'},
+    {id:'n23',name:'Frontotemporal demensiya',d:"Xulq-atvor o'zgarishi"},
+    {id:'n24',name:'Vaskulyar demensiya',d:'Insultdan keyin'},
+  ]},
+  {sec:'🔁 Periferik NS',col:'#06b6d4',topics:[
+    {id:'n25',name:'Guillan-Barre sindromi',d:'Asending falaj'},
+    {id:'n26',name:'Neyropatiyalar',d:'Diabetik, alkogol'},
+    {id:'n27',name:'Miasteniya gravis',d:'NMJ, antixolinesteraza'},
+    {id:'n28',name:'Kramp va fassikulatsiya',d:'Differentsial'},
+  ]},
+  {sec:"🤕 Bosh og'riq",col:'#f97316',topics:[
+    {id:'n29',name:'Migren',d:"Aura, triptan"},
+    {id:'n30',name:"Klaster bosh og'riq",d:'Avtonomik belgilar'},
+    {id:'n31',name:'Intrakranial gipertenziya',d:'IIH, papilledema'},
+    {id:'n32',name:'Bosh og\'riq differentsiali',d:'Tasnif'},
+  ]},
+];
+
+const TMPLS=[
+  {id:'t1',icon:'🧪',name:'Kasallik shabloni',desc:'Etiologiya, patogenez, klinika',col:'#5b8dee',
+   txt:`📌 KASALLIK NOMI:\n\n━━━━━━━━━━━━━━━━\n🔬 ETIOLOGIYA:\n• \n• \n\n⚙️ PATOGENEZ:\n• \n• \n\n🩺 KLINIKA:\nAsosiy belgilar:\n• \n• \n• \n\nQo'shimcha belgilar:\n• \n\n━━━━━━━━━━━━━━━━\n🔍 DIAGNOSTIKA:\nAnamnez: \nOb'yektiv: \nLaboratoriya: \nInstrumental: \n\n━━━━━━━━━━━━━━━━\n💊 DAVOLASH:\nEtiotrop: \nPatogenetik: \nSimptomatik: \n\n⚠️ ASORAT:\n• \n\n📊 PROGNOZ:\n`},
+  {id:'t2',icon:'💊',name:'Dori-darmon',desc:'Farmakologiya shabloni',col:'#22c97a',
+   txt:`💊 DORI NOMI:\nINN: \nGuruhi: \n\n━━━━━━━━━━━━━━━━\n🎯 TA'SIR MEXANIZMI:\n• \n\n📋 KO'RSATMALAR:\n• \n• \n\n🚫 MUMKIN EMAS:\n• \n• \n\n━━━━━━━━━━━━━━━━\n💉 DOZALASH:\nKattalar: \nBolalar: \n\n⚠️ NOJO'YA TA'SIRLAR:\n• \n• \n\n🔄 O'ZARO TA'SIR:\n• \n`},
+  {id:'t3',icon:'📊',name:'Differentsial diagnostika',desc:'Farqlash jadvali',col:'#f0a500',
+   txt:`🔍 DIFFERENTSIAL DIAGNOSTIKA\n\nASosiy shikoyat: \n\n━━━━━━━━━━━━━━━━\n1️⃣ BIRINCHI TAXMIN:\n• Foyda: \n• Qarshi: \n• Tasdiq uchun: \n\n2️⃣ IKKINCHI TAXMIN:\n• Foyda: \n• Qarshi: \n• Tasdiq uchun: \n\n3️⃣ UCHINCHI TAXMIN:\n• Foyda: \n• Qarshi: \n• Tasdiq uchun: \n\n━━━━━━━━━━━━━━━━\n✅ YAKUNIY TASHXIS:\nAsoslash: \n`},
+  {id:'t4',icon:'🩺',name:"Bemorni ko'rish",desc:'Klinik holat yozish',col:'#7c5cbf',
+   txt:`🩺 KLINIK HOLAT\n\nBemor: yosh, jins\nShikoyat: \n\n━━━━━━━━━━━━━━━━\n📋 ANAMNEZ:\nKasallik: \nHayot: \nAllergiya: \n\n━━━━━━━━━━━━━━━━\n👀 OB'YEKTIV:\nUmumiy holat: \nOng: \nKo'z almashtirishi: \nMotor: \nSensor: \nReflekslar: \nKoordinatsiya: \nMeningeal: \n\n━━━━━━━━━━━━━━━━\n🔬 TEKSHIRUVLAR:\nOAK: \nMRT/KT: \nEEG: \nLP: \n\n📌 TASHXIS:\nDavolash rejasi: \n`},
+  {id:'t5',icon:'⚡',name:'Favqulodda holat',desc:'Emergency protokol',col:'#e05555',
+   txt:`🚨 FAVQULODDA HOLAT\n\nHolat: \nVaqt omili: \n\n━━━━━━━━━━━━━━━━\n🔴 DARHOL CHORA:\n1. \n2. \n3. \n\n🟡 BIRINCHI 30 DAQIQA:\n• \n• \n\n━━━━━━━━━━━━━━━━\n💊 DORILAR:\n1. dori: doza\n2. dori: doza\n\n📋 MONITORING:\n• Vital: \n• Nevrolog: \n\n⚠️ XATO QILMASLIK:\n• \n• \n`},
+  {id:'t6',icon:'📖',name:'Leksiya konspekti',desc:'Dars jarayonida yozish',col:'#06b6d4',
+   txt:`📖 LEKSIYA KONSPEKTI\n\nFan: Nevrologiya\nMavzu: \nSana: \nO'qituvchi: \n\n━━━━━━━━━━━━━━━━\n🎯 ASOSIY FIKRLAR:\n1. \n2. \n3. \n\n📝 BATAFSIL:\n\n\n━━━━━━━━━━━━━━━━\n❓ TUSHUNMAGAN JOYLAR:\n• \n\n💡 ESLATMA:\n• \n\n📚 MANBALAR:\n• \n`},
+  {id:'t7',icon:'🧬',name:'Genetik kasallik',desc:'Sindromi, meros',col:'#d966a8',
+   txt:`🧬 GENETIK KASALLIK / SINDROMI\n\nNomi: \nMeros turi: AD / AR / X-linked\n\n━━━━━━━━━━━━━━━━\n🔬 GEN / LOKUS:\nGen: \nXromosoma: \nMutatsiya: \n\n🧪 PATOFIZOLOGIYA:\n• \n• \n\n━━━━━━━━━━━━━━━━\n🩺 KLINIKA:\nBoshlanish yoshi: \nAsosiy belgilar:\n• \n• \n\nNeyrologik belgilar:\n• \n\n━━━━━━━━━━━━━━━━\n🔍 DIAGNOSTIKA:\nGenetik test: \nMRT topilmasi: \n\n💊 DAVOLASH:\nSimptomatik: \nPrognoz: \n`},
+  {id:'t8',icon:'🔁',name:'Takrorlash kartasi',desc:'Imtihon oldidan',col:'#84cc16',
+   txt:`🔁 TAKRORLASH KARTASI\n\nMavzu: \nImtihon sanasi: \n\n━━━━━━━━━━━━━━━━\n✅ BILAMAN:\n• \n• \n• \n\n⚠️ YAXSHI BILMAYMAN:\n• \n• \n\n❌ BILMAYMAN:\n• \n• \n\n━━━━━━━━━━━━━━━━\n🔑 KALIT SO'ZLAR:\n\n\n📊 O'Z-O'ZIMNI BAHOLASH:\nBilim darajasi: ___/10\nTakrorlash: \n`},
+];
 
 let notes=JSON.parse(localStorage.getItem('nn4_notes')||'[]');
-let customSubjects=JSON.parse(localStorage.getItem('nn4_subj')||'[]');
-let currentView='home';
-let editingNote=null;
-let flashIdx=0;
-let flashFlipped=false;
-let filterSubj='all';
-let filterColor='all';
-let sortBy='date';
-let gridMode=true;
-let searchQ='';
-let mobileEditorTab='write'; // 'write' | 'settings'
+let customSubj=JSON.parse(localStorage.getItem('nn4_subj')||'[]');
+let topicProg=JSON.parse(localStorage.getItem('nn4_tp')||'{}');
+let view='home',editing=null;
+let sq='',fsubj='all',fcol='all',sort='date',grid=true;
+let fi=0,ff=false;
 
-// ─── AUTOSAVE STATE ───
+function save(){localStorage.setItem('nn4_notes',JSON.stringify(notes));localStorage.setItem('nn4_subj',JSON.stringify(customSubj));localStorage.setItem('nn4_tp',JSON.stringify(topicProg));}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
+function asubj(){ return ['Nevrologiya',...customSubj]; } function asubjNames(){ return ['Nevrologiya',...customSubj.map(getFanName)]; }
+function wc(t){return(t||'').split(/\s+/).filter(Boolean).length}
+function fd(ts){return new Date(ts).toLocaleDateString('uz-UZ',{day:'2-digit',month:'short',year:'numeric'})}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function toast(msg,type='ok'){
+  const e=document.getElementById('te');
+  e.textContent=msg;e.style.background=type==='err'?'#e05555':'#22c97a';
+  e.style.display='block';clearTimeout(window._tt);
+  window._tt=setTimeout(()=>e.style.display='none',2600);
+}
+
+// go() replaced by JS below
+
+function newNote(subj,txt,title){
+  const n={id:uid(),title:title||'',content:txt||'',subject:subj||asubj()[0],
+    color:COLORS[0],images:[],tags:[],pinned:false,starred:false,progress:'new',
+    createdAt:Date.now(),updatedAt:Date.now()};
+  notes.unshift(n);save();editing={...n};
+  ['home','neuro','flash','prog','stats'].forEach(k=>{
+    document.getElementById('nb-'+k)?.classList.remove('on');
+    document.getElementById('mb-'+k)?.classList.remove('on');
+  });
+  go('editor');
+}
+
 let _autosaveTimer=null;
-let _hasUnsaved=false;
-const AUTOSAVE_DELAY=1200; // 1.2 soniya
+let _lastSavedContent='';
+let _lastSavedTitle='';
+let _autoSaveInterval=null;
 
-function save(){
-  try{
-    localStorage.setItem('nn4_notes',JSON.stringify(notes));
-    localStorage.setItem('nn4_subj',JSON.stringify(customSubjects));
-    return true;
-  }catch(e){
-    // localStorage to'lgan bo'lishi mumkin
-    console.warn('localStorage save error:',e);
-    return false;
+function saveNote(silent){
+  if(!editing)return;
+  editing.updatedAt=Date.now();
+  const i=notes.findIndex(x=>x.id===editing.id);
+  if(i>=0)notes[i]={...editing};
+  save();
+  _lastSavedContent=editing.content||'';
+  _lastSavedTitle=editing.title||'';
+  // clear draft
+  localStorage.removeItem('nn4_draft_'+editing.id);
+  if(!silent){
+    toast('Saqlandi ✓');
+    showSaveBar('saved');
+  }
+  showHint('saved');
+  updateSaveBtn(false);
+}
+
+function autoSave(){
+  if(!editing)return;
+  const changed=(editing.content||'')!==_lastSavedContent||(editing.title||'')!==_lastSavedTitle;
+  if(!changed)return;
+  showSaveBar('saving');
+  showHint('saving');
+  setTimeout(()=>{
+    editing.updatedAt=Date.now();
+    const i=notes.findIndex(x=>x.id===editing.id);
+    if(i>=0)notes[i]={...editing};
+    save();
+    _lastSavedContent=editing.content||'';
+    _lastSavedTitle=editing.title||'';
+    showSaveBar('saved');
+    showHint('saved');
+    updateSaveBtn(false);
+  },300);
+}
+
+function showSaveBar(state){
+  const bar=document.getElementById('autosave-bar');
+  if(!bar)return;
+  bar.className='';
+  void bar.offsetWidth;
+  bar.className=state;
+}
+
+function showHint(state){
+  const hint=document.getElementById('autosave-hint');
+  if(!hint)return;
+  if(state==='unsaved'){
+    hint.innerHTML=`<span class="dot" style="background:var(--amber)"></span>Saqlanmagan o'zgarishlar...`;
+    hint.classList.add('show');
+  } else if(state==='saving'){
+    hint.innerHTML=`<span class="dot" style="background:var(--accent)"></span>Saqlanmoqda...`;
+    hint.classList.add('show');
+  } else if(state==='saved'){
+    hint.innerHTML=`<span class="dot" style="background:var(--green)"></span>Avtomatik saqlandi ✓`;
+    hint.classList.add('show');
+    clearTimeout(window._hintT);
+    window._hintT=setTimeout(()=>hint.classList.remove('show'),2000);
   }
 }
-function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
-function allSubjects(){return[...SUBJECTS,...customSubjects];}
-function wc(t){return(t||'').split(/\s+/).filter(Boolean).length;}
-function fmtDate(ts){return new Date(ts).toLocaleDateString('uz-UZ',{day:'2-digit',month:'short',year:'numeric'});}
-function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
-function isMobile(){return window.innerWidth<=720;}
 
-// ─── AUTOSAVE INDICATOR ───
-function setAutoSaveStatus(status){
-  const el=document.getElementById('autosave-indicator');
-  if(!el)return;
-  const labels={idle:'',typing:'Yozilmoqda...',saving:'Saqlanmoqda...',saved:'Saqlandi ✓',error:'Xato!'};
-  el.className='';el.classList.add(status);
-  el.innerHTML=`<span class="as-dot"></span><span>${labels[status]}</span>`;
-}
-
-// Debounced avto-saqlash — foydalanuvchi to'xtaganida 1.2s keyin saqlanadi
-function triggerAutosave(){
-  _hasUnsaved=true;
-  setAutoSaveStatus('typing');
-  clearTimeout(_autosaveTimer);
-  _autosaveTimer=setTimeout(()=>{
-    if(!editingNote||!_hasUnsaved)return;
-    setAutoSaveStatus('saving');
-    editingNote.updatedAt=Date.now();
-    const idx=notes.findIndex(x=>x.id===editingNote.id);
-    if(idx>=0)notes[idx]={...editingNote};
-    const ok=save();
-    _hasUnsaved=false;
-    setAutoSaveStatus(ok?'saved':'error');
-    if(!ok)toast('Saqlashda xato — xotira to\'lgan bo\'lishi mumkin','err');
-    // 3 soniyadan keyin "idle" ga qaytadi
-    setTimeout(()=>setAutoSaveStatus('idle'),3000);
-  },AUTOSAVE_DELAY);
-}
-
-// Sahifa yopilishda ogohlantirish
-window.addEventListener('beforeunload',e=>{
-  if(_hasUnsaved&&currentView==='editor'){
-    e.preventDefault();
-    e.returnValue='Saqlanmagan o\'zgarishlar bor. Chiqishni xohlaysizmi?';
-    return e.returnValue;
+function updateSaveBtn(unsaved){
+  const btn=document.getElementById('save-btn');
+  if(!btn)return;
+  if(unsaved){
+    btn.style.background='var(--amber)';
+    btn.textContent='● Saqlash';
+  } else {
+    btn.style.background='var(--accent)';
+    btn.textContent='💾 Saqlandi';
   }
-});
-
-// ─── TOAST ───
-function toast(msg,type){
-  const el=document.getElementById('toast-el');
-  el.textContent=msg;
-  el.style.background=type==='err'?'var(--danger)':type==='warn'?'var(--warn)':'#10b981';
-  el.style.display='block';clearTimeout(window._tt);
-  window._tt=setTimeout(()=>el.style.display='none',2800);
 }
 
-// ─── NAV ───
-function nav(v,noteId){
-  currentView=v;
-  // desktop nav
-  document.querySelectorAll('.dnav-btn').forEach(b=>b.classList.remove('active'));
-  const dn=document.getElementById('dn-'+v);if(dn)dn.classList.add('active');
-  // bottom nav
-  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
-  const bn=document.getElementById('bn-'+v);if(bn)bn.classList.add('active');
-
-  if(v==='home')renderHome();
-  else if(v==='editor'&&editingNote)renderEditor();
-  else if(v==='detail'&&noteId)renderDetail(noteId);
-  else if(v==='flashcards')renderFlashcards();
-  else if(v==='stats')renderStats();
-  document.getElementById('main').scrollTop=0;
+function startAutosave(){
+  _lastSavedContent=editing?.content||'';
+  _lastSavedTitle=editing?.title||'';
+  clearInterval(_autoSaveInterval);
+  _autoSaveInterval=setInterval(autoSave,30000); // 30 soniya
 }
 
-// ─── NOTE CRUD ───
-function newNote(){
-  const n={
-    id:uid(),title:'',content:'',subject:allSubjects()[0],
-    color:COLORS[0],images:[],tags:[],
-    pinned:false,starred:false,
-    createdAt:Date.now(),updatedAt:Date.now()
-  };
-  notes.unshift(n);save();
-  editingNote={...n};
-  mobileEditorTab='write';
-  nav('editor');
+function stopAutosave(){
+  clearInterval(_autoSaveInterval);
+  _autoSaveInterval=null;
 }
 
-function saveNote(){
-  if(!editingNote)return;
-  clearTimeout(_autosaveTimer);
-  setAutoSaveStatus('saving');
-  editingNote.updatedAt=Date.now();
-  const idx=notes.findIndex(x=>x.id===editingNote.id);
-  if(idx>=0)notes[idx]={...editingNote};
-  const ok=save();
-  _hasUnsaved=false;
-  setAutoSaveStatus(ok?'saved':'error');
-  if(ok)toast('Saqlandi ✓');
-  else toast('Saqlashda xato!','err');
-  setTimeout(()=>setAutoSaveStatus('idle'),3000);
-  refreshEditorLeft();
-}
-
-function deleteNote(id){
-  notes=notes.filter(x=>x.id!==id);save();
-  closeModal();nav('home');toast('O\'chirildi','err');
-}
-
+function delNote(id){notes=notes.filter(x=>x.id!==id);save();cm('del-modal');go('home');toast("O'chirildi",'err');}
+function showDel(id){document.getElementById('del-modal').style.display='flex';document.getElementById('del-ok').onclick=()=>delNote(id);}
+function cm(id){document.getElementById(id).style.display='none'}
 function togglePin(id){const n=notes.find(x=>x.id===id);if(n){n.pinned=!n.pinned;save();}}
 function toggleStar(id){const n=notes.find(x=>x.id===id);if(n){n.starred=!n.starred;save();}}
-
-function duplicateNote(n){
-  const c={...n,id:uid(),title:(n.title||'Nomsiz')+' (nusxa)',createdAt:Date.now(),updatedAt:Date.now(),pinned:false,images:[...(n.images||[])],tags:[...(n.tags||[])]};
-  notes.unshift(c);save();toast('Nusxa yaratildi 📋');
+function dupNote(n){const c={...n,id:uid(),title:n.title+' (nusxa)',createdAt:Date.now(),updatedAt:Date.now(),pinned:false,images:[...(n.images||[])],tags:[...(n.tags||[])]};notes.unshift(c);save();toast('Nusxa yaratildi 📋');}
+function setP(id,val){const n=notes.find(x=>x.id===id);if(n){n.progress=val;save();}}
+function showLB(src, imgObj){
+  const lbimg = document.getElementById('lbimg');
+  lbimg.src = src;
+  document.getElementById('lb').style.display='flex';
+  // show info
+  const info = document.getElementById('lb-info');
+  if(info && imgObj){
+    info.textContent = `${imgObj.name} · ${imgObj.size||'?'}KB${imgObj.width?' · '+imgObj.width+'×'+imgObj.height+'px':''}${imgObj.compressed?' · 🗜 siqilgan':''}`;
+  } else if(info){
+    info.textContent='';
+  }
 }
 
-// ─── MODAL ───
-function showModal(id){
-  document.getElementById('del-modal').classList.add('open');
-  document.getElementById('del-confirm').onclick=()=>deleteNote(id);
-}
-function closeModal(){document.getElementById('del-modal').classList.remove('open');}
-function toggleMobileMenu(){document.getElementById('mobile-menu').classList.add('open');}
-function closeMobileMenu(){document.getElementById('mobile-menu').classList.remove('open');}
-function showLightbox(src){document.getElementById('lb-img').src=src;document.getElementById('lightbox').classList.add('open');}
-
-// ─── FILTER ───
-function getFiltered(){
+function gf(){
   return notes.filter(n=>{
-    const q=searchQ.toLowerCase();
+    const q=sq.toLowerCase();
     const ms=!q||[n.title,n.content,n.subject,...(n.tags||[])].some(t=>(t||'').toLowerCase().includes(q));
-    const mj=filterSubj==='all'||n.subject===filterSubj;
-    const mc=filterColor==='all'||n.color===filterColor;
+    const mj=fsubj==='all'||n.subject===fsubj;
+    const mc=fcol==='all'||n.color===fcol;
     return ms&&mj&&mc;
   }).sort((a,b)=>{
     if(a.pinned!==b.pinned)return a.pinned?-1:1;
-    if(sortBy==='date')return b.updatedAt-a.updatedAt;
-    if(sortBy==='title')return(a.title||'').localeCompare(b.title||'');
-    if(sortBy==='words')return wc(b.content)-wc(a.content);
+    if(sort==='date')return b.updatedAt-a.updatedAt;
+    if(sort==='title')return(a.title||'').localeCompare(b.title||'');
+    if(sort==='words')return wc(b.content)-wc(a.content);
     return 0;
   });
 }
 
-// ─── NOTE CARD ───
-function renderNoteCard(n){
-  return`<div class="note-card" style="--card-color:${n.color};border-left-color:${n.color}" onclick="nav('detail','${n.id}')">
-    <div class="card-pins">${n.pinned?'📌':''}${n.starred?'⭐':''}</div>
-    <div class="note-title">${esc(n.title)||'Nomsiz'}</div>
-    <div class="note-preview">${esc(n.content)||'Kontent yo\'q...'}</div>
-    <div class="note-meta">
-      <span class="tag" style="background:${n.color}22;color:${n.color}">${esc(n.subject)}</span>
-      ${(n.images||[]).length>0?`<span class="tag" style="background:#ffffff0a;color:var(--text3)">📸 ${n.images.length}</span>`:''}
-      ${(n.tags||[]).slice(0,2).map(t=>`<span class="tag" style="background:#ffffff08;color:var(--text3)">#${esc(t)}</span>`).join('')}
+function pb(p){return`<span class="pbadge ${PC[p]||'pb-new'}">${PI[p]||'○'} ${PL[p]||'Yangi'}</span>`}
+
+function nc(n,list){
+  const bc=n.color+'28';
+  return`<div class="nc" style="border-color:${bc};border-left-color:${n.color}" onclick="go('detail','${n.id}')" onmouseenter="this.style.borderColor='${n.color}55'" onmouseleave="this.style.borderColor='${bc}'">
+    <div style="position:absolute;top:9px;right:9px;display:flex;gap:3px">${n.pinned?'<span style="font-size:11px">📌</span>':''}${n.starred?'<span style="font-size:11px">⭐</span>':''}</div>
+    <div class="nc-t">${esc(n.title)||'Nomsiz'}</div>
+    <div class="nc-p${list?' lc':''}">${esc(n.content)||"Kontent yo'q..."}</div>
+    <div class="nc-f">
+      <span class="chip" style="background:${n.color}18;color:${n.color}">${esc(n.subject)}</span>
+      ${pb(n.progress||'new')}
+      ${(n.images||[]).length?`<span class="chip" style="background:#2d3f5818;color:var(--muted)">📸${n.images.length}</span>`:''}
+      ${(n.tags||[]).slice(0,2).map(t=>`<span class="chip" style="background:#2d3f5818;color:var(--dim)">#${esc(t)}</span>`).join('')}
     </div>
-    <div class="note-footer"><span>${fmtDate(n.updatedAt)}</span><span>${wc(n.content)} so'z</span></div>
+    <div class="nc-d">${fd(n.updatedAt)} · ${wc(n.content)} so'z</div>
   </div>`;
 }
 
-// ─── HOME ───
-function renderHome(){
-  const filtered=getFiltered();
-  const pinned=filtered.filter(n=>n.pinned);
-  const starred=filtered.filter(n=>n.starred&&!n.pinned);
-  const rest=filtered.filter(n=>!n.pinned&&(!n.starred||searchQ||filterSubj!=='all'||filterColor!=='all'));
-  const subs=allSubjects();
-
-  const sortBtns=['date','title','words'].map(s=>
-    `<button class="sort-btn ${sortBy===s?'active':''}" onclick="sortBy='${s}';renderHome()">${s==='date'?'Sana':s==='title'?'Sarlavha':'So\'zlar'}</button>`
-  ).join('');
-
-  document.getElementById('main').innerHTML=`<div class="view">
-    <div class="search-wrap">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input class="search-inp" placeholder="Qidirish — mavzu, teg, matn..." value="${esc(searchQ)}" oninput="searchQ=this.value;renderHome()"/>
-    </div>
-    <div class="filter-row">
-      <select class="filter-select" onchange="filterSubj=this.value;renderHome()">
-        <option value="all">Barcha fanlar</option>
-        ${subs.map(s=>`<option value="${esc(s)}" ${filterSubj===s?'selected':''}>${esc(s)}</option>`).join('')}
-      </select>
-      <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
-        ${COLORS.map(c=>`<div class="color-dot ${filterColor===c?'active':''}" style="background:${c}" onclick="filterColor=filterColor==='${c}'?'all':'${c}';renderHome()"></div>`).join('')}
-      </div>
-    </div>
-    <div class="filter-row" style="margin-bottom:18px;gap:5px">
-      ${sortBtns}
-      <button class="sort-btn" onclick="gridMode=!gridMode;renderHome()">${gridMode?'☰ Liste':'⊞ Grid'}</button>
-    </div>
-
-    ${notes.length===0?`<div class="empty">
-      <div class="empty-icon">📓</div>
-      <div class="empty-title">Hali konspekt yo'q</div>
-      <div class="empty-sub">Birinchi konspektingizni yarating</div>
-      <button class="btn-primary" onclick="newNote()">📝 Konspekt yaratish</button>
-    </div>`:''}
-
-    ${notes.length>0&&filtered.length===0?`<div class="empty" style="padding:40px">
-      <div class="empty-icon" style="font-size:36px">🔍</div>
-      <div class="empty-title">Natija topilmadi</div>
-      <div class="empty-sub">"${esc(searchQ)}" so'rovi bo'yicha hech narsa yo'q</div>
-    </div>`:''}
-
-    ${pinned.length>0?`<div class="sec">📌 Pinlangan (${pinned.length})</div><div class="${gridMode?'note-grid':'note-grid'}" style="${gridMode?'':'grid-template-columns:1fr'}">${pinned.map(renderNoteCard).join('')}</div>`:''}
-    ${starred.length>0&&!searchQ&&filterSubj==='all'&&filterColor==='all'?`<div class="sec">⭐ Sevimlilar (${starred.length})</div><div class="note-grid" style="${gridMode?'':'grid-template-columns:1fr'}">${starred.map(renderNoteCard).join('')}</div>`:''}
-    ${rest.length>0?`<div class="sec">📚 Konspektlar (${rest.length})</div><div class="note-grid" style="${gridMode?'':'grid-template-columns:1fr'}">${rest.map(renderNoteCard).join('')}</div>`:''}
-  </div>`;
+function showTmpl(subj){
+  document.getElementById('tlist').innerHTML=TMPLS.map(t=>`
+    <div class="tmpl" onclick="useTmpl('${t.id}','${esc(subj||'')}')">
+      <div class="tmi">${t.icon}</div>
+      <div class="tmn">${t.name}</div>
+      <div class="tmd">${t.desc}</div>
+    </div>`).join('');
+  document.getElementById('tmpl-modal').style.display='flex';
 }
 
-// ─── EDITOR ───
-function renderEditor(){
-  if(!editingNote)return;
-  const n=editingNote;
-  const mobile=isMobile();
+function useTmpl(tid,subj){
+  const t=TMPLS.find(x=>x.id===tid);if(!t)return;
+  cm('tmpl-modal');newNote(subj||asubj()[0],t.txt,t.name);
+}
 
+// ── HOME ──────────────────────────────────────────────────────────
+function rHome(){
+  const f=gf();
+  const pinned=f.filter(n=>n.pinned);
+  const starred=f.filter(n=>n.starred&&!n.pinned);
+  const rest=f.filter(n=>!n.pinned&&(!n.starred||sq||fsubj!=='all'));
+  const subs=asubj();
   document.getElementById('main').innerHTML=`
-  ${mobile?`<div class="mobile-editor-tabs">
-    <button class="mob-tab ${mobileEditorTab==='write'?'active':''}" onclick="mobileEditorTab='write';refreshMobTab()">✏️ Yozish</button>
-    <button class="mob-tab ${mobileEditorTab==='settings'?'active':''}" onclick="mobileEditorTab='settings';refreshMobTab()">⚙️ Sozlamalar</button>
-  </div>`:''}
-  <div class="view" style="padding-bottom:${mobile?'80px':'20px'}">
-    <div class="editor-toolbar" style="background:var(--surface);border-radius:var(--r) var(--r) 0 0;border:1px solid var(--border);border-bottom:none;margin-bottom:0">
-      <button class="btn-ghost" onclick="if(_hasUnsaved){if(!confirm('Saqlanmagan o\\'zgarishlar bor. Chiqasizmi?'))return;_hasUnsaved=false;clearTimeout(_autosaveTimer);}saveNote();nav('home')" style="flex-shrink:0">← Orqaga</button>
-      <input id="e-title" placeholder="Mavzu sarlavhasi..." value="${esc(n.title)}" oninput="editingNote.title=this.value;triggerAutosave()"/>
-      <span id="autosave-indicator" class="idle"><span class="as-dot"></span><span></span></span>
-      <button class="btn-primary" style="background:${n.color};flex-shrink:0" onclick="saveNote()">💾 Saqlash</button>
-      <button class="icon-btn" onclick="showModal('${n.id}')" style="color:var(--danger);border-color:var(--danger)44;flex-shrink:0">🗑</button>
+  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+    <div style="position:relative;flex:1;min-width:140px;max-width:320px">
+      <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px">🔍</span>
+      <input class="inp" style="padding-left:32px" placeholder="Qidirish..." value="${esc(sq)}" oninput="sq=this.value;rHome()"/>
     </div>
-    <div class="editor-layout" id="editor-layout">
-      <div class="editor-main" id="editor-main-panel" style="border-left-color:${n.color};border-radius:0 0 var(--r) var(--r);${mobile&&mobileEditorTab!=='write'?'display:none':''}">
-        <div class="editor-body">
-          <textarea id="e-content" placeholder="Dars konspektini yozing...\n\n• Asosiy tushunchalar\n• Formulalar va ta'riflar\n• Eslatmalar\n\nCtrl+S — saqlash"
-            oninput="editingNote.content=this.value;updateStats();triggerAutosave()">${esc(n.content)}</textarea>
-        </div>
-        <div class="editor-status" id="e-stats">
-          <span>📝 ${wc(n.content)} so'z</span>
-          <span>🔤 ${(n.content||'').length} belgi</span>
-          <span>📄 ${(n.content||'').split('\n').length} qator</span>
-        </div>
-        ${(n.images||[]).length>0?`<div class="editor-imgs" id="e-imgs">${renderImgThumbs(n.images)}</div>`:'<div id="e-imgs"></div>'}
-      </div>
-      <div class="editor-side" id="editor-side-panel" style="${mobile&&mobileEditorTab!=='settings'?'display:none':''}">
-        ${renderEditorSide(n)}
-      </div>
-      <div class="mobile-side-panel" id="mobile-side-panel" style="${mobile&&mobileEditorTab==='settings'?'':'display:none'}">
-        ${renderEditorSide(n)}
-      </div>
-    </div>
-  </div>`;
-
-  const ta=document.getElementById('e-content');
-  if(ta){
-    ta.addEventListener('keydown',e=>{
-      if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveNote();}
-    });
-    if(mobile&&mobileEditorTab==='write'){ta.focus();}
-  }
-  // Indikatorni boshlang'ich holatga keltir
-  _hasUnsaved=false;
-  clearTimeout(_autosaveTimer);
-  setAutoSaveStatus('idle');
-  // Storage metrni yangilash
-  setTimeout(updateStorageMeter,50);
-}
-
-function renderEditorSide(n){
-  const subs=allSubjects();
-  return`
-  <div class="side-card">
-    <span class="side-label">📚 Fan</span>
-    <select class="inp" id="e-subj" style="margin-bottom:8px" onchange="editingNote.subject=this.value;triggerAutosave()">
-      ${subs.map(s=>`<option value="${esc(s)}" ${n.subject===s?'selected':''}>${esc(s)}</option>`).join('')}
+    <select class="inp" style="width:auto;min-width:110px" onchange="fsubj=this.value;rHome()">
+      <option value="all" ${fsubj==='all'?'selected':''}>Barcha fanlar</option>
+      ${subs.map(s=>`<option value="${esc(s)}" ${fsubj===s?'selected':''}>${esc(s)}</option>`).join('')}
     </select>
-    <div id="add-subj-area">
-      <button class="btn-ghost" style="font-size:12px;width:100%;justify-content:center" onclick="showAddSubj()">+ Yangi fan</button>
+    <select class="inp" style="width:auto" onchange="sort=this.value;rHome()">
+      <option value="date" ${sort==='date'?'selected':''}>Sana</option>
+      <option value="title" ${sort==='title'?'selected':''}>Sarlavha</option>
+      <option value="words" ${sort==='words'?'selected':''}>So'z soni</option>
+    </select>
+    <div style="display:flex;gap:4px;flex-wrap:wrap">
+      ${COLORS.map(c=>`<div class="cdot ${fcol===c?'on':''}" style="background:${c}" onclick="fcol=fcol==='${c}'?'all':'${c}';rHome()"></div>`).join('')}
+    </div>
+    <button class="ibtn" onclick="grid=!grid;rHome()">${grid?'☰':'▦'}</button>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-s btn-sm" onclick="showTmpl()">📋 Shablon</button>
+      <button class="btn btn-p btn-sm" onclick="newNote()">+ Yangi</button>
     </div>
   </div>
-  <div class="side-card">
-    <span class="side-label">🎨 Rang</span>
-    <div class="color-pick-row" id="color-row">
-      ${COLORS.map(c=>`<div class="color-dot ${n.color===c?'active':''}" style="background:${c}" onclick="pickColor('${c}')"></div>`).join('')}
+  ${notes.length===0?`<div style="text-align:center;padding:60px 16px">
+    <div style="font-size:50px;margin-bottom:14px">📓</div>
+    <div style="font-size:18px;font-weight:700;color:#4a6080;margin-bottom:8px">Hech qanday konspekt yo'q</div>
+    <div style="font-size:13px;color:var(--dim);margin-bottom:20px">Shablon bilan tez boshlang!</div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-s" onclick="showTmpl()">📋 Shablon tanlash</button>
+      <button class="btn btn-p" onclick="newNote()">+ Bo'sh konspekt</button>
     </div>
-  </div>
-  <div class="side-card">
-    <span class="side-label">🏷 Teglar <small style="color:var(--text3);text-transform:none;letter-spacing:0">(Enter)</small></span>
-    <input class="inp" id="tag-inp" placeholder="Teg qo'shish..." style="margin-bottom:8px" onkeydown="onTagKey(event)"/>
-    <div id="tags-wrap" style="display:flex;gap:5px;flex-wrap:wrap">
-      ${(n.tags||[]).map(t=>`<span class="tag" style="background:${n.color}22;color:${n.color};cursor:pointer" onclick="removeTag('${esc(t)}')">#${esc(t)} ×</span>`).join('')}
-    </div>
-  </div>
-  <div class="side-card">
-    <span class="side-label">📸 Rasmlar</span>
-    <input type="file" id="img-inp" accept="image/*" multiple style="display:none" onchange="addImages(event)"/>
-    <button class="btn-primary" style="background:${n.color};width:100%;justify-content:center" onclick="document.getElementById('img-inp').click()">📷 Rasm yuklash</button>
-    <p style="font-size:11px;color:var(--text3);margin-top:6px;text-align:center">Avtomatik siqiladi • max 350KB/rasm</p>
-    <div id="storage-meter" style="margin-top:10px"></div>
-  </div>
-  <div class="side-card">
-    <span class="side-label">⚙️ Opsiyalar</span>
-    <label class="check-row"><input type="checkbox" ${n.pinned?'checked':''} onchange="editingNote.pinned=this.checked;triggerAutosave()"/> 📌 Yuqoriga pin</label>
-    <label class="check-row"><input type="checkbox" ${n.starred?'checked':''} onchange="editingNote.starred=this.checked;triggerAutosave()"/> ⭐ Sevimlilar</label>
-  </div>
-  <div style="font-size:11px;color:var(--text3);text-align:center;padding:4px 0 8px">
-    Yaratilgan: ${fmtDate(n.createdAt)}<br/>Tahrirlangan: ${fmtDate(n.updatedAt)}
-  </div>`;
+  </div>`:''}
+  ${notes.length>0&&f.length===0?`<div style="text-align:center;padding:40px;color:var(--dim)">"${esc(sq)}" topilmadi</div>`:''}
+  ${pinned.length?`<div class="stitle">📌 Pinlangan</div><div class="${grid?'ngrid':'nlist'}">${pinned.map(n=>nc(n,!grid)).join('')}</div>`:''}
+  ${starred.length&&!sq&&fsubj==='all'?`<div class="stitle">⭐ Sevimlilar</div><div class="${grid?'ngrid':'nlist'}">${starred.map(n=>nc(n,!grid)).join('')}</div>`:''}
+  ${rest.length?`<div class="stitle">📚 Barcha konspektlar (${rest.length})</div><div class="${grid?'ngrid':'nlist'}">${rest.map(n=>nc(n,!grid)).join('')}</div>`:''}`;
 }
 
-function renderImgThumbs(imgs){
-  return imgs.map(img=>{
-    const sizeInfo=img.newKB?`${img.newKB}KB`:'';
-    const savedInfo=img.origKB&&img.newKB&&img.origKB>img.newKB
-      ?` <span style="color:var(--accent3)">-${Math.round((1-img.newKB/img.origKB)*100)}%</span>`:'';
-    return`<div class="img-wrap" title="${esc(img.name)}${img.origKB?' ('+img.origKB+'KB → '+img.newKB+'KB)':''}">
-      <img src="${img.url}" class="img-thumb" onclick="showLightbox('${img.url}')"/>
-      <button class="img-del" onclick="removeImg('${img.id}')">×</button>
-      ${sizeInfo?`<div style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,.65);border-radius:3px;padding:1px 4px;font-size:9px;color:#fff;pointer-events:none">${sizeInfo}${savedInfo}</div>`:''}
+// ── NEURO ─────────────────────────────────────────────────────────
+function rNeuro(){
+  const total=NEURO.reduce((a,s)=>a+s.topics.length,0);
+  const done=NEURO.reduce((a,s)=>a+s.topics.filter(t=>topicProg[t.id]==='done').length,0);
+  const pct=Math.round((done/total)*100);
+  document.getElementById('main').innerHTML=`
+  <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:18px;flex-wrap:wrap">
+    <div style="flex:1;min-width:180px">
+      <div style="font-family:'Instrument Serif',serif;font-size:26px;font-style:italic;color:#ecf2ff;margin-bottom:3px">🧠 Nevrologiya</div>
+      <div style="font-size:13px;color:var(--muted)">${total} ta mavzu · ${done} ta o'rganildi</div>
+    </div>
+    <div style="min-width:160px;flex:1">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+        <span style="color:var(--muted)">Umumiy progress</span>
+        <span style="color:var(--green);font-weight:700">${pct}%</span>
+      </div>
+      <div class="pbar"><div class="pbf" style="width:${pct}%;background:var(--green)"></div></div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-s btn-sm" onclick="showTmpl('Nevrologiya')">📋 Shablon</button>
+      <button class="btn btn-p btn-sm" onclick="newNote('Nevrologiya')">+ Konspekt</button>
+    </div>
+  </div>
+  ${NEURO.map(sec=>{
+    const dc=sec.topics.filter(t=>topicProg[t.id]==='done').length;
+    const sp=Math.round((dc/sec.topics.length)*100);
+    return`<div style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:15px;font-weight:700;color:#ecf2ff;display:flex;align-items:center;gap:8px">
+          <span style="color:${sec.col}">${sec.sec}</span>
+          <span class="chip" style="background:${sec.col}18;color:${sec.col}">${dc}/${sec.topics.length}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:60px"><div class="pbar"><div class="pbf" style="width:${sp}%;background:${sec.col}"></div></div></div>
+        </div>
+      </div>
+      <div>
+        ${sec.topics.map(t=>{
+          const p=topicProg[t.id]||'new';
+          const rn=notes.filter(n=>n.subject==='Nevrologiya'&&(n.title||'').toLowerCase().includes(t.name.slice(0,6).toLowerCase()));
+          return`<div class="ti ${p==='done'?'done':''}">
+            <div class="tidot" style="background:${p==='done'?'var(--green)':p==='learning'?'var(--amber)':p==='review'?'var(--accent)':'var(--dim)'}"></div>
+            <div style="flex:1;min-width:0">
+              <div class="tname">${esc(t.name)}</div>
+              <div class="tmeta">${esc(t.d)}${rn.length?` · 📝 ${rn.length} ta`:''}</div>
+            </div>
+            <div style="display:flex;gap:5px;align-items:center;flex-shrink:0;flex-wrap:wrap">
+              ${pb(p)}
+              <select class="inp" style="width:auto;font-size:11px;padding:3px 7px;background:#0e1520" onchange="topicProg['${t.id}']=this.value;save();rNeuro()">
+                ${PS.map(s=>`<option value="${s}" ${p===s?'selected':''}>${PL[s]}</option>`).join('')}
+              </select>
+              <button class="btn btn-xs" style="background:${sec.col}18;color:${sec.col}" onclick="newNote('Nevrologiya','',${JSON.stringify(t.name)})">+ Yoz</button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
     </div>`;
-  }).join('');
+  }).join('')}`;
 }
 
-function refreshMobTab(){
-  renderEditor();
-}
-
-function refreshEditorLeft(){
-  const n=editingNote;
-  const stats=document.getElementById('e-stats');
-  if(stats){
-    stats.innerHTML=`<span>📝 ${wc(n.content)} so'z</span><span>🔤 ${(n.content||'').length} belgi</span><span>📄 ${(n.content||'').split('\n').length} qator</span>`;
+// ── EDITOR ────────────────────────────────────────────────────────
+function rEditor(){
+  if(!editing)return;
+  const n=editing;
+  const subs=asubj();
+  document.getElementById('main').innerHTML=`
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+    <button class="ghost btn-sm" onclick="saveNote();go('home')">← Orqaga</button>
+    <input id="etit" class="inp" value="${esc(n.title)}" placeholder="Mavzu sarlavhasi..."
+      style="flex:1;font-size:16px;font-weight:700;background:transparent;border:none;padding:4px 0;min-width:100px;outline:none"
+      oninput="editing.title=this.value;onContentChange()"/>
+    <button class="btn btn-p btn-sm" id="save-btn" onclick="saveNote()">💾 Saqlash</button>
+    <button class="ibtn" onclick="saveNote();go('detail','${n.id}')" title="Ko'rish">👁</button>
+    <button class="ibtn" style="color:var(--red);border-color:rgba(224,85,85,.3)" onclick="showDel('${n.id}')">🗑</button>
+  </div>
+  <div class="ewrap">
+    <div class="emain" style="border-color:${n.color}28;border-left-color:${n.color}" id="emn">
+      <textarea class="etxt" id="etxt"
+        placeholder="Dars konspektini yozing...&#10;&#10;• Asosiy tushunchalar&#10;• Formulalar&#10;• Klinik belgilar&#10;&#10;Ctrl+S = saqlash"
+        oninput="editing.content=this.value;upSt();onContentChange()">${esc(n.content)}</textarea>
+      <div class="efoot" id="est">
+        <span>📝 ${wc(n.content)} so'z</span><span>🔤 ${(n.content||'').length} belgi</span><span>📄 ${(n.content||'').split('\n').length} qator</span>
+      </div>
+      <div id="imgrow" ${(n.images||[]).length?'':'style="display:none"'} class="imgrow">
+        ${(n.images||[]).map(img=>`<div style="position:relative;flex-shrink:0">
+          <img src="${img.url}" class="imt" onclick="showLB(this.src)" title="${esc(img.name)}"/>
+          <button onclick="rmImg('${img.id}')" style="position:absolute;top:-5px;right:-5px;background:#e05555;border:none;border-radius:50%;width:16px;height:16px;color:#fff;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center">×</button>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="eside">
+      <div class="sc">
+        <span class="lbl">📚 Fan</span>
+        <select class="inp" style="margin-bottom:8px" onchange="editing.subject=this.value">
+          ${subs.map(s=>`<option value="${esc(s)}" ${n.subject===s?'selected':''}>${esc(s)}</option>`).join('')}
+        </select>
+        <div id="nsarea"><button class="ghost btn-sm" style="width:100%;border-radius:var(--rs)" onclick="showNS()">+ Yangi fan</button></div>
+      </div>
+      <div class="sc">
+        <span class="lbl">📈 Progress</span>
+        <select class="inp" onchange="editing.progress=this.value">
+          ${PS.map(s=>`<option value="${s}" ${(n.progress||'new')===s?'selected':''}>${PI[s]} ${PL[s]}</option>`).join('')}
+        </select>
+      </div>
+      <div class="sc">
+        <span class="lbl">🎨 Rang</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap" id="cdots">
+          ${COLORS.map(c=>`<div class="cdot ${n.color===c?'on':''}" style="background:${c}" onclick="pickC('${c}')"></div>`).join('')}
+        </div>
+      </div>
+      <div class="sc">
+        <span class="lbl">🏷 Teglar</span>
+        <input class="inp" id="taginp" placeholder="Teg + Enter" style="margin-bottom:8px" onkeydown="onTK(event)"/>
+        <div id="twrap" style="display:flex;gap:5px;flex-wrap:wrap">
+          ${(n.tags||[]).map(t=>`<span class="chip" style="background:${n.color}18;color:${n.color};cursor:pointer" onclick="rmTag('${esc(t)}')">#${esc(t)} ×</span>`).join('')}
+        </div>
+      </div>
+      <div class="sc">
+        <span class="lbl">📸 Rasmlar</span>
+        <input type="file" id="imginp" accept="image/*" multiple style="display:none" onchange="addImgs(event)"/>
+        <button class="btn btn-sm" style="background:${n.color};width:100%;justify-content:center;margin-bottom:8px" onclick="document.getElementById('imginp').click()">📷 Rasm yuklash</button>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:8px;text-align:center">Auto-siqish: max 1200px · 300KB</p>
+        <div style="margin-bottom:4px">
+          <div style="height:4px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:4px">
+            <div id="storage-bar-fill" style="height:100%;border-radius:4px;background:var(--green);width:0%;transition:width .4s,background .3s"></div>
+          </div>
+          <div id="storage-bar-label" style="font-size:10px;color:var(--muted)">Xotira hisoblanmoqda...</div>
+        </div>
+      </div>
+      <div class="sc">
+        <span class="lbl">📋 Shablon</span>
+        <button class="ghost btn-sm" style="width:100%" onclick="showTmpl(editing.subject)">Shablon yuklash</button>
+      </div>
+      <div class="sc">
+        <span class="lbl">⚙️ Opsiyalar</span>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;color:#8a9db5;margin-bottom:8px">
+          <input type="checkbox" ${n.pinned?'checked':''} onchange="editing.pinned=this.checked"> 📌 Pin
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;color:#8a9db5">
+          <input type="checkbox" ${n.starred?'checked':''} onchange="editing.starred=this.checked"> ⭐ Sevimli
+        </label>
+      </div>
+      <div style="font-size:11px;color:var(--dim);text-align:center">Yaratilgan: ${fd(n.createdAt)}</div>
+    </div>
+  </div>`;
+  document.getElementById('etxt').addEventListener('keydown',e=>{
+    if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveNote();}
+  });
+  startAutosave();
+  setTimeout(updateStorageBar, 100);
+  // restore unsaved draft if exists
+  const draft=localStorage.getItem('nn4_draft_'+n.id);
+  if(draft){
+    try{
+      const d=JSON.parse(draft);
+      if(d.updatedAt > n.updatedAt){
+        if(confirm('Saqlanmagan draft topildi. Davom ettirasizmi?')){
+          editing.content=d.content||editing.content;
+          editing.title=d.title||editing.title;
+          document.getElementById('etxt').value=editing.content;
+          document.getElementById('etit').value=editing.title;
+          upSt();
+          showHint('unsaved');
+          updateSaveBtn(true);
+        }
+      }
+    }catch(e){}
   }
+  // save draft every 5 seconds
+  clearInterval(window._draftTimer);
+  window._draftTimer=setInterval(()=>{
+    if(!editing)return;
+    localStorage.setItem('nn4_draft_'+editing.id, JSON.stringify({
+      content:editing.content,
+      title:editing.title,
+      updatedAt:Date.now()
+    }));
+  },5000);
 }
 
-function updateStats(){
-  refreshEditorLeft();
+function upSt(){
+  const c=editing.content||'';
+  const e=document.getElementById('est');
+  if(e)e.innerHTML=`<span>📝 ${wc(c)} so'z</span><span>🔤 ${c.length} belgi</span><span>📄 ${c.split('\n').length} qator</span>`;
 }
 
-function pickColor(c){
-  editingNote.color=c;
-  document.querySelectorAll('.color-dot').forEach(d=>d.classList.toggle('active',d.style.background===c));
-  const em=document.getElementById('editor-main-panel');
-  if(em)em.style.borderLeftColor=c;
-  document.querySelectorAll('[onclick*="img-inp"]').forEach(b=>b.style.background=c);
-  triggerAutosave();
+function onContentChange(){
+  clearTimeout(_autosaveTimer);
+  updateSaveBtn(true);
+  showHint('unsaved');
+  // auto-save after 3 seconds of inactivity
+  _autosaveTimer=setTimeout(()=>{
+    autoSave();
+  },3000);
 }
 
-function onTagKey(e){
+function pickC(c){
+  editing.color=c;
+  document.querySelectorAll('#cdots .cdot').forEach(d=>d.classList.toggle('on',d.style.background===c));
+  const em=document.getElementById('emn');
+  if(em){em.style.borderColor=c+'28';em.style.borderLeftColor=c;}
+}
+
+function onTK(e){
   if((e.key==='Enter'||e.key===',')&&e.target.value.trim()){
-    e.preventDefault();
-    const t=e.target.value.trim();
-    editingNote.tags=[...new Set([...(editingNote.tags||[]),t])];
-    e.target.value='';
-    refreshTags();
-    triggerAutosave();
+    e.preventDefault();const t=e.target.value.trim();
+    editing.tags=[...new Set([...(editing.tags||[]),t])];e.target.value='';rfTags();
   }
 }
-function refreshTags(){
-  const n=editingNote;
-  const w=document.getElementById('tags-wrap');
-  if(w)w.innerHTML=(n.tags||[]).map(t=>`<span class="tag" style="background:${n.color}22;color:${n.color};cursor:pointer" onclick="removeTag('${esc(t)}')">#${esc(t)} ×</span>`).join('');
+function rfTags(){
+  const w=document.getElementById('twrap');
+  if(w)w.innerHTML=(editing.tags||[]).map(t=>`<span class="chip" style="background:${editing.color}18;color:${editing.color};cursor:pointer" onclick="rmTag('${esc(t)}')">#${esc(t)} ×</span>`).join('');
 }
-function removeTag(t){
-  editingNote.tags=(editingNote.tags||[]).filter(x=>x!==t);
-  refreshTags();
-  triggerAutosave();
-}
+function rmTag(t){editing.tags=(editing.tags||[]).filter(x=>x!==t);rfTags();}
 
-function showAddSubj(){
-  const a=document.getElementById('add-subj-area');
-  if(a)a.innerHTML=`<div style="display:flex;gap:6px"><input class="inp" id="new-subj" placeholder="Fan nomi..." style="flex:1;font-size:12px"/><button class="btn-primary" onclick="addSubj()">+</button></div>`;
-}
-function addSubj(){
-  const inp=document.getElementById('new-subj');
-  if(!inp||!inp.value.trim())return;
-  const s=inp.value.trim();
-  if(!customSubjects.includes(s)){customSubjects.push(s);save();}
-  editingNote.subject=s;
-  renderEditor();
-}
+function showNS(){document.getElementById('nsarea').innerHTML=`<div style="display:flex;gap:6px"><input class="inp" id="nsinp" placeholder="Fan nomi..." style="flex:1;font-size:12px"/><button class="btn btn-p btn-sm" onclick="addSubj()">+</button></div>`;}
+function addSubj(){const v=document.getElementById('nsinp')?.value?.trim();if(!v)return;customSubj.push(v);save();editing.subject=v;rEditor();}
 
-// ─── IMAGE COMPRESSION ───
-const IMG_MAX_W=1280;   // max kenglik px
-const IMG_MAX_H=1280;   // max balandlik px
-const IMG_QUALITY=0.72; // JPEG sifati (0–1)
-const IMG_MAX_KB=350;   // bitta rasm uchun maksimal KB
-const STORAGE_MAX=4.5*1024*1024; // 4.5MB — xavfsiz limit
+// ── IMAGE COMPRESS ──────────────────────────────────────────────
+const IMG_MAX_W = 1200;   // max width px
+const IMG_MAX_H = 1200;   // max height px
+const IMG_QUALITY = 0.75; // JPEG quality
+const IMG_MAX_KB = 300;   // max KB per image
 
-function getStorageUsedBytes(){
-  let total=0;
-  try{for(const k in localStorage)if(Object.prototype.hasOwnProperty.call(localStorage,k))total+=localStorage[k].length*2;}catch{}
-  return total;
-}
-function fmtKB(bytes){
+function formatBytes(bytes){
   if(bytes<1024)return bytes+'B';
-  if(bytes<1024*1024)return Math.round(bytes/1024)+'KB';
-  return(bytes/1024/1024).toFixed(1)+'MB';
+  if(bytes<1024*1024)return (bytes/1024).toFixed(1)+'KB';
+  return (bytes/1024/1024).toFixed(1)+'MB';
 }
+
+function base64Size(b64){ return Math.round((b64.length*3/4)/1024); }
 
 function compressImage(file){
-  return new Promise((resolve,reject)=>{
-    const reader=new FileReader();
-    reader.onerror=reject;
-    reader.onload=ev=>{
-      const img=new Image();
-      img.onerror=reject;
-      img.onload=()=>{
-        let {width:w,height:h}=img;
-        // O'lchamni kamaytir
-        const ratio=Math.min(1,IMG_MAX_W/w,IMG_MAX_H/h);
-        w=Math.round(w*ratio);h=Math.round(h*ratio);
+  return new Promise((resolve)=>{
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        let {width:w, height:h} = img;
+        // Scale down if needed
+        const ratio = Math.min(IMG_MAX_W/w, IMG_MAX_H/h, 1);
+        w = Math.round(w*ratio);
+        h = Math.round(h*ratio);
 
-        const canvas=document.createElement('canvas');
-        canvas.width=w;canvas.height=h;
-        const ctx=canvas.getContext('2d');
-        ctx.drawImage(img,0,0,w,h);
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0,0,w,h);
+        ctx.drawImage(img, 0, 0, w, h);
 
-        // Avval JPEG bilan siqib ko'r, kerak bo'lsa sifatni pasayt
-        let quality=IMG_QUALITY;
-        let dataUrl=canvas.toDataURL('image/jpeg',quality);
-
-        // Agar hali ham katta bo'lsa, sifatni pasaytir
-        while(dataUrl.length*0.75>IMG_MAX_KB*1024&&quality>0.3){
-          quality-=0.1;
-          dataUrl=canvas.toDataURL('image/jpeg',quality);
+        // Try different qualities until under limit
+        let quality = IMG_QUALITY;
+        let url = canvas.toDataURL('image/jpeg', quality);
+        while(base64Size(url) > IMG_MAX_KB && quality > 0.3){
+          quality -= 0.1;
+          url = canvas.toDataURL('image/jpeg', quality);
         }
 
-        const origKB=Math.round(file.size/1024);
-        const newKB=Math.round(dataUrl.length*0.75/1024);
-        resolve({dataUrl,origKB,newKB,w,h});
+        const origKB = Math.round(file.size/1024);
+        const newKB = base64Size(url);
+        resolve({
+          id: uid(),
+          url,
+          name: file.name,
+          ts: Date.now(),
+          origSize: origKB,
+          size: newKB,
+          width: w,
+          height: h,
+          compressed: origKB > newKB
+        });
       };
-      img.src=ev.target.result;
+      img.onerror = () => resolve(null);
+      img.src = ev.target.result;
     };
+    reader.onerror = () => resolve(null);
     reader.readAsDataURL(file);
   });
 }
 
-function updateStorageMeter(){
-  const el=document.getElementById('storage-meter');
-  if(!el)return;
-  const used=getStorageUsedBytes();
-  const pct=Math.min(100,Math.round((used/STORAGE_MAX)*100));
-  const color=pct>85?'var(--danger)':pct>65?'var(--warn)':'var(--accent3)';
-  el.innerHTML=`
-    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px">
-      <span>💾 Xotira</span>
-      <span style="color:${color}">${fmtKB(used)} / ${fmtKB(STORAGE_MAX)} (${pct}%)</span>
-    </div>
-    <div style="height:4px;background:var(--border);border-radius:4px;overflow:hidden">
-      <div style="height:100%;width:${pct}%;background:${color};border-radius:4px;transition:width .4s"></div>
-    </div>
-    ${pct>85?`<div style="font-size:10px;color:var(--danger);margin-top:4px">⚠ Xotira deyarli to'ldi! Ba'zi rasmlarni o'chiring.</div>`:''}
-  `;
+function checkStorageQuota(){
+  try{
+    const total = JSON.stringify(notes).length + JSON.stringify(customSubj).length;
+    const totalKB = Math.round(total/1024);
+    const limitKB = 4500; // safe limit ~4.5MB of 5MB
+    return { used: totalKB, limit: limitKB, pct: Math.round(totalKB/limitKB*100) };
+  }catch(e){ return {used:0,limit:4500,pct:0}; }
 }
 
-async function addImages(e){
-  const files=Array.from(e.target.files);
+async function addImgs(e){
+  const files = Array.from(e.target.files);
   if(!files.length)return;
 
-  // Yuklanish ko'rsatkichi
-  const imgWrap=document.getElementById('e-imgs');
-  const loadId='img-loading-'+uid();
-  if(imgWrap){
-    const loader=document.createElement('div');
-    loader.id=loadId;
-    loader.style.cssText='display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);padding:4px 0';
-    loader.innerHTML=`<span style="animation:pulse 1s infinite;display:inline-block">⏳</span> ${files.length} ta rasm siqilmoqda...`;
-    imgWrap.appendChild(loader);
-  }
+  // Show loading state
+  const btn = document.querySelector('#imginp+button') || document.querySelector('[onclick*="imginp"]');
+  const origText = btn?.textContent;
+  if(btn){ btn.textContent='⏳ Siqilmoqda...'; btn.disabled=true; }
 
-  const results=[];
+  let successCount = 0;
+  let savedKB = 0;
+
   for(const file of files){
-    // Storage limitini tekshir
-    const usedNow=getStorageUsedBytes();
-    if(usedNow>STORAGE_MAX*0.92){
-      toast('Xotira to\'ldi! Avval ba\'zi rasmlarni o\'chiring.','err');
+    // Check storage before adding
+    const quota = checkStorageQuota();
+    if(quota.pct >= 90){
+      toast(`⚠️ Xotira ${quota.pct}% to'lgan! Rasm siqilmadi.`, 'err');
       break;
     }
-    try{
-      const {dataUrl,origKB,newKB,w,h}=await compressImage(file);
-      const img={id:uid(),url:dataUrl,name:file.name,ts:Date.now(),origKB,newKB,w,h};
-      editingNote.images=[...(editingNote.images||[]),img];
-      results.push({name:file.name,origKB,newKB});
-    }catch(err){
-      toast(`"${file.name}" yuklashda xato`,'err');
-    }
+
+    const compressed = await compressImage(file);
+    if(!compressed){ toast(`Rasm o'qilmadi: ${file.name}`, 'err'); continue; }
+
+    editing.images = [...(editing.images||[]), compressed];
+    savedKB += (compressed.origSize - compressed.size);
+    successCount++;
   }
 
-  refreshImgs();
-  triggerAutosave();
-  updateStorageMeter();
+  rfImgs();
+  updateStorageBar();
 
-  // Natija xabar
-  if(results.length){
-    const saved=results.reduce((a,r)=>a+(r.origKB-r.newKB),0);
-    const msg=results.length===1
-      ?`📸 ${results[0].origKB}KB → ${results[0].newKB}KB (${Math.round((1-results[0].newKB/results[0].origKB)*100)}% tejandi)`
-      :`📸 ${results.length} rasm yuklandi · ${saved}KB tejandi`;
+  if(btn){ btn.textContent = origText||'📷 Rasm yuklash'; btn.disabled=false; }
+
+  if(successCount > 0){
+    const msg = savedKB > 10
+      ? `📸 ${successCount} rasm yuklandi · ${savedKB}KB tejlandi ✓`
+      : `📸 ${successCount} rasm yuklandi ✓`;
     toast(msg);
   }
+  e.target.value='';
 }
 
-function removeImg(id){
-  editingNote.images=(editingNote.images||[]).filter(i=>i.id!==id);
-  refreshImgs();
-  triggerAutosave();
-  updateStorageMeter();
+function updateStorageBar(){
+  const bar = document.getElementById('storage-bar-fill');
+  const label = document.getElementById('storage-bar-label');
+  if(!bar||!label)return;
+  const q = checkStorageQuota();
+  const color = q.pct>80?'var(--red)':q.pct>60?'var(--amber)':'var(--green)';
+  bar.style.width = Math.min(q.pct,100)+'%';
+  bar.style.background = color;
+  label.textContent = `Xotira: ${q.used}KB / ${q.limit}KB (${q.pct}%)`;
+  label.style.color = q.pct>80?'var(--red)':q.pct>60?'var(--amber)':'var(--muted)';
 }
-function refreshImgs(){
-  const w=document.getElementById('e-imgs');
-  if(!w)return;
-  const imgs=editingNote.images||[];
-  if(imgs.length>0){
-    w.style.display='flex';
-    w.innerHTML=renderImgThumbs(imgs);
-  }else{w.innerHTML='';}
+function rmImg(id){editing.images=(editing.images||[]).filter(i=>i.id!==id);rfImgs();}
+function rfImgs(){
+  const row=document.getElementById('imgrow');if(!row)return;
+  const imgs=editing.images||[];
+  row.style.display=imgs.length?'flex':'none';
+  row.innerHTML=imgs.map(img=>`<div style="position:relative;flex-shrink:0;text-align:center">
+    <img src="${img.url}" class="imt" onclick="showLB(this.src)" title="${esc(img.name)}"/>
+    <button onclick="rmImg('${img.id}')" style="position:absolute;top:-5px;right:-5px;background:#e05555;border:none;border-radius:50%;width:16px;height:16px;color:#fff;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">×</button>
+    <div style="font-size:9px;color:var(--dim);margin-top:2px;white-space:nowrap">
+      ${img.size?img.size+'KB':''}${img.compressed?' ✓':''}
+    </div>
+  </div>`).join('');
+  updateStorageBar();
 }
 
-// ─── DETAIL ───
-function renderDetail(noteId){
-  const n=notes.find(x=>x.id===noteId);
-  if(!n){nav('home');return;}
-  document.getElementById('main').innerHTML=`<div class="view">
-    <div class="detail-header">
-      <button class="btn-ghost" onclick="nav('home')" style="margin-bottom:14px">← Orqaga</button>
-      <div class="detail-title" style="color:${n.color}">${esc(n.title)||'Nomsiz konspekt'}</div>
-      <div class="detail-meta">
-        <span class="tag" style="background:${n.color}22;color:${n.color}">${esc(n.subject)}</span>
-        ${(n.tags||[]).map(t=>`<span class="tag" style="background:#ffffff08;color:var(--text3)">#${esc(t)}</span>`).join('')}
-        <span style="font-size:11px;color:var(--text3)">${fmtDate(n.updatedAt)}</span>
-        <span style="font-size:11px;color:var(--text3)">· ${wc(n.content)} so'z</span>
-        ${(n.images||[]).length>0?`<span style="font-size:11px;color:var(--text3)">· 📸 ${n.images.length}</span>`:''}
-      </div>
-      <div class="detail-actions">
-        <button class="btn-primary" style="background:${n.color}" onclick="editingNote={...notes.find(x=>x.id==='${n.id}')};mobileEditorTab='write';nav('editor')">✏️ Tahrirlash</button>
-        <button class="btn-ghost" onclick="toggleStar('${n.id}');renderDetail('${n.id}')" style="${n.starred?'border-color:#f0a04a;color:#f0a04a':''}">⭐</button>
-        <button class="btn-ghost" onclick="togglePin('${n.id}');renderDetail('${n.id}')" style="${n.pinned?'border-color:var(--accent);color:var(--accent)':''}">📌</button>
-        <button class="btn-ghost" onclick="duplicateNote(notes.find(x=>x.id==='${n.id}'));toast('Nusxa yaratildi 📋')">📋 Nusxa</button>
-        <button class="btn-ghost" style="color:var(--danger);border-color:var(--danger)44" onclick="showModal('${n.id}')">🗑 O'chir</button>
+// ── DETAIL ────────────────────────────────────────────────────────
+function rDetail(nid){
+  const n=notes.find(x=>x.id===nid);if(!n){go('home');return;}
+  document.getElementById('main').innerHTML=`
+  <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+    <button class="ghost btn-sm" onclick="go('home')">← Orqaga</button>
+    <div style="flex:1;min-width:140px">
+      <h1 style="font-family:'Instrument Serif',serif;font-size:22px;font-style:italic;color:${n.color};margin-bottom:5px">${esc(n.title)||'Nomsiz konspekt'}</h1>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+        <span class="chip" style="background:${n.color}18;color:${n.color}">${esc(n.subject)}</span>
+        ${pb(n.progress||'new')}
+        ${(n.tags||[]).map(t=>`<span class="chip" style="background:#2d3f5818;color:var(--muted)">#${esc(t)}</span>`).join('')}
+        <span style="font-size:11px;color:var(--dim)">${fd(n.updatedAt)} · ${wc(n.content)} so'z${(n.images||[]).length?' · 📸'+n.images.length:''}</span>
       </div>
     </div>
-    <div class="detail-content" style="border-left-color:${n.color}">
-      ${n.content
-        ?`<pre>${esc(n.content)}</pre>`
-        :`<span style="color:var(--text3)">Kontent yo'q</span>`}
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn btn-p btn-sm" onclick="editing={...notes.find(x=>x.id==='${n.id}')};go('editor')">✏️ Tahrirlash</button>
+      <button class="ibtn" onclick="toggleStar('${n.id}');rDetail('${n.id}')" style="${n.starred?'color:var(--amber);border-color:rgba(240,165,0,.4)':''}">${n.starred?'⭐':'☆'}</button>
+      <button class="ibtn" onclick="togglePin('${n.id}');rDetail('${n.id}')" style="${n.pinned?'color:var(--accent);border-color:rgba(91,141,238,.4)':''}">${n.pinned?'📌':'📍'}</button>
+      <button class="ghost btn-sm" onclick="dupNote(notes.find(x=>x.id==='${n.id}'))">📋</button>
     </div>
-    ${(n.images||[]).length>0?`
-      <div class="sec">Rasmlar (${n.images.length})</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px">
-        ${n.images.map(img=>`<div style="border-radius:10px;overflow:hidden;border:1px solid var(--border);cursor:zoom-in" onclick="showLightbox('${img.url}')">
-          <img src="${img.url}" style="width:100%;height:120px;object-fit:cover;display:block"/>
-          <div style="padding:5px 8px;font-size:10px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(img.name)}</div>
-        </div>`).join('')}
-      </div>
-    `:''}
-  </div>`;
+  </div>
+  <div style="background:var(--card);border:1px solid ${n.color}28;border-left:4px solid ${n.color};border-radius:var(--r);padding:20px 22px;margin-bottom:14px;min-height:80px">
+    ${n.content?`<pre style="font-family:var(--font);font-size:14px;color:#d0dff5;line-height:1.9;white-space:pre-wrap;word-break:break-word;margin:0">${esc(n.content)}</pre>`:`<span style="color:var(--dim)">Kontent yo'q</span>`}
+  </div>
+  ${(n.images||[]).length?`
+    <div class="stitle">Rasmlar (${n.images.length})</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:20px">
+      ${n.images.map(img=>`<div style="border-radius:10px;overflow:hidden;border:1px solid var(--border);cursor:zoom-in" onclick="showLB('${img.url}', ${JSON.stringify(img).replace(/`/g,'')})">
+        <img src="${img.url}" style="width:100%;height:110px;object-fit:cover;display:block"/>
+        <div style="padding:4px 8px;font-size:10px;color:var(--muted);background:var(--card);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+          ${esc(img.name)}${img.size?' · '+img.size+'KB':''}${img.compressed?' 🗜':''}
+        </div>
+      </div>`).join('')}
+    </div>`:''}`;
 }
 
-// ─── FLASHCARDS ───
-function renderFlashcards(){
+// ── FLASHCARDS ────────────────────────────────────────────────────
+function rFlash(){
   const deck=notes.filter(n=>n.title&&n.content);
-  if(deck.length===0){
-    document.getElementById('main').innerHTML=`<div class="view">
-      <div class="empty">
-        <div class="empty-icon">🃏</div>
-        <div class="empty-title">Flashcard uchun konspekt kerak</div>
-        <div class="empty-sub">Sarlavha va kontent bor konspekt yarating</div>
-        <button class="btn-primary" onclick="newNote()">+ Konspekt yaratish</button>
-      </div>
-    </div>`;
+  if(!deck.length){
+    document.getElementById('main').innerHTML=`<div style="text-align:center;padding:70px 16px">
+      <div style="font-size:48px;margin-bottom:12px">🃏</div>
+      <div style="color:var(--dim);font-size:15px;margin-bottom:16px">Flashcard uchun konspekt kerak</div>
+      <button class="btn btn-p" onclick="newNote()">+ Konspekt yaratish</button></div>`;
     return;
   }
-  const idx=((flashIdx%deck.length)+deck.length)%deck.length;
-  const n=deck[idx];
-  const total=deck.length;
-  const pct=Math.round(((idx+1)/total)*100);
-
-  document.getElementById('main').innerHTML=`<div class="view">
-    <div class="flash-wrap">
-      <div style="text-align:center;margin-bottom:14px">
-        <div style="font-size:13px;color:var(--text2);font-weight:600">${idx+1} / ${total}</div>
-        <div class="wpm-bar" style="margin-top:6px"><div class="wpm-fill" style="width:${pct}%"></div></div>
-      </div>
-      <div class="flash-card" style="border-left-color:${n.color}" onclick="flashFlipped=!flashFlipped;renderFlashcards()">
-        ${!flashFlipped?`
-          <div style="font-size:12px;color:${n.color};font-weight:600;letter-spacing:.8px;margin-bottom:10px;text-transform:uppercase">${esc(n.subject)}</div>
-          <div style="font-family:'Instrument Serif',Georgia,serif;font-size:22px;font-style:italic;color:var(--text);margin-bottom:14px;line-height:1.3">${esc(n.title)}</div>
-          ${(n.tags||[]).length?`<div style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-bottom:12px">${(n.tags||[]).slice(0,3).map(t=>`<span class="tag" style="background:${n.color}22;color:${n.color}">#${esc(t)}</span>`).join('')}</div>`:''}
-          <div style="font-size:12px;color:var(--text3);margin-top:6px">👆 Bosib javobni ko'ring</div>
-        `:`
-          <div style="font-size:11px;color:${n.color};font-weight:700;letter-spacing:1px;margin-bottom:14px;text-transform:uppercase">Javob</div>
-          <div style="font-size:13px;color:var(--text2);line-height:1.85;text-align:left;max-width:100%">${esc(n.content.slice(0,350)+(n.content.length>350?'...':''))}</div>
-        `}
-      </div>
-      <div class="flash-btns">
-        <button class="btn-ghost" onclick="flashFlipped=false;flashIdx=${(idx-1+total)%total};renderFlashcards()">← Oldingi</button>
-        <button class="btn-ghost" style="color:var(--accent2)" onclick="flashFlipped=false;flashIdx=Math.floor(Math.random()*${total});renderFlashcards()">🔀 Tasodifiy</button>
-        <button class="btn-primary" style="background:${n.color}" onclick="flashFlipped=false;flashIdx=${(idx+1)%total};renderFlashcards()">Keyingi →</button>
-      </div>
-      <div class="flash-dots">
-        ${Array.from({length:Math.min(total,20)},(_,i)=>`<div class="f-dot" style="background:${i===idx?'var(--accent)':'var(--border)'}" onclick="flashIdx=${i};flashFlipped=false;renderFlashcards()"></div>`).join('')}
-        ${total>20?`<div style="font-size:11px;color:var(--text3)">+${total-20}</div>`:''}
+  const idx=fi%deck.length,n=deck[idx];
+  const stateClrs={new:'var(--dim)',learning:'var(--amber)',review:'var(--accent)',done:'var(--green)'};
+  document.getElementById('main').innerHTML=`
+  <div style="max-width:560px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:8px">
+      <div style="font-family:'Instrument Serif',serif;font-size:22px;font-style:italic;color:#ecf2ff">🃏 Flashcards</div>
+    </div>
+    <div style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:14px">${idx+1} / ${deck.length}</div>
+    <div class="fcard" style="border-left-color:${n.color}" onclick="ff=!ff;rFlash()">
+      ${!ff?`
+        <div style="font-size:12px;color:${n.color};font-weight:700;letter-spacing:1px;margin-bottom:10px">${esc(n.subject)}</div>
+        <div style="font-size:20px;font-weight:700;color:#ecf2ff;margin-bottom:14px;font-family:'Instrument Serif',serif;font-style:italic">${esc(n.title)}</div>
+        ${(n.tags||[]).length?`<div style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-bottom:12px">${(n.tags||[]).slice(0,3).map(t=>`<span class="chip" style="background:${n.color}18;color:${n.color}">#${esc(t)}</span>`).join('')}</div>`:''}
+        <div style="font-size:12px;color:var(--dim)">👆 Bosing — javobni ko'ring</div>
+      `:`
+        <div style="font-size:11px;color:${n.color};font-weight:700;letter-spacing:1px;margin-bottom:12px">JAVOB</div>
+        <div style="font-size:13px;color:#a0b4cc;line-height:1.85;text-align:left;max-width:100%">${esc(n.content.slice(0,360)+(n.content.length>360?'...':''))}</div>
+      `}
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:14px">
+      <button class="ghost" onclick="ff=false;fi=(fi-1+${deck.length})%${deck.length};rFlash()">← Oldingi</button>
+      <button class="ghost" style="color:var(--red)" onclick="ff=false;fi=Math.floor(Math.random()*${deck.length});rFlash()">🔀</button>
+      <button class="btn btn-p" onclick="ff=false;fi=(fi+1)%${deck.length};rFlash()">Keyingi →</button>
+    </div>
+    <div style="display:flex;justify-content:center;gap:4px;margin-top:12px;flex-wrap:wrap">
+      ${deck.slice(0,24).map((_,i)=>`<div onclick="fi=${i};ff=false;rFlash()" style="width:7px;height:7px;border-radius:50%;background:${i===idx?'var(--accent)':'var(--dim)'};cursor:pointer;transition:.15s"></div>`).join('')}
+    </div>
+    <div style="margin-top:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600;letter-spacing:.5px">PROGRESS BELGILASH</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${PS.map(s=>`<button class="btn btn-xs" style="background:${(n.progress||'new')===s?stateClrs[s]+'33':'var(--border)'};color:${(n.progress||'new')===s?stateClrs[s]:'var(--muted)'};border:1px solid ${(n.progress||'new')===s?stateClrs[s]+'44':'var(--border)'}" onclick="setP('${n.id}','${s}');rFlash()">${PI[s]} ${PL[s]}</button>`).join('')}
       </div>
     </div>
   </div>`;
 }
 
-// ─── STATS ───
-function renderStats(){
-  const subs=allSubjects().map(s=>({s,c:notes.filter(n=>n.subject===s).length})).filter(x=>x.c>0).sort((a,b)=>b.c-a.c);
-  const recent=[...notes].sort((a,b)=>b.updatedAt-a.updatedAt).slice(0,5);
-  const totalImg=notes.reduce((a,n)=>a+(n.images||[]).length,0);
-  const totalW=notes.reduce((a,n)=>a+wc(n.content),0);
+// ── PROGRESS ──────────────────────────────────────────────────────
+function rProg(){
+  const byS=Object.fromEntries(PS.map(s=>[s,notes.filter(n=>(n.progress||'new')===s)]));
+  const sc={new:'var(--dim)',learning:'var(--amber)',review:'var(--accent)',done:'var(--green)'};
+  const total=NEURO.reduce((a,s)=>a+s.topics.length,0);
+  const nDone=NEURO.reduce((a,s)=>a+s.topics.filter(t=>topicProg[t.id]==='done').length,0);
+  const nLearn=NEURO.reduce((a,s)=>a+s.topics.filter(t=>topicProg[t.id]==='learning').length,0);
+  const nRev=NEURO.reduce((a,s)=>a+s.topics.filter(t=>topicProg[t.id]==='review').length,0);
+  document.getElementById('main').innerHTML=`
+  <div style="font-family:'Instrument Serif',serif;font-size:24px;font-style:italic;color:#ecf2ff;margin-bottom:18px">📈 O'rganish progressi</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:22px">
+    ${PS.map(s=>`<div class="stt" style="border-color:${sc[s]}22">
+      <div style="font-size:20px;margin-bottom:6px">${PI[s]}</div>
+      <div class="stv" style="color:${sc[s]}">${byS[s].length}</div>
+      <div class="stl">${PL[s]}</div>
+    </div>`).join('')}
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px">
+      <div class="stitle">Konspektlar progressi</div>
+      ${PS.map(s=>{const cnt=byS[s].length;const pct=notes.length?Math.round((cnt/notes.length)*100):0;return`<div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text)">${PI[s]} ${PL[s]}</span><span style="color:${sc[s]}">${cnt} ta · ${pct}%</span></div>
+        <div class="pbar"><div class="pbf" style="width:${pct}%;background:${sc[s]}"></div></div>
+      </div>`;}).join('')}
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px">
+      <div class="stitle">Nevrologiya mavzulari (${total})</div>
+      ${[['done',nDone,'var(--green)',"O'rganildi"],['learning',nLearn,'var(--amber)',"O'rganilmoqda"],['review',nRev,'var(--accent)','Takrorlash'],['new',total-nDone-nLearn-nRev,'var(--dim)','Boshlanmagan']].map(([k,v,c,l])=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+        <div style="width:8px;height:8px;border-radius:50%;background:${c};flex-shrink:0"></div>
+        <span style="font-size:13px;flex:1;color:var(--text)">${l}</span>
+        <span style="font-size:14px;font-weight:700;color:${c}">${v}</span>
+      </div>`).join('')}
+      <div style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+          <span style="color:var(--muted)">Jami progress</span>
+          <span style="color:var(--green);font-weight:700">${Math.round((nDone/total)*100)}%</span>
+        </div>
+        <div class="pbar"><div class="pbf" style="width:${Math.round((nDone/total)*100)}%;background:var(--green)"></div></div>
+      </div>
+    </div>
+  </div>
+  ${PS.filter(s=>byS[s].length>0).map(s=>`
+    <div style="margin-bottom:20px">
+      <div class="stitle">${PI[s]} ${PL[s]} (${byS[s].length})</div>
+      <div class="ngrid">${byS[s].map(n=>nc(n,false)).join('')}</div>
+    </div>`).join('')}`;
+}
 
-  document.getElementById('main').innerHTML=`<div class="view">
-    <div style="font-family:'Instrument Serif',Georgia,serif;font-size:24px;font-style:italic;margin-bottom:20px;color:var(--text)">Statistika</div>
-    <div class="stat-grid">
-      ${[['📓',notes.length,'Jami konspekt'],['📸',totalImg,'Rasmlar'],['📝',totalW,'Jami so\'z'],['⭐',notes.filter(n=>n.starred).length,'Sevimlilar'],['📌',notes.filter(n=>n.pinned).length,'Pinlangan'],['📚',subs.length,'Fanlar']].map(([ic,v,l])=>`
-      <div class="stat-card">
-        <div class="stat-icon">${ic}</div>
-        <div class="stat-val">${v}</div>
-        <div class="stat-lbl">${l}</div>
+// ── STATS ─────────────────────────────────────────────────────────
+function rStats(){
+  const subs=asubj().map(s=>({s,c:notes.filter(n=>n.subject===s).length})).filter(x=>x.c>0).sort((a,b)=>b.c-a.c);
+  const ti=notes.reduce((a,n)=>a+(n.images||[]).length,0);
+  const tw=notes.reduce((a,n)=>a+wc(n.content),0);
+  document.getElementById('main').innerHTML=`
+  <div style="font-family:'Instrument Serif',serif;font-size:24px;font-style:italic;color:#ecf2ff;margin-bottom:18px">📊 Statistika</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:22px">
+    ${[['📓',notes.length,'Jami konspekt'],['📸',ti,'Jami rasm'],['📝',tw,"So'z"],['⭐',notes.filter(n=>n.starred).length,'Sevimlilar'],['📌',notes.filter(n=>n.pinned).length,'Pinlangan'],['✅',notes.filter(n=>(n.progress||'new')==='done').length,"O'rganildi"]].map(([ic,v,l])=>`
+    <div class="stt"><div style="font-size:20px;margin-bottom:6px">${ic}</div><div class="stv">${v}</div><div class="stl">${l}</div></div>`).join('')}
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px">
+      <div class="stitle">Fanlar bo'yicha</div>
+      ${subs.length?subs.map(({s,c},i)=>{const col=COLORS[i%COLORS.length];const pct=Math.round((c/notes.length)*100);return`<div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text)">${esc(s)}</span><span style="color:${col}">${c} ta</span></div>
+        <div class="pbar"><div class="pbf" style="width:${pct}%;background:${col}"></div></div>
+      </div>`;}).join(''):`<div style="color:var(--dim);font-size:13px">Ma'lumot yo'q</div>`}
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px">
+      <div class="stitle">So'nggi konspektlar</div>
+      ${[...notes].sort((a,b)=>b.updatedAt-a.updatedAt).slice(0,6).map(n=>`
+      <div onclick="go('detail','${n.id}')" style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer">
+        <div style="width:8px;height:8px;border-radius:50%;background:${n.color};flex-shrink:0"></div>
+        <div style="flex:1;overflow:hidden">
+          <div style="font-size:13px;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(n.title)||'Nomsiz'}</div>
+          <div style="font-size:11px;color:var(--dim)">${esc(n.subject)} · ${fd(n.updatedAt)}</div>
+        </div>${pb(n.progress||'new')}
       </div>`).join('')}
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px">
-        <div class="sec" style="margin-top:0">Fanlar bo'yicha</div>
-        ${subs.length===0?`<div style="color:var(--text3);font-size:13px">Ma'lumot yo'q</div>`:subs.map(({s,c},i)=>{
-          const col=COLORS[i%COLORS.length];
-          const pct=Math.round((c/notes.length)*100);
-          return`<div style="margin-bottom:12px">
-            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
-              <span style="color:var(--text)">${esc(s)}</span>
-              <span style="color:${col}">${c} ta · ${pct}%</span>
-            </div>
-            <div class="prog-bar"><div class="prog-fill" style="background:${col};width:${pct}%"></div></div>
-          </div>`;
-        }).join('')}
-      </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px">
-        <div class="sec" style="margin-top:0">So'nggi tahrirlangan</div>
-        ${recent.length===0?`<div style="color:var(--text3);font-size:13px">Hali konspekt yo'q</div>`:recent.map(n=>`
-        <div class="recent-item" onclick="nav('detail','${n.id}')">
-          <div class="recent-dot" style="background:${n.color}"></div>
-          <div class="recent-info">
-            <div class="recent-title">${esc(n.title)||'Nomsiz'}</div>
-            <div class="recent-sub">${esc(n.subject)} · ${fmtDate(n.updatedAt)}</div>
-          </div>
-        </div>`).join('')}
-      </div>
-    </div>
   </div>`;
 }
 
-// ─── EXPORT / IMPORT ───
+// ── EXPORT / IMPORT ───────────────────────────────────────────────
 function exportData(){
-  const blob=new Blob([JSON.stringify({notes,customSubjects},null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='neuronotepad_backup.json';a.click();
+  const b=new Blob([JSON.stringify({notes,customSubj,topicProg},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='neuronotepad_backup.json';a.click();
   toast('Eksport qilindi ⬇');
 }
 function importData(e){
-  const file=e.target.files[0];if(!file)return;
+  const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
   r.onload=ev=>{
     try{
       const d=JSON.parse(ev.target.result);
-      if(Array.isArray(d.notes)){
-        notes=[...d.notes,...notes];
-        if(d.customSubjects)customSubjects=[...new Set([...customSubjects,...d.customSubjects])];
-        save();toast(d.notes.length+' ta konspekt yuklandi ⬆');renderHome();
-      }else if(Array.isArray(d)){
-        notes=[...d,...notes];save();toast(d.length+' ta yuklandi ⬆');renderHome();
-      }else{toast('Format noto\'g\'ri','err');}
-    }catch{toast('Fayl o\'qishda xato!','err');}
+      if(Array.isArray(d.notes)){notes=[...d.notes,...notes];if(d.customSubj)customSubj=[...new Set([...customSubj,...d.customSubj])];if(d.topicProg)topicProg={...d.topicProg,...topicProg};save();toast(d.notes.length+' ta yuklandi ⬆');rHome();}
+      else if(Array.isArray(d)){notes=[...d,...notes];save();toast(d.length+' ta yuklandi ⬆');rHome();}
+    }catch{toast('Format xato!','err');}
   };
-  r.readAsText(file);e.target.value='';
+  r.readAsText(f);e.target.value='';
 }
 
-// ─── HANDLE RESIZE ───
-window.addEventListener('resize',()=>{
-  if(currentView==='editor'&&editingNote)renderEditor();
-});
 
-// ─── CLOSE MODALS ON OUTSIDE CLICK ───
-document.querySelectorAll('.overlay').forEach(o=>{
-  o.addEventListener('click',e=>{
-    if(e.target===o){
-      o.classList.remove('open');
-    }
-  });
-});
+// ── FAN MANAGEMENT ────────────────────────────────────────────────
+let newFanColor = '#5b8dee';
 
-// ─── PWA: SERVICE WORKER ───
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg=>{
-        console.log('SW registered:', reg.scope);
-        // Yangi versiya kelsa — foydalanuvchiga xabar
-        reg.addEventListener('updatefound',()=>{
-          const newSW=reg.installing;
-          newSW.addEventListener('statechange',()=>{
-            if(newSW.state==='installed'&&navigator.serviceWorker.controller){
-              showUpdateBanner();
-            }
-          });
-        });
-      })
-      .catch(err=>console.log('SW error:',err));
-  });
+function selFI(icon){
+  document.getElementById('fan-icon-inp').value = icon;
+  document.querySelectorAll('.fio').forEach(el=>el.classList.remove('on'));
+  event.target.classList.add('on');
 }
 
-// ─── PWA: A2HS (Add to Home Screen) ───
-let _deferredInstallPrompt=null;
-window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault();
-  _deferredInstallPrompt=e;
-  // 3 soniyadan keyin install bannerini ko'rsat
-  setTimeout(showInstallBanner,3000);
-});
-
-window.addEventListener('appinstalled',()=>{
-  _deferredInstallPrompt=null;
-  hideInstallBanner();
-  toast('Ilova o\'rnatildi! 🎉');
-});
-
-function showInstallBanner(){
-  if(!_deferredInstallPrompt)return;
-  const b=document.getElementById('install-banner');
-  if(b)b.style.display='flex';
-}
-function hideInstallBanner(){
-  const b=document.getElementById('install-banner');
-  if(b)b.style.display='none';
-  _deferredInstallPrompt=null;
-}
-async function triggerInstall(){
-  if(!_deferredInstallPrompt)return;
-  _deferredInstallPrompt.prompt();
-  const {outcome}=await _deferredInstallPrompt.userChoice;
-  if(outcome==='accepted')toast('O\'rnatilmoqda... ⬇');
-  hideInstallBanner();
+function selFC(col){
+  newFanColor = col;
+  document.querySelectorAll('.fcdot').forEach(el=>el.classList.remove('on'));
+  event.target.classList.add('on');
 }
 
-function showUpdateBanner(){
-  const b=document.getElementById('update-banner');
-  if(b)b.style.display='flex';
-}
-function applyUpdate(){
-  if(navigator.serviceWorker.controller){
-    navigator.serviceWorker.controller.postMessage('skipWaiting');
+function showAddFan(){
+  document.getElementById('fan-name-inp').value='';
+  document.getElementById('fan-icon-inp').value='📚';
+  document.querySelectorAll('.fio').forEach(el=>el.classList.remove('on'));
+  document.querySelectorAll('.fcdot').forEach(el=>el.classList.remove('on'));
+  newFanColor='#5b8dee';
+  // show existing custom fans
+  const el=document.getElementById('existing-fans-list');
+  if(el){
+    el.innerHTML = customSubj.length===0
+      ? `<div style="font-size:12px;color:var(--dim)">Hali fan qo'shilmagan</div>`
+      : customSubj.map((s,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+          <span style="font-size:13px;color:var(--text);flex:1">${esc(s.icon||'📚')} ${esc(s.name||s)}</span>
+          <button class="btn-xs" style="background:rgba(224,85,85,.15);color:#e05555;border:none;border-radius:6px;cursor:pointer;font-family:inherit;padding:3px 8px" onclick="delFan(${i})">O'chir</button>
+        </div>`).join('');
   }
-  window.location.reload();
+  document.getElementById('addfan-modal').style.display='flex';
+  setTimeout(()=>document.getElementById('fan-name-inp').focus(),100);
 }
 
-// ─── OFFLINE / ONLINE STATUS ───
-function updateNetworkStatus(){
-  const el=document.getElementById('network-status');
-  if(!el)return;
-  if(navigator.onLine){
-    el.style.display='none';
-  }else{
-    el.style.display='flex';
+function addFanConfirm(){
+  const nameEl=document.getElementById('fan-name-inp');
+  const iconEl=document.getElementById('fan-icon-inp');
+  const name=(nameEl?.value||'').trim();
+  const icon=(iconEl?.value||'📚').trim();
+  if(!name){nameEl?.focus();return;}
+  const fanObj={name,icon,color:newFanColor};
+  customSubj.push(fanObj);
+  save();
+  renderDynFans();
+  toast(`Fan qo'shildi: ${icon} ${name} ✓`);
+  cm('addfan-modal');
+}
+
+function delFan(idx){
+  const fan=customSubj[idx];
+  const fanName=fan?.name||fan;
+  if(confirm(fanName+` fanini o'chirasizmi?`)){
+    customSubj.splice(idx,1);
+    save();
+    renderDynFans();
+    toast("Fan o'chirildi",'err');
+    showAddFan();
   }
 }
-window.addEventListener('online',()=>{updateNetworkStatus();toast('Internet tiklandi 🌐');});
-window.addEventListener('offline',()=>{updateNetworkStatus();toast('Offline rejim — ma\'lumotlar saqlanadi','warn');});
 
-// ─── URL SHORTCUT: ?action=new ───
-if(location.search.includes('action=new')){
-  setTimeout(newNote,300);
-  history.replaceState(null,'',location.pathname);
+function getFanName(s){ return typeof s==='object' ? s.name : s; }
+function getFanIcon(s){ return typeof s==='object' ? (s.icon||'📚') : '📚'; }
+function getFanColor(s){ return typeof s==='object' ? (s.color||'#5b8dee') : '#5b8dee'; }
+function getFanLabel(s){ return getFanIcon(s)+' '+getFanName(s); }
+
+function asubj(){ return ['Nevrologiya',...customSubj]; }
+function asubjNames(){ return ['Nevrologiya',...customSubj.map(getFanName)]; }
+
+function renderDynFans(){
+  const wrap=document.getElementById('dyn-fans');
+  if(!wrap)return;
+  wrap.innerHTML=customSubj.map((s,i)=>{
+    const name=getFanName(s);
+    const icon=getFanIcon(s);
+    const col=getFanColor(s);
+    const id='nb-fan-'+i;
+    return`<button class="nb" id="${id}" onclick="go('fan','${esc(name)}')" style="display:flex;align-items:center;gap:4px">
+      <span style="font-size:13px">${icon}</span>${esc(name)}
+    </button>`;
+  }).join('');
 }
 
-// ─── INIT ───
-renderHome();
-updateNetworkStatus();
-</script>
+function go(v,arg){
+  if(view==='editor'&&v!=='editor'){stopAutosave();clearInterval(window._draftTimer);}
+  view=v;
+  ['home','neuro','flash','prog','stats'].forEach(k=>{
+    document.getElementById('nb-'+k)?.classList.toggle('on',k===v);
+    document.getElementById('mb-'+k)?.classList.toggle('on',k===v);
+  });
+  // dynamic fan buttons
+  document.querySelectorAll('[id^="nb-fan-"]').forEach(b=>b.classList.remove('on'));
+  if(v==='fan' && arg){
+    customSubj.forEach((s,i)=>{ if(getFanName(s)===arg) document.getElementById('nb-fan-'+i)?.classList.add('on'); });
+  }
+  if(v==='home')rHome();
+  else if(v==='neuro')rNeuro();
+  else if(v==='flash')rFlash();
+  else if(v==='prog')rProg();
+  else if(v==='stats')rStats();
+  else if(v==='editor')rEditor();
+  else if(v==='detail')rDetail(arg);
+  else if(v==='fan')rFan(arg);
+  window.scrollTo(0,0);
+}
 
-<!-- PWA: Install Banner -->
-<div id="install-banner" style="display:none;position:fixed;bottom:calc(var(--bottom-nav) + 10px);left:12px;right:12px;z-index:150;background:#0c1019;border:1px solid #7c6af733;border-radius:14px;padding:14px 16px;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.6)">
-  <img src="icons/icon-192.png" style="width:40px;height:40px;border-radius:10px;flex-shrink:0" onerror="this.style.display='none'"/>
-  <div style="flex:1">
-    <div style="font-size:13px;font-weight:600;color:#eef2f7">NeurоNotepad ni o'rnating</div>
-    <div style="font-size:11px;color:#3d4f6a;margin-top:2px">Offline ishlaydi • Tezroq ochiladi</div>
+function rFan(fanName){
+  const fanObj=customSubj.find(s=>getFanName(s)===fanName);
+  const icon=fanObj?getFanIcon(fanObj):'📚';
+  const col=fanObj?getFanColor(fanObj):'#5b8dee';
+  const fanNotes=notes.filter(n=>n.subject===fanName).sort((a,b)=>b.updatedAt-a.updatedAt);
+  const done=fanNotes.filter(n=>(n.progress||'new')==='done').length;
+  document.getElementById('main').innerHTML=`
+  <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:18px;flex-wrap:wrap">
+    <div style="flex:1;min-width:180px">
+      <div style="font-family:'Instrument Serif',serif;font-size:26px;font-style:italic;color:${col};margin-bottom:3px">${icon} ${esc(fanName)}</div>
+      <div style="font-size:13px;color:var(--muted)">${fanNotes.length} ta konspekt · ${done} ta o'rganildi</div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn btn-s btn-sm" onclick="showTmpl('${esc(fanName)}')">&#128203; Shablon</button>
+      <button class="btn btn-p btn-sm" onclick="newNote('${esc(fanName)}')" style="background:${col}">+ Konspekt</button>
+    </div>
   </div>
-  <button onclick="triggerInstall()" style="background:#7c6af7;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;color:#fff;cursor:pointer;flex-shrink:0">O'rnatish</button>
-  <button onclick="hideInstallBanner()" style="background:transparent;border:none;color:#3d4f6a;font-size:18px;cursor:pointer;flex-shrink:0;padding:0 2px">×</button>
-</div>
+  ${fanNotes.length===0?`<div style="text-align:center;padding:60px 16px">
+    <div style="font-size:44px;margin-bottom:12px">${icon}</div>
+    <div style="font-size:16px;font-weight:700;color:#4a6080;margin-bottom:8px">${esc(fanName)} bo'yicha hali konspekt yo'q</div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px">
+      <button class="btn btn-s" onclick="showTmpl('${esc(fanName)}')">&#128203; Shablon bilan boshlash</button>
+      <button class="btn btn-p" onclick="newNote('${esc(fanName)}')" style="background:${col}">+ Bo'sh konspekt</button>
+    </div>
+  </div>`:`
+  <div class="stitle">&#128218; Barcha konspektlar (${fanNotes.length})</div>
+  <div class="ngrid">${fanNotes.map(n=>nc(n,false)).join('')}</div>`}`;
+}
 
-<!-- PWA: Update Banner -->
-<div id="update-banner" style="display:none;position:fixed;top:calc(var(--topbar) + 8px);left:12px;right:12px;z-index:150;background:#0c1019;border:1px solid #4ecba433;border-radius:12px;padding:12px 16px;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.5)">
-  <span style="font-size:16px">🔄</span>
-  <div style="flex:1;font-size:13px;color:#eef2f7">Yangi versiya mavjud</div>
-  <button onclick="applyUpdate()" style="background:#4ecba4;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:#06080f;cursor:pointer">Yangilash</button>
-  <button onclick="document.getElementById('update-banner').style.display='none'" style="background:transparent;border:none;color:#3d4f6a;font-size:16px;cursor:pointer">×</button>
-</div>
-
-<!-- Offline status bar -->
-<div id="network-status" style="display:none;position:fixed;top:var(--topbar);left:0;right:0;z-index:90;background:#f0a04a;padding:5px 16px;font-size:12px;font-weight:600;color:#06080f;align-items:center;justify-content:center;gap:6px">
-  <span>📵</span> Offline rejim — barcha o'zgarishlar qurilmada saqlanadi
-</div>
+renderDynFans();
+rHome();
+</script>
 </body>
 </html>
