@@ -77,7 +77,7 @@ button:active{transform:scale(.97)}
 .ewrap{display:grid;grid-template-columns:1fr 280px;gap:14px;min-height:calc(100vh - 115px)}
 .emain{background:var(--card);border-radius:var(--r);border:1px solid;display:flex;flex-direction:column;overflow:hidden}
 .eside{display:flex;flex-direction:column;overflow-y:auto;padding-bottom:20px}
-.etxt{flex:1;background:transparent;border:none;outline:none;padding:18px 20px;font-size:14px;color:#dce6f5;line-height:1.9;resize:none;font-family:var(--font)}
+.etxt{display:none}/* replaced by rich-editor */
 .efoot{padding:6px 16px;font-size:11px;color:var(--dim);border-top:1px solid var(--border);display:flex;gap:14px;flex-wrap:wrap}
 .imgrow{padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap}
 .imt{width:72px;height:58px;object-fit:cover;border-radius:6px;border:1px solid var(--border);cursor:zoom-in;display:block}
@@ -155,6 +155,81 @@ button:active{transform:scale(.97)}
 }
 #autosave-hint.show{display:block;}
 #autosave-hint .dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle;}
+
+/* ── FORMAT TOOLBAR ─────────────────────────────── */
+.fmt-toolbar{
+  display:flex;gap:2px;padding:6px 10px;border-bottom:1px solid var(--border);
+  flex-wrap:wrap;align-items:center;background:rgba(0,0,0,.15);
+}
+.fmt-btn{
+  background:transparent;border:none;border-radius:6px;
+  padding:5px 8px;font-size:13px;color:var(--muted);cursor:pointer;
+  transition:all .12s;line-height:1;display:inline-flex;align-items:center;gap:3px;
+  font-family:var(--font);
+}
+.fmt-btn:hover{background:rgba(255,255,255,.08);color:var(--text)}
+.fmt-btn.active{background:rgba(91,141,238,.2);color:var(--accent)}
+.fmt-sep{width:1px;height:20px;background:var(--border);margin:0 3px;flex-shrink:0}
+.fmt-select{
+  background:#0e1520;border:1px solid var(--border);border-radius:6px;
+  padding:4px 8px;font-size:12px;color:var(--muted);outline:none;
+  font-family:var(--font);cursor:pointer;
+}
+.fmt-select:focus{border-color:var(--accent)}
+
+/* ── RICH EDITOR ── */
+.rich-editor{
+  flex:1;outline:none;padding:18px 20px;font-size:14px;
+  color:#dce6f5;line-height:1.9;overflow-y:auto;
+  font-family:var(--font);min-height:200px;
+  word-break:break-word;
+}
+.rich-editor:empty:before{
+  content:attr(data-placeholder);color:var(--dim);pointer-events:none;
+}
+.rich-editor h1{font-family:'Instrument Serif',serif;font-size:22px;font-style:italic;color:#ecf2ff;margin:12px 0 6px;border-bottom:1px solid var(--border);padding-bottom:6px}
+.rich-editor h2{font-family:'Instrument Serif',serif;font-size:18px;color:#ecf2ff;margin:10px 0 5px}
+.rich-editor h3{font-size:15px;font-weight:700;color:#c8d8f0;margin:8px 0 4px}
+.rich-editor strong,.rich-editor b{color:#fff;font-weight:700}
+.rich-editor em,.rich-editor i{color:#a5c0e8;font-style:italic}
+.rich-editor u{text-decoration:underline;text-decoration-color:var(--accent)}
+.rich-editor s{text-decoration:line-through;color:var(--muted)}
+.rich-editor mark{background:rgba(240,165,0,.25);color:#f0c060;border-radius:3px;padding:0 3px}
+.rich-editor code{background:#0e1520;border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:12px;color:#7dd3fc;font-family:'Courier New',monospace}
+.rich-editor pre{background:#0e1520;border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin:8px 0;overflow-x:auto}
+.rich-editor pre code{background:none;border:none;padding:0;font-size:13px}
+.rich-editor ul{padding-left:20px;margin:6px 0}
+.rich-editor ol{padding-left:20px;margin:6px 0}
+.rich-editor li{margin:3px 0;color:#d0dff5}
+.rich-editor blockquote{border-left:3px solid var(--accent);padding:8px 14px;margin:8px 0;background:rgba(91,141,238,.08);border-radius:0 8px 8px 0;color:#a0b4cc;font-style:italic}
+.rich-editor a{color:var(--accent);text-decoration:underline}
+.rich-editor hr{border:none;border-top:1px solid var(--border);margin:12px 0}
+.rich-editor table{border-collapse:collapse;width:100%;margin:8px 0}
+.rich-editor td,.rich-editor th{border:1px solid var(--border);padding:6px 10px;font-size:13px}
+.rich-editor th{background:rgba(91,141,238,.1);color:var(--accent);font-weight:600}
+.rich-editor img{max-width:100%;border-radius:8px;margin:8px 0}
+
+/* word count bar */
+.wc-bar{padding:5px 16px;font-size:11px;color:var(--dim);border-top:1px solid var(--border);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+
+/* ── COMMUNITY FEED ── */
+.comm-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px;overflow:hidden;transition:border-color .2s}
+.comm-card:hover{border-color:var(--border2)}
+.comm-header{padding:12px 14px 8px;display:flex;align-items:center;gap:10px}
+.comm-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.comm-user{flex:1;min-width:0}
+.comm-username{font-size:13px;font-weight:600;color:#ecf2ff}
+.comm-meta{font-size:11px;color:var(--muted)}
+.comm-body{padding:0 14px 10px}
+.comm-title{font-family:'Instrument Serif',serif;font-size:17px;font-style:italic;color:#ecf2ff;margin-bottom:5px;cursor:pointer}
+.comm-title:hover{color:var(--accent)}
+.comm-content{font-size:12px;color:var(--muted);line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.comm-footer{padding:8px 14px 12px;display:flex;gap:8px;align-items:center;border-top:1px solid var(--border)}
+.comm-tag{background:rgba(91,141,238,.12);color:var(--accent);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600}
+.comm-likes{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:var(--font);padding:4px 8px;border-radius:8px;transition:.15s}
+.comm-likes:hover{background:rgba(255,255,255,.05);color:var(--red)}
+.comm-likes.liked{color:var(--red)}
+.pub-modal{background:#0e1520;border:1px solid var(--border2);border-radius:18px;padding:22px;width:100%;max-width:420px;max-height:80vh;overflow-y:auto}
 </style>
 </head>
 <body>
@@ -165,6 +240,7 @@ button:active{transform:scale(.97)}
   </div>
   <div class="nav-area" id="nav-area">
     <button class="nb on" id="nb-home" onclick="go('home')">🏠 Bosh sahifa</button>
+    <button class="nb" id="nb-comm" onclick="go('comm')">🌐 Jamoat</button>
     <button class="nb" id="nb-neuro" onclick="go('neuro')">🧠 Nevrologiya</button>
     <button class="nb" id="nb-flash" onclick="go('flash')">🃏 Flashcards</button>
     <button class="nb" id="nb-prog" onclick="go('prog')">📈 Progress</button>
@@ -185,6 +261,7 @@ button:active{transform:scale(.97)}
 <div id="autosave-hint"></div>
 <div id="mbar">
   <button class="mb on" id="mb-home" onclick="go('home')"><span class="mi">🏠</span>Bosh</button>
+  <button class="mb" id="mb-comm" onclick="go('comm')"><span class="mi">🌐</span>Jamoat</button>
   <button class="mb" id="mb-neuro" onclick="go('neuro')"><span class="mi">🧠</span>Nevro</button>
   <button class="mb" id="mb-flash" onclick="go('flash')"><span class="mi">🃏</span>Flash</button>
   <button class="mb" id="mb-prog" onclick="go('prog')"><span class="mi">📈</span>Progress</button>
@@ -387,7 +464,7 @@ function newNote(subj,txt,title){
     color:COLORS[0],images:[],tags:[],pinned:false,starred:false,progress:'new',
     createdAt:Date.now(),updatedAt:Date.now()};
   notes.unshift(n);save();editing={...n};
-  ['home','neuro','flash','prog','stats'].forEach(k=>{
+  ['home','comm','neuro','flash','prog','stats'].forEach(k=>{
     document.getElementById('nb-'+k)?.classList.remove('on');
     document.getElementById('mb-'+k)?.classList.remove('on');
   });
@@ -419,6 +496,8 @@ function saveNote(silent){
 
 function autoSave(){
   if(!editing)return;
+  const re=document.getElementById('rich-ed');
+  if(re&&!_srcMode)editing.content=re.innerHTML;
   const changed=(editing.content||'')!==_lastSavedContent||(editing.title||'')!==_lastSavedTitle;
   if(!changed)return;
   showSaveBar('saving');
@@ -745,9 +824,19 @@ function rEditor(){
       <div style="font-size:11px;color:var(--dim);text-align:center">Yaratilgan: ${fd(n.createdAt)}</div>
     </div>
   </div>`;
-  document.getElementById('etxt').addEventListener('keydown',e=>{
-    if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveNote();}
-  });
+  // Init rich editor content
+  const richEd = document.getElementById('rich-ed');
+  if(richEd){
+    // If content looks like HTML, use as-is; otherwise convert plain text
+    const cnt = editing.content || '';
+    if(cnt.trim().startsWith('<') || cnt.includes('<br') || cnt.includes('<p') || cnt.includes('<h')){
+      richEd.innerHTML = cnt;
+    } else {
+      // Convert plain text to HTML paragraphs
+      richEd.innerHTML = cnt.split('\n').map(line => line.trim() ? `<p>${line}</p>` : '<p><br></p>').join('');
+    }
+    richEd.focus();
+  }
   startAutosave();
   setTimeout(updateStorageBar, 100);
   // restore unsaved draft if exists
@@ -759,8 +848,10 @@ function rEditor(){
         if(confirm('Saqlanmagan draft topildi. Davom ettirasizmi?')){
           editing.content=d.content||editing.content;
           editing.title=d.title||editing.title;
-          document.getElementById('etxt').value=editing.content;
-          document.getElementById('etit').value=editing.title;
+          const re2=document.getElementById('rich-ed');
+          if(re2)re2.innerHTML=editing.content;
+          const ti=document.getElementById('etit');
+          if(ti)ti.value=editing.title;
           upSt();
           showHint('unsaved');
           updateSaveBtn(true);
@@ -781,19 +872,28 @@ function rEditor(){
 }
 
 function upSt(){
-  const c=editing.content||'';
-  const e=document.getElementById('est');
-  if(e)e.innerHTML=`<span>📝 ${wc(c)} so'z</span><span>🔤 ${c.length} belgi</span><span>📄 ${c.split('\n').length} qator</span>`;
+  const re=document.getElementById('rich-ed');
+  const txt=re?re.innerText||'':'';
+  const html=re?re.innerHTML||'':'';
+  const words=txt.split(/\s+/).filter(Boolean).length;
+  const chars=txt.replace(/\s/g,'').length;
+  const reading=Math.ceil(words/200);
+  const w=document.getElementById('wc-words');
+  const ch=document.getElementById('wc-chars');
+  const rd=document.getElementById('wc-reading');
+  if(w)w.textContent=`📝 ${words} so'z`;
+  if(ch)ch.textContent=`🔤 ${chars} belgi`;
+  if(rd)rd.textContent=`⏱ ${reading} daq o'qish`;
 }
 
 function onContentChange(){
+  // sync from rich editor
+  const re=document.getElementById('rich-ed');
+  if(re&&!_srcMode)editing.content=re.innerHTML;
   clearTimeout(_autosaveTimer);
   updateSaveBtn(true);
   showHint('unsaved');
-  // auto-save after 3 seconds of inactivity
-  _autosaveTimer=setTimeout(()=>{
-    autoSave();
-  },3000);
+  _autosaveTimer=setTimeout(()=>{ autoSave(); },3000);
 }
 
 function pickC(c){
@@ -979,6 +1079,7 @@ function rDetail(nid){
       <button class="ibtn" onclick="toggleStar('${n.id}');rDetail('${n.id}')" style="${n.starred?'color:var(--amber);border-color:rgba(240,165,0,.4)':''}">${n.starred?'⭐':'☆'}</button>
       <button class="ibtn" onclick="togglePin('${n.id}');rDetail('${n.id}')" style="${n.pinned?'color:var(--accent);border-color:rgba(91,141,238,.4)':''}">${n.pinned?'📌':'📍'}</button>
       <button class="ghost btn-sm" onclick="dupNote(notes.find(x=>x.id==='${n.id}'))">📋</button>
+      <button class="btn btn-s btn-sm" onclick="publishNote('${n.id}')">🌐 Ulashish</button>
     </div>
   </div>
   <div style="background:var(--card);border:1px solid ${n.color}28;border-left:4px solid ${n.color};border-radius:var(--r);padding:20px 22px;margin-bottom:14px;min-height:80px">
@@ -1144,6 +1245,149 @@ function importData(e){
 }
 
 
+
+// ══════════════════════════════════════════════════
+// 🖊 RICH TEXT EDITOR FUNCTIONS
+// ══════════════════════════════════════════════════
+
+let _srcMode = false;
+
+function fmt(cmd, val){
+  document.getElementById('rich-ed')?.focus();
+  document.execCommand(cmd, false, val||null);
+  onRichInput();
+  updateToolbarState();
+}
+
+function fmtBlock(tag){
+  if(!tag)return;
+  document.getElementById('rich-ed')?.focus();
+  document.execCommand('formatBlock', false, tag);
+  onRichInput();
+}
+
+function fmtMark(){
+  const sel=window.getSelection();
+  if(!sel||sel.isCollapsed)return;
+  const range=sel.getRangeAt(0);
+  const mark=document.createElement('mark');
+  try{range.surroundContents(mark);}
+  catch(e){document.execCommand('insertHTML',false,`<mark>${sel.toString()}</mark>`);}
+  onRichInput();
+}
+
+function fmtCode(){
+  const sel=window.getSelection();
+  const txt=sel?.toString()||'';
+  if(txt){
+    document.execCommand('insertHTML',false,`<code>${txt.replace(/</g,'&lt;')}</code>`);
+  } else {
+    document.execCommand('insertHTML',false,`<code>kod</code>`);
+  }
+  onRichInput();
+}
+
+function fmtHR(){
+  document.execCommand('insertHTML',false,'<hr/>');
+  onRichInput();
+}
+
+function fmtTable(){
+  const html=`<table><tr><th>Ustun 1</th><th>Ustun 2</th><th>Ustun 3</th></tr><tr><td>Ma'lumot</td><td>Ma'lumot</td><td>Ma'lumot</td></tr><tr><td></td><td></td><td></td></tr></table><p><br></p>`;
+  document.execCommand('insertHTML',false,html);
+  onRichInput();
+}
+
+function fmtLink(){
+  const url=prompt("Havola URL si:", "https://");
+  if(url){
+    const sel=window.getSelection();
+    const txt=sel?.toString()||'Havola';
+    document.execCommand('insertHTML',false,`<a href="${url}" target="_blank">${txt}</a>`);
+    onRichInput();
+  }
+}
+
+function onRichInput(){
+  if(_srcMode)return;
+  const re=document.getElementById('rich-ed');
+  if(!re)return;
+  editing.content=re.innerHTML;
+  onContentChange();
+  upSt();
+}
+
+function onSrcInput(){
+  const se=document.getElementById('src-ed');
+  const re=document.getElementById('rich-ed');
+  if(!se||!re)return;
+  re.innerHTML=se.value;
+  editing.content=se.value;
+  onContentChange();
+}
+
+function toggleSrcMode(){
+  _srcMode=!_srcMode;
+  const re=document.getElementById('rich-ed');
+  const se=document.getElementById('src-ed');
+  const btn=document.getElementById('src-mode-btn');
+  const tb=document.getElementById('fmt-toolbar');
+  if(!re||!se)return;
+  if(_srcMode){
+    se.value=re.innerHTML;
+    re.style.display='none';
+    se.style.display='block';
+    if(btn)btn.classList.add('active');
+    // hide toolbar buttons except src mode btn
+    if(tb)tb.querySelectorAll('.fmt-btn:not(#src-mode-btn),.fmt-sep,.fmt-select').forEach(el=>el.style.opacity='0.3');
+  } else {
+    re.innerHTML=se.value;
+    editing.content=se.value;
+    re.style.display='block';
+    se.style.display='none';
+    if(btn)btn.classList.remove('active');
+    if(tb)tb.querySelectorAll('.fmt-btn:not(#src-mode-btn),.fmt-sep,.fmt-select').forEach(el=>el.style.opacity='1');
+  }
+}
+
+function updateToolbarState(){
+  const cmds=['bold','italic','underline','strikeThrough'];
+  const labels=['B','I','U','S'];
+  document.querySelectorAll('.fmt-toolbar .fmt-btn').forEach(btn=>{
+    const txt=btn.querySelector('b,i,u,s')?.tagName?.toLowerCase();
+    if(txt){
+      const cmd=txt==='b'?'bold':txt==='i'?'italic':txt==='u'?'underline':'strikeThrough';
+      btn.classList.toggle('active',document.queryCommandState(cmd));
+    }
+  });
+}
+
+function onRichKey(e){
+  // Ctrl+S save
+  if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveNote();return;}
+  // Ctrl+B Bold
+  if((e.ctrlKey||e.metaKey)&&e.key==='b'){e.preventDefault();fmt('bold');return;}
+  // Ctrl+I Italic
+  if((e.ctrlKey||e.metaKey)&&e.key==='i'){e.preventDefault();fmt('italic');return;}
+  // Ctrl+U Underline
+  if((e.ctrlKey||e.metaKey)&&e.key==='u'){e.preventDefault();fmt('underline');return;}
+  // Tab -> indent
+  if(e.key==='Tab'){
+    e.preventDefault();
+    document.execCommand('insertHTML',false,'&nbsp;&nbsp;&nbsp;&nbsp;');
+  }
+}
+
+function getRichText(){
+  const re=document.getElementById('rich-ed');
+  return re?re.innerHTML:'';
+}
+
+function setRichText(html){
+  const re=document.getElementById('rich-ed');
+  if(re)re.innerHTML=html||'';
+}
+
 // ── FAN MANAGEMENT ────────────────────────────────────────────────
 let newFanColor = '#5b8dee';
 
@@ -1230,7 +1474,7 @@ function renderDynFans(){
 function go(v,arg){
   if(view==='editor'&&v!=='editor'){stopAutosave();clearInterval(window._draftTimer);}
   view=v;
-  ['home','neuro','flash','prog','stats'].forEach(k=>{
+  ['home','comm','neuro','flash','prog','stats'].forEach(k=>{
     document.getElementById('nb-'+k)?.classList.toggle('on',k===v);
     document.getElementById('mb-'+k)?.classList.toggle('on',k===v);
   });
@@ -1247,6 +1491,7 @@ function go(v,arg){
   else if(v==='editor')rEditor();
   else if(v==='detail')rDetail(arg);
   else if(v==='fan')rFan(arg);
+  else if(v==='comm')rComm();
   window.scrollTo(0,0);
 }
 
@@ -1279,8 +1524,339 @@ function rFan(fanName){
   <div class="ngrid">${fanNotes.map(n=>nc(n,false)).join('')}</div>`}`;
 }
 
+
+// ══════════════════════════════════════════════════
+// 🌐 GITHUB GIST — JAMOAT KONSPEKTLARI
+// ══════════════════════════════════════════════════
+const GITHUB_TOKEN = 'ghp_1HSkEf3v0vyk03Jregw9kh4DQc45MQ2Huep7';
+const GITHUB_USERNAME = 'medsee';
+const GIST_DESCRIPTION = 'NeurоNotepad Jamoat Konspektlari';
+const GIST_FILENAME = 'neuronotepad_community.json';
+let _gistId = localStorage.getItem('nn4_gist_id') || null;
+let _commFilter = 'all';
+let _commLikes = JSON.parse(localStorage.getItem('nn4_comm_likes') || '{}');
+
+// ── Gist ID ni topish yoki yaratish ──────────────
+async function getOrCreateGist() {
+  if (_gistId) return _gistId;
+  // Search existing gists
+  try {
+    const res = await fetch('https://api.github.com/gists?per_page=100', {
+      headers: { Authorization: `token ${GITHUB_TOKEN}`, Accept: 'application/vnd.github.v3+json' }
+    });
+    const gists = await res.json();
+    const found = Array.isArray(gists) && gists.find(g => g.description === GIST_DESCRIPTION && g.files[GIST_FILENAME]);
+    if (found) {
+      _gistId = found.id;
+      localStorage.setItem('nn4_gist_id', _gistId);
+      return _gistId;
+    }
+  } catch(e) {}
+  // Create new gist
+  try {
+    const res = await fetch('https://api.github.com/gists', {
+      method: 'POST',
+      headers: { Authorization: `token ${GITHUB_TOKEN}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        description: GIST_DESCRIPTION,
+        public: true,
+        files: { [GIST_FILENAME]: { content: JSON.stringify({ notes: [], updated: Date.now() }) } }
+      })
+    });
+    const g = await res.json();
+    if (g.id) {
+      _gistId = g.id;
+      localStorage.setItem('nn4_gist_id', _gistId);
+      return _gistId;
+    }
+  } catch(e) {}
+  return null;
+}
+
+// ── Gist'dan ma'lumot olish ──────────────────────
+async function fetchCommunityNotes() {
+  const id = await getOrCreateGist();
+  if (!id) return [];
+  try {
+    const res = await fetch(`https://api.github.com/gists/${id}`, {
+      headers: { Authorization: `token ${GITHUB_TOKEN}`, Accept: 'application/vnd.github.v3+json', 'Cache-Control': 'no-cache' }
+    });
+    const g = await res.json();
+    const raw = g.files?.[GIST_FILENAME]?.content;
+    if (!raw) return [];
+    const data = JSON.parse(raw);
+    return Array.isArray(data.notes) ? data.notes : [];
+  } catch(e) { return []; }
+}
+
+// ── Gist'ga yozish ───────────────────────────────
+async function saveCommunityNotes(notesList) {
+  const id = await getOrCreateGist();
+  if (!id) return false;
+  try {
+    const res = await fetch(`https://api.github.com/gists/${id}`, {
+      method: 'PATCH',
+      headers: { Authorization: `token ${GITHUB_TOKEN}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ files: { [GIST_FILENAME]: { content: JSON.stringify({ notes: notesList, updated: Date.now() }) } } })
+    });
+    return res.ok;
+  } catch(e) { return false; }
+}
+
+// ── Konspektni ommaviy qilish ────────────────────
+async function publishNote(noteId) {
+  const note = notes.find(n => n.id === noteId);
+  if (!note) return;
+
+  // Show publish modal
+  document.getElementById('pub-modal-overlay').style.display = 'flex';
+  document.getElementById('pub-modal-content').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-size:16px;font-weight:700;color:#ecf2ff">🌐 Jamoatga nashr qilish</div>
+      <button class="ibtn" onclick="document.getElementById('pub-modal-overlay').style.display='none'" style="font-size:13px;padding:4px 8px">✕</button>
+    </div>
+    <div style="background:rgba(91,141,238,.08);border:1px solid rgba(91,141,238,.2);border-radius:10px;padding:12px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:600;color:#ecf2ff;margin-bottom:3px">${esc(note.title)||'Nomsiz'}</div>
+      <div style="font-size:12px;color:var(--muted)">${esc(note.subject)} · ${wc(note.content)} so'z</div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <span class="lbl">Muallif ismi (ko'rinadigan)</span>
+      <input class="inp" id="pub-author" placeholder="Ismi Sharif" value="${esc(currentProfile?.name||'')}"/>
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <span class="lbl">Universitet / Kurs (ixtiyoriy)</span>
+      <input class="inp" id="pub-uni" placeholder="ToshTibTibbiyot · 3-kurs"/>
+    </div>
+    <div style="background:rgba(240,165,0,.08);border:1px solid rgba(240,165,0,.2);border-radius:8px;padding:10px;margin-bottom:14px;font-size:12px;color:var(--amber)">
+      ⚠️ Nashr qilingan konspekt GitHub Gist'da ommaviy saqlanadi. Hamma ko'ra oladi.
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="ghost" style="flex:1" onclick="document.getElementById('pub-modal-overlay').style.display='none'">Bekor</button>
+      <button class="btn btn-p" style="flex:1;justify-content:center" onclick="confirmPublish('${noteId}')">🚀 Nashr qilish</button>
+    </div>`;
+}
+
+async function confirmPublish(noteId) {
+  const note = notes.find(n => n.id === noteId);
+  if (!note) return;
+  const author = document.getElementById('pub-author')?.value?.trim() || 'Anonim';
+  const uni = document.getElementById('pub-uni')?.value?.trim() || '';
+  const btn = document.querySelector('#pub-modal-content .btn-p');
+  if (btn) { btn.textContent = '⏳ Yuklanmoqda...'; btn.disabled = true; }
+
+  // Prepare note for community (strip large images to save space)
+  const pubNote = {
+    id: 'pub_' + note.id + '_' + Date.now(),
+    title: note.title || 'Nomsiz',
+    content: note.content || '',
+    subject: note.subject,
+    color: note.color || '#5b8dee',
+    tags: note.tags || [],
+    author,
+    uni,
+    avatar: author.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2),
+    likes: 0,
+    publishedAt: Date.now(),
+    images: (note.images || []).slice(0, 2).map(img => ({ url: img.url?.slice(0,500)||'', name: img.name||'' }))
+  };
+
+  const existing = await fetchCommunityNotes();
+  const updated = [pubNote, ...existing].slice(0, 200); // max 200 ta
+  const ok = await saveCommunityNotes(updated);
+
+  document.getElementById('pub-modal-overlay').style.display = 'none';
+  if (ok) {
+    toast('Jamoatga nashr qilindi 🚀');
+    // Mark note as published
+    note.isPublished = true;
+    const i = notes.findIndex(x => x.id === noteId);
+    if (i >= 0) notes[i] = note;
+    save();
+  } else {
+    toast('Xato yuz berdi. Internet borligini tekshiring', 'err');
+  }
+}
+
+// ── Like bosish (localStorage) ───────────────────
+function toggleCommLike(noteId, btn) {
+  if (_commLikes[noteId]) {
+    delete _commLikes[noteId];
+    if (btn) { btn.classList.remove('liked'); btn.innerHTML = `🤍 ${parseInt(btn.dataset.count||0)}`; }
+  } else {
+    _commLikes[noteId] = true;
+    if (btn) { btn.classList.add('liked'); btn.innerHTML = `❤️ ${parseInt(btn.dataset.count||0)+1}`; }
+    toast('Like bosildi ❤️');
+  }
+  localStorage.setItem('nn4_comm_likes', JSON.stringify(_commLikes));
+}
+
+// ── Community sahifasi ───────────────────────────
+async function rComm() {
+  document.getElementById('main').innerHTML = `
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+    <div>
+      <div style="font-family:'Instrument Serif',serif;font-size:24px;font-style:italic;color:#ecf2ff">🌐 Jamoat konspektlari</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:2px">Barcha foydalanuvchilar ulashgan konspektlar</div>
+    </div>
+    <button class="btn btn-s btn-sm" onclick="showPublishPicker()">📤 O'z konspektimni ulashish</button>
+  </div>
+  <div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:16px;padding-bottom:2px" id="comm-filters">
+    <div class="fchip on" onclick="setCommFilter('all',this)">✨ Hammasi</div>
+    <div class="fchip" onclick="setCommFilter('new',this)">🆕 Yangi</div>
+    <div class="fchip" onclick="setCommFilter('hot',this)">🔥 Mashhur</div>
+    ${['Nevrologiya','Anatomiya','Fiziologiya','Biokimyo','Farmakologiya'].map(s=>`<div class="fchip" onclick="setCommFilter('${s}',this)">${s}</div>`).join('')}
+  </div>
+  <div id="comm-list">
+    ${[1,2,3].map(()=>`<div class="sk-card"><div class="skeleton" style="height:14px;width:50%;margin-bottom:8px"></div><div class="skeleton" style="height:12px;width:100%;margin-bottom:5px"></div><div class="skeleton" style="height:12px;width:70%"></div></div>`).join('')}
+  </div>`;
+  await loadCommNotes();
+}
+
+let _allCommNotes = [];
+
+async function loadCommNotes() {
+  _allCommNotes = await fetchCommunityNotes();
+  renderCommList();
+}
+
+function setCommFilter(val, el) {
+  _commFilter = val;
+  document.querySelectorAll('#comm-filters .fchip').forEach(c => c.classList.remove('on'));
+  el?.classList.add('on');
+  renderCommList();
+}
+
+function renderCommList() {
+  let list = [..._allCommNotes];
+  if (_commFilter === 'new') list = list.sort((a,b) => b.publishedAt - a.publishedAt);
+  else if (_commFilter === 'hot') list = list.sort((a,b) => (b.likes||0) - (a.likes||0));
+  else if (_commFilter !== 'all') list = list.filter(n => n.subject === _commFilter);
+
+  const el = document.getElementById('comm-list');
+  if (!el) return;
+  if (!list.length) {
+    el.innerHTML = `<div style="text-align:center;padding:60px 16px">
+      <div style="font-size:48px;margin-bottom:12px">📭</div>
+      <div style="font-size:16px;font-weight:700;color:#4a6080;margin-bottom:8px">Hali konspekt yo'q</div>
+      <div style="font-size:13px;color:var(--dim);margin-bottom:16px">Birinchi bo'lib o'z konspektingizni ulashing!</div>
+      <button class="btn btn-p" onclick="showPublishPicker()">📤 Konspekt ulashish</button>
+    </div>`;
+    return;
+  }
+  el.innerHTML = list.map(n => commCardHTML(n)).join('');
+}
+
+function commCardHTML(n) {
+  const liked = !!_commLikes[n.id];
+  const likeCount = (n.likes||0) + (liked ? 1 : 0);
+  const fd2 = (ts) => { if(!ts)return''; const d=new Date(ts); const diff=Math.floor((Date.now()-d)/1000); if(diff<60)return'Hozirgina'; if(diff<3600)return Math.floor(diff/60)+' daqiqa oldin'; if(diff<86400)return Math.floor(diff/3600)+' soat oldin'; return Math.floor(diff/86400)+' kun oldin'; };
+  // strip HTML for preview
+  const div = document.createElement('div');
+  div.innerHTML = n.content || '';
+  const plainText = div.innerText || div.textContent || '';
+
+  return `<div class="comm-card">
+    <div class="comm-header">
+      <div class="comm-avatar">${esc(n.avatar||'?')}</div>
+      <div class="comm-user">
+        <div class="comm-username">${esc(n.author||'Anonim')}</div>
+        <div class="comm-meta">${esc(n.uni||'')}${n.uni?' · ':''}${fd2(n.publishedAt)}</div>
+      </div>
+      <span style="background:${n.color||'#5b8dee'}18;color:${n.color||'#5b8dee'};border-radius:20px;padding:2px 9px;font-size:11px;font-weight:600">${esc(n.subject||'')}</span>
+    </div>
+    <div class="comm-body">
+      <div class="comm-title" onclick="showCommDetail('${n.id}')">${esc(n.title)}</div>
+      <div class="comm-content">${esc(plainText)}</div>
+    </div>
+    ${(n.tags||[]).length ? `<div style="padding:0 14px 8px;display:flex;gap:5px;flex-wrap:wrap">${(n.tags||[]).slice(0,4).map(t=>`<span class="comm-tag">#${esc(t)}</span>`).join('')}</div>` : ''}
+    <div class="comm-footer">
+      <button class="comm-likes ${liked?'liked':''}" data-count="${n.likes||0}"
+        id="cl-${n.id}"
+        onclick="toggleCommLike('${n.id}',this)">
+        ${liked?'❤️':'🤍'} ${likeCount}
+      </button>
+      <button class="comm-likes" onclick="showCommDetail('${n.id}')">💬 O'qish</button>
+      <div style="flex:1"></div>
+      <button class="comm-likes" onclick="copyCommLink('${n.id}')">↗ Ulashish</button>
+    </div>
+  </div>`;
+}
+
+function showCommDetail(noteId) {
+  const n = _allCommNotes.find(x => x.id === noteId);
+  if (!n) return;
+  const overlay = document.getElementById('pub-modal-overlay');
+  const content = document.getElementById('pub-modal-content');
+  overlay.style.display = 'flex';
+  const div = document.createElement('div'); div.innerHTML = n.content||''; const plain = div.innerText||'';
+  content.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <span style="background:${n.color||'#5b8dee'}18;color:${n.color||'#5b8dee'};border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600">${esc(n.subject)}</span>
+      <button class="ibtn" onclick="document.getElementById('pub-modal-overlay').style.display='none'" style="font-size:13px;padding:4px 8px">✕</button>
+    </div>
+    <div style="font-family:'Instrument Serif',serif;font-size:20px;font-style:italic;color:#ecf2ff;margin-bottom:8px">${esc(n.title)}</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">✍️ ${esc(n.author||'Anonim')} ${n.uni?'· '+esc(n.uni):''}</div>
+    <div class="rich-editor" style="pointer-events:none;max-height:50vh;overflow-y:auto;border:1px solid var(--border);border-radius:var(--rs);padding:14px;font-size:13px" id="comm-detail-body"></div>
+    ${(n.tags||[]).length?`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:10px">${(n.tags||[]).map(t=>`<span class="comm-tag">#${esc(t)}</span>`).join('')}</div>`:''}
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="ghost" style="flex:1" onclick="document.getElementById('pub-modal-overlay').style.display='none'">Yopish</button>
+      <button class="btn btn-s" style="flex:1;justify-content:center" onclick="saveCommNote('${n.id}')">💾 O'zimga saqlash</button>
+    </div>`;
+  // Render rich content
+  const body = document.getElementById('comm-detail-body');
+  if (body) {
+    if ((n.content||'').trim().startsWith('<')) body.innerHTML = n.content;
+    else body.innerHTML = (n.content||'').split('\n').map(l=>l.trim()?`<p>${l}</p>`:'<p><br></p>').join('');
+  }
+}
+
+function saveCommNote(noteId) {
+  const cn = _allCommNotes.find(x => x.id === noteId);
+  if (!cn) return;
+  const newNote = {
+    id: uid(), title: cn.title + ' (jamoat)',
+    content: cn.content||'', subject: cn.subject||'Nevrologiya',
+    color: cn.color||'#5b8dee', tags: cn.tags||[],
+    images: [], pinned: false, starred: false,
+    progress: 'new', createdAt: Date.now(), updatedAt: Date.now()
+  };
+  notes.unshift(newNote); save();
+  document.getElementById('pub-modal-overlay').style.display = 'none';
+  toast("Konspekt o'zingizga saqlandi 💾");
+}
+
+function copyCommLink(noteId) {
+  const txt = `NeurоNotepad: ${_allCommNotes.find(x=>x.id===noteId)?.title||'Konspekt'}\nhttps://gist.github.com/${GITHUB_USERNAME}/${_gistId}`;
+  navigator.clipboard?.writeText(txt).then(()=>toast('Havola nusxalandi ↗')).catch(()=>toast('Nusxalab oling: gist.github.com/'+GITHUB_USERNAME+'/'+(_gistId||'')));
+}
+
+function showPublishPicker() {
+  if (!notes.length) { toast("Avval konspekt yarating",'warn'); return; }
+  document.getElementById('pub-modal-overlay').style.display = 'flex';
+  document.getElementById('pub-modal-content').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-size:15px;font-weight:700;color:#ecf2ff">📤 Qaysi konspektni ulashish?</div>
+      <button class="ibtn" onclick="document.getElementById('pub-modal-overlay').style.display='none'" style="font-size:13px;padding:4px 8px">✕</button>
+    </div>
+    <div style="max-height:55vh;overflow-y:auto">
+      ${notes.map(n=>`<div onclick="publishNote('${n.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);margin-bottom:7px;cursor:pointer;transition:.15s" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border)'">
+        <div style="width:10px;height:10px;border-radius:50%;background:${n.color||'#5b8dee'};flex-shrink:0"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:#ecf2ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(n.title)||'Nomsiz'}</div>
+          <div style="font-size:11px;color:var(--muted)">${esc(n.subject)} · ${wc(n.content)} so'z${n.isPublished?' · ✅ Nashr qilingan':''}</div>
+        </div>
+        <span style="font-size:11px;color:var(--accent)">Ulashish →</span>
+      </div>`).join('')}
+    </div>`;
+}
+
 renderDynFans();
 rHome();
 </script>
+
+<!-- PUBLISH / COMMUNITY MODAL -->
+<div class="ovl" id="pub-modal-overlay" style="display:none">
+  <div class="pub-modal" id="pub-modal-content"></div>
+</div>
 </body>
 </html>
