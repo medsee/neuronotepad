@@ -462,12 +462,15 @@ async function getCommunityFromDB() {
   if (!_firebaseReady || !db) return getCommunity();
   try {
     const snap = await db.ref('community').orderByChild('publishedAt').limitToLast(100).get();
-    if (!snap.exists()) return getCommunity(); // fallback if empty
+    if (!snap.exists()) return []; // Firebase ulangan lekin bo'sh — [] qaytaradi
     const data = snap.val();
-    return Object.values(data).sort((a,b) => b.publishedAt - a.publishedAt);
+    const list = Object.values(data).sort((a,b) => b.publishedAt - a.publishedAt);
+    // Sync to localStorage for offline use
+    saveCommunity(list);
+    return list;
   } catch(e) {
     console.error('Firebase read xato:', e);
-    return getCommunity();
+    return getCommunity(); // offline fallback
   }
 }
 
@@ -533,19 +536,22 @@ let _commListener = null;
 function startCommListener() {
   if (!_firebaseReady || !db || _commListener) return;
   _commListener = db.ref('community').orderByChild('publishedAt').limitToLast(50);
-  _commListener.on('child_added', (snap) => {
-    const note = snap.val();
-    // Add to local cache if not exists
-    const existing = getCommunity();
-    if (!existing.find(x => x.id === note.id)) {
-      saveCommunity([note, ...existing]);
-      if (view === 'comm') {
-        const list = document.getElementById('comm-list');
-        if (list && list.children.length > 0) {
-          const card = document.createElement('div');
-          card.innerHTML = commCardHTML(note);
-          list.insertBefore(card.firstChild, list.firstChild);
-        }
+  _commListener.on('value', (snap) => {
+    // Full refresh when ANY change happens in Firebase
+    if (!snap.exists()) return;
+    const data = snap.val();
+    const list = Object.values(data).sort((a,b) => b.publishedAt - a.publishedAt);
+    saveCommunity(list);
+    // Update UI if on comm page
+    if (view === 'comm') {
+      const commList = document.getElementById('comm-list');
+      if (commList) {
+        commList.innerHTML = list.map(n => commCardHTML(n)).join('');
+      }
+      // Update count
+      const countEl = document.querySelector('#main > div > div:first-child > div:last-child');
+      if (countEl && countEl.textContent.includes('ta konspekt')) {
+        // update count
       }
     }
   });
@@ -1921,10 +1927,15 @@ async function confirmPublish(noteId) {
   const ni = notes.findIndex(x => x.id === noteId);
   if (ni >= 0) { notes[ni].isPublished = true; save(); }
 
-  if (prog) prog.textContent = dbOk ? '✅ Hammaga korinadi!' : '✅ Saqlandi (offline)';
-  setTimeout(() => {
+  if (prog) prog.textContent = dbOk ? '✅ Barcha qurilmalarda korinadi!' : '✅ Saqlandi (offline)';
+  setTimeout(async () => {
     (document.getElementById('pub-modal-overlay')||{style:{}}).style.display = 'none';
     toast(dbOk ? '🚀 Barcha qurilmalarda korinadi!' : '✅ Nashr qilindi');
+    // Force refresh from Firebase
+    if (dbOk) {
+      const fresh = await getCommunityFromDB();
+      saveCommunity(fresh);
+    }
     if (view === 'comm') rComm();
   }, 700);
 }
