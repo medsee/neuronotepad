@@ -230,6 +230,59 @@ button:active{transform:scale(.97)}
 .comm-likes:hover{background:rgba(255,255,255,.05);color:var(--red)}
 .comm-likes.liked{color:var(--red)}
 .pub-modal{background:#0e1520;border:1px solid var(--border2);border-radius:18px;padding:22px;width:100%;max-width:420px;max-height:80vh;overflow-y:auto}
+
+/* ── SPACED REPETITION ── */
+.sr-btn{display:flex;flex-direction:column;align-items:center;gap:3px;border:none;border-radius:12px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .15s;flex:1}
+.sr-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.3)}
+.sr-btn .sr-days{font-size:10px;font-weight:400;opacity:.8;margin-top:2px}
+.sr-easy{background:rgba(34,201,122,.2);color:var(--green);border:1px solid rgba(34,201,122,.3)}
+.sr-easy:hover{background:rgba(34,201,122,.35)}
+.sr-medium{background:rgba(240,165,0,.2);color:var(--amber);border:1px solid rgba(240,165,0,.3)}
+.sr-medium:hover{background:rgba(240,165,0,.35)}
+.sr-hard{background:rgba(224,85,85,.2);color:var(--red);border:1px solid rgba(224,85,85,.3)}
+.sr-hard:hover{background:rgba(224,85,85,.35)}
+.sr-stats-bar{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.sr-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 14px;text-align:center;flex:1;min-width:80px}
+.sr-stat-v{font-size:20px;font-weight:700;color:#ecf2ff;font-family:'Instrument Serif',serif}
+.sr-stat-l{font-size:10px;color:var(--muted);margin-top:1px}
+.sr-queue-badge{background:rgba(224,85,85,.15);color:var(--red);border-radius:20px;padding:2px 10px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:4px}
+.flip-card{perspective:1000px;cursor:pointer}
+.flip-inner{position:relative;width:100%;transition:transform .5s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d;min-height:200px}
+.flip-inner.flipped{transform:rotateY(180deg)}
+.flip-front,.flip-back{position:absolute;width:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:20px;padding:32px 24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:200px}
+.flip-back{transform:rotateY(180deg);background:var(--card);border:1px solid var(--border2)}
+
+/* ── O'QISH REJIMI ── */
+.read-mode-wrap{position:fixed;inset:0;background:var(--bg);z-index:600;overflow-y:auto;padding:0}
+.read-mode-inner{max-width:700px;margin:0 auto;padding:40px 24px 80px}
+.read-mode-title{font-family:'Instrument Serif',serif;font-size:30px;font-style:italic;color:#ecf2ff;margin-bottom:8px;line-height:1.3}
+.read-mode-bar{position:fixed;top:0;left:0;right:0;background:rgba(6,8,16,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:12px;z-index:601}
+.read-progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);z-index:602;transition:width .1s}
+
+/* ── PRINT ── */
+.print-modal-inner{background:#0e1520;border:1px solid var(--border2);border-radius:18px;padding:22px;width:100%;max-width:400px}
+@media print{
+  body{background:#fff!important;color:#000!important;font-family:Georgia,serif}
+  #topbar,#mbar,#fab,.read-mode-bar,.no-print{display:none!important}
+  .read-mode-wrap{position:static!important}
+  .read-mode-inner{padding:20px!important;max-width:100%!important}
+  .read-mode-title{color:#000!important;font-size:24px}
+  .rich-editor{color:#000!important;background:#fff!important}
+  .rich-editor h1,.rich-editor h2,.rich-editor h3{color:#000!important}
+  .rich-editor code,.rich-editor pre{background:#f5f5f5!important;color:#333!important;border-color:#ddd!important}
+  .rich-editor blockquote{border-left-color:#333!important;background:#f9f9f9!important;color:#333!important}
+  .rich-editor table td,.rich-editor table th{border-color:#ccc!important}
+  .print-meta{color:#555!important}
+}
+
+/* ── GLOBAL SEARCH ── */
+.gsearch-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:700;display:flex;align-items:flex-start;justify-content:center;padding-top:80px}
+.gsearch-box{background:#0d1220;border:1px solid var(--border2);border-radius:16px;width:100%;max-width:580px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.gsearch-inp{width:100%;background:transparent;border:none;outline:none;padding:16px 20px;font-size:16px;color:var(--text);font-family:var(--font);border-bottom:1px solid var(--border)}
+.gsearch-result{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;transition:background .12s;border-bottom:1px solid var(--border)}
+.gsearch-result:hover{background:rgba(91,141,238,.08)}
+.gsearch-result:last-child{border-bottom:none}
+.gsearch-hl{color:var(--accent);font-weight:600}
 </style>
 </head>
 <body>
@@ -242,7 +295,7 @@ button:active{transform:scale(.97)}
     <button class="nb on" id="nb-home" onclick="go('home')">🏠 Bosh sahifa</button>
     <button class="nb" id="nb-comm" onclick="go('comm')">🌐 Jamoat</button>
     <button class="nb" id="nb-neuro" onclick="go('neuro')">🧠 Nevrologiya</button>
-    <button class="nb" id="nb-flash" onclick="go('flash')">🃏 Flashcards</button>
+    <button class="nb" id="nb-flash" onclick="go('flash')" style="position:relative">🃏 Flashcards<span id="sr-badge" style="display:none;position:absolute;top:2px;right:2px;background:var(--red);border-radius:50%;width:8px;height:8px"></span></button>
     <button class="nb" id="nb-prog" onclick="go('prog')">📈 Progress</button>
     <button class="nb" id="nb-stats" onclick="go('stats')">📊 Statistika</button>
     <!-- dynamic fan buttons inserted here by JS -->
@@ -263,7 +316,7 @@ button:active{transform:scale(.97)}
   <button class="mb on" id="mb-home" onclick="go('home')"><span class="mi">🏠</span>Bosh</button>
   <button class="mb" id="mb-comm" onclick="go('comm')"><span class="mi">🌐</span>Jamoat</button>
   <button class="mb" id="mb-neuro" onclick="go('neuro')"><span class="mi">🧠</span>Nevro</button>
-  <button class="mb" id="mb-flash" onclick="go('flash')"><span class="mi">🃏</span>Flash</button>
+  <button class="mb" id="mb-flash" onclick="go('flash')" style="position:relative"><span class="mi">🃏</span>Flash<span id="sr-badge-m" style="display:none;position:absolute;top:2px;right:8px;background:var(--red);border-radius:50%;width:8px;height:8px"></span></button>
   <button class="mb" id="mb-prog" onclick="go('prog')"><span class="mi">📈</span>Progress</button>
   <button class="mb" id="mb-stats" onclick="go('stats')"><span class="mi">📊</span>Stat</button>
 </div>
@@ -1079,7 +1132,9 @@ function rDetail(nid){
       <button class="ibtn" onclick="toggleStar('${n.id}');rDetail('${n.id}')" style="${n.starred?'color:var(--amber);border-color:rgba(240,165,0,.4)':''}">${n.starred?'⭐':'☆'}</button>
       <button class="ibtn" onclick="togglePin('${n.id}');rDetail('${n.id}')" style="${n.pinned?'color:var(--accent);border-color:rgba(91,141,238,.4)':''}">${n.pinned?'📌':'📍'}</button>
       <button class="ghost btn-sm" onclick="dupNote(notes.find(x=>x.id==='${n.id}'))">📋</button>
-      <button class="btn btn-s btn-sm" onclick="publishNote('${n.id}')">🌐 Ulashish</button>
+      <button class="ibtn" onclick="openReadMode('${n.id}')" title="O'qish rejimi">👁</button>
+      <button class="ibtn" onclick="printNote('${n.id}')" title="Chop etish">🖨️</button>
+      <button class="btn btn-s btn-sm" onclick="openPublishForm('${n.id}')">🌐 Ulashish</button>
     </div>
   </div>
   <div style="background:var(--card);border:1px solid ${n.color}28;border-left:4px solid ${n.color};border-radius:var(--r);padding:20px 22px;margin-bottom:14px;min-height:80px">
@@ -1099,7 +1154,14 @@ function rDetail(nid){
 
 // ── FLASHCARDS ────────────────────────────────────────────────────
 function rFlash(){
-  const deck=notes.filter(n=>n.title&&n.content);
+  const now=Date.now();
+  const allDeck=notes.filter(n=>n.title&&n.content);
+  const due=allDeck.filter(n=>(srData[n.id]?.nextReview||0)<=now);
+  const notDue=allDeck.filter(n=>(srData[n.id]?.nextReview||0)>now);
+  const deck=[...due,...notDue];
+  const learned=allDeck.filter(n=>srData[n.id]?.ease).length;
+  const dueCount=due.length;
+  const easyCount=allDeck.filter(n=>srData[n.id]?.ease==='easy').length;
   if(!deck.length){
     document.getElementById('main').innerHTML=`<div style="text-align:center;padding:70px 16px">
       <div style="font-size:48px;margin-bottom:12px">🃏</div>
@@ -1108,40 +1170,73 @@ function rFlash(){
     return;
   }
   const idx=fi%deck.length,n=deck[idx];
-  const stateClrs={new:'var(--dim)',learning:'var(--amber)',review:'var(--accent)',done:'var(--green)'};
+  const srInfo=srData[n.id]||{};
+  const isDue=(srInfo.nextReview||0)<=now;
   document.getElementById('main').innerHTML=`
-  <div style="max-width:560px;margin:0 auto">
-    <div style="text-align:center;margin-bottom:8px">
-      <div style="font-family:'Instrument Serif',serif;font-size:22px;font-style:italic;color:#ecf2ff">🃏 Flashcards</div>
+  <div style="max-width:580px;margin:0 auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-family:'Instrument Serif',serif;font-size:22px;font-style:italic;color:#ecf2ff">🃏 Spaced Repetition</div>
+      ${dueCount>0
+        ?`<span class="sr-queue-badge">🔴 ${dueCount} ta bugun</span>`
+        :`<span class="sr-queue-badge" style="background:rgba(34,201,122,.1);color:var(--green)">✅ Hammasi ko'rilgan</span>`}
     </div>
-    <div style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:14px">${idx+1} / ${deck.length}</div>
-    <div class="fcard" style="border-left-color:${n.color}" onclick="ff=!ff;rFlash()">
-      ${!ff?`
-        <div style="font-size:12px;color:${n.color};font-weight:700;letter-spacing:1px;margin-bottom:10px">${esc(n.subject)}</div>
-        <div style="font-size:20px;font-weight:700;color:#ecf2ff;margin-bottom:14px;font-family:'Instrument Serif',serif;font-style:italic">${esc(n.title)}</div>
-        ${(n.tags||[]).length?`<div style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-bottom:12px">${(n.tags||[]).slice(0,3).map(t=>`<span class="chip" style="background:${n.color}18;color:${n.color}">#${esc(t)}</span>`).join('')}</div>`:''}
-        <div style="font-size:12px;color:var(--dim)">👆 Bosing — javobni ko'ring</div>
-      `:`
-        <div style="font-size:11px;color:${n.color};font-weight:700;letter-spacing:1px;margin-bottom:12px">JAVOB</div>
-        <div style="font-size:13px;color:#a0b4cc;line-height:1.85;text-align:left;max-width:100%">${esc(n.content.slice(0,360)+(n.content.length>360?'...':''))}</div>
-      `}
+    <div class="sr-stats-bar">
+      <div class="sr-stat"><div class="sr-stat-v">${deck.length}</div><div class="sr-stat-l">Jami karta</div></div>
+      <div class="sr-stat"><div class="sr-stat-v" style="color:var(--red)">${dueCount}</div><div class="sr-stat-l">Bugun kerak</div></div>
+      <div class="sr-stat"><div class="sr-stat-v" style="color:var(--green)">${easyCount}</div><div class="sr-stat-l">Oson</div></div>
+      <div class="sr-stat"><div class="sr-stat-v" style="color:var(--accent)">${Math.round(learned/Math.max(deck.length,1)*100)}%</div><div class="sr-stat-l">Progress</div></div>
     </div>
-    <div style="display:flex;gap:10px;justify-content:center;margin-top:14px">
-      <button class="ghost" onclick="ff=false;fi=(fi-1+${deck.length})%${deck.length};rFlash()">← Oldingi</button>
-      <button class="ghost" style="color:var(--red)" onclick="ff=false;fi=Math.floor(Math.random()*${deck.length});rFlash()">🔀</button>
-      <button class="btn btn-p" onclick="ff=false;fi=(fi+1)%${deck.length};rFlash()">Keyingi →</button>
+    <div class="flip-card" onclick="ff=!ff;rFlash()" style="margin-bottom:14px">
+      <div class="flip-inner ${ff?'flipped':''}" style="min-height:220px">
+        <div class="flip-front" style="background:var(--card);border:1px solid ${isDue?'rgba(224,85,85,.35)':'var(--border)'};border-left:4px solid ${n.color||'var(--accent)'}">
+          ${isDue?`<div style="font-size:10px;color:var(--red);font-weight:700;letter-spacing:1px;margin-bottom:8px">🔴 BUGUN O'RGANISH KERAK</div>`:''}
+          <div style="font-size:12px;color:${n.color||'var(--accent)'};font-weight:700;letter-spacing:1px;margin-bottom:10px">${esc(n.subject)}</div>
+          <div style="font-family:'Instrument Serif',serif;font-size:20px;font-weight:700;color:#ecf2ff;margin-bottom:12px;font-style:italic">${esc(n.title)}</div>
+          ${(n.tags||[]).length?`<div style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-bottom:10px">${(n.tags||[]).slice(0,3).map(t=>`<span class="chip" style="background:${n.color||'var(--accent)'}18;color:${n.color||'var(--accent)'}">#${esc(t)}</span>`).join('')}</div>`:''}
+          ${(()=>{ if(!srInfo.ease)return '<div style="font-size:11px;color:var(--dim)">Hali korilmagan</div>'; const el=srInfo.ease==='easy'?'😊 Oson':srInfo.ease==='medium'?'Oʼrta':'😓 Qiyin'; return '<div style="font-size:11px;color:var(--dim)">Oxirgi: '+el+' · '+(srInfo.reviewCount||0)+' marta</div>'; })()}
+          <div style="font-size:12px;color:var(--dim);margin-top:12px">👆 Bosib javobni koring</div>
+        </div>
+        <div class="flip-back">
+          <div style="font-size:11px;color:${n.color||'var(--accent)'};font-weight:700;letter-spacing:1px;margin-bottom:12px;text-transform:uppercase">Javob</div>
+          <div id="flash-ans" style="font-size:13px;color:#a0b4cc;line-height:1.8;text-align:left;max-width:100%;overflow-y:auto;max-height:150px" class="rich-editor" contenteditable="false"></div>
+        </div>
+      </div>
     </div>
-    <div style="display:flex;justify-content:center;gap:4px;margin-top:12px;flex-wrap:wrap">
-      ${deck.slice(0,24).map((_,i)=>`<div onclick="fi=${i};ff=false;rFlash()" style="width:7px;height:7px;border-radius:50%;background:${i===idx?'var(--accent)':'var(--dim)'};cursor:pointer;transition:.15s"></div>`).join('')}
+    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:14px">
+      <button class="ghost btn-sm" onclick="event.stopPropagation();ff=false;fi=(fi-1+${deck.length})%${deck.length};rFlash()">← Oldingi</button>
+      <button class="ghost btn-sm" onclick="event.stopPropagation();ff=false;fi=Math.floor(Math.random()*${deck.length});rFlash()">🔀</button>
+      <button class="btn btn-p btn-sm" onclick="event.stopPropagation();ff=false;fi=(fi+1)%${deck.length};rFlash()">Keyingi →</button>
     </div>
-    <div style="margin-top:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600;letter-spacing:.5px">PROGRESS BELGILASH</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        ${PS.map(s=>`<button class="btn btn-xs" style="background:${(n.progress||'new')===s?stateClrs[s]+'33':'var(--border)'};color:${(n.progress||'new')===s?stateClrs[s]:'var(--muted)'};border:1px solid ${(n.progress||'new')===s?stateClrs[s]+'44':'var(--border)'}" onclick="setP('${n.id}','${s}');rFlash()">${PI[s]} ${PL[s]}</button>`).join('')}
+    <div style="display:flex;justify-content:center;gap:4px;margin-bottom:14px;flex-wrap:wrap">
+      ${deck.slice(0,20).map((_,i)=>`<div onclick="fi=${i};ff=false;rFlash()" style="width:7px;height:7px;border-radius:50%;background:${i===idx?'var(--accent)':'var(--dim)'};cursor:pointer;transition:.15s"></div>`).join('')}
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:600;letter-spacing:.5px;text-align:center">QANCHALIK BILASIZ? — Javobni ko'rgandan keyin bosing</div>
+      <div style="display:flex;gap:8px">
+        <button class="sr-btn sr-hard" onclick="event.stopPropagation();srAnswer('${n.id}','hard');ff=false;fi=(fi+1)%${deck.length};rFlash()">
+          😓 Qiyin<span class="sr-days">Ertaga</span>
+        </button>
+        <button class="sr-btn sr-medium" onclick="event.stopPropagation();srAnswer('${n.id}','medium');ff=false;fi=(fi+1)%${deck.length};rFlash()">
+          😐 O'rta<span class="sr-days">3 kun</span>
+        </button>
+        <button class="sr-btn sr-easy" onclick="event.stopPropagation();srAnswer('${n.id}','easy');ff=false;fi=(fi+1)%${deck.length};rFlash()">
+          😊 Oson<span class="sr-days">7 kun</span>
+        </button>
       </div>
     </div>
   </div>`;
+  setTimeout(()=>{
+    const el=document.getElementById('flash-ans');
+    if(el){
+      const cnt=n.content||'';
+      if(cnt.trim().startsWith('<')||cnt.includes('<p')||cnt.includes('<h'))
+        el.innerHTML=cnt;
+      else
+        el.innerHTML=cnt.split('\n').slice(0,10).map(l=>l.trim()?`<p>${esc(l)}</p>`:'').join('');
+    }
+  },30);
 }
+
 
 // ── PROGRESS ──────────────────────────────────────────────────────
 function rProg(){
@@ -1473,6 +1568,14 @@ function renderDynFans(){
 
 function go(v,arg){
   if(view==='editor'&&v!=='editor'){stopAutosave();clearInterval(window._draftTimer);}
+  // Update SR badge
+  setTimeout(()=>{
+    const cnt=srDueCount();
+    ['sr-badge','sr-badge-m'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.style.display=cnt>0?'block':'none';
+    });
+  },100);
   view=v;
   ['home','comm','neuro','flash','prog','stats'].forEach(k=>{
     document.getElementById('nb-'+k)?.classList.toggle('on',k===v);
@@ -1526,196 +1629,187 @@ function rFan(fanName){
 
 
 // ══════════════════════════════════════════════════
-// 🌐 GITHUB GIST — JAMOAT KONSPEKTLARI
+// 🌐 JAMOAT KONSPEKTLARI — localStorage asosida
+// Instagram kabi: like, ko'rilganlar, izohlar
 // ══════════════════════════════════════════════════
-const GITHUB_TOKEN = 'ghp_1HSkEf3v0vyk03Jregw9kh4DQc45MQ2Huep7';
-const GITHUB_USERNAME = 'medsee';
-const GIST_DESCRIPTION = 'NeurоNotepad Jamoat Konspektlari';
-const GIST_FILENAME = 'neuronotepad_community.json';
-let _gistId = localStorage.getItem('nn4_gist_id') || null;
+
+// Jamoat ma'lumotlari localStorage da saqlanadi
+// Har bir foydalanuvchi o'z brauzerida ko'radi
+// "Ommaviy" qilingan konspektlar jamoat feedida ko'rinadi
+
+function getCommunity() {
+  try { return JSON.parse(localStorage.getItem('nn4_community') || '[]'); } catch { return []; }
+}
+function saveCommunity(data) {
+  localStorage.setItem('nn4_community', JSON.stringify(data));
+}
+function getMyLikes() {
+  try { return JSON.parse(localStorage.getItem('nn4_my_likes') || '{}'); } catch { return {}; }
+}
+function saveMyLikes(data) { localStorage.setItem('nn4_my_likes', JSON.stringify(data)); }
+function getComments(noteId) {
+  try { return JSON.parse(localStorage.getItem('nn4_cmts_' + noteId) || '[]'); } catch { return []; }
+}
+function saveComments(noteId, data) {
+  localStorage.setItem('nn4_cmts_' + noteId, JSON.stringify(data));
+}
+
 let _commFilter = 'all';
-let _commLikes = JSON.parse(localStorage.getItem('nn4_comm_likes') || '{}');
+let _openCommentId = null;
 
-// ── Gist ID ni topish yoki yaratish ──────────────
-async function getOrCreateGist() {
-  if (_gistId) return _gistId;
-  // Search existing gists
-  try {
-    const res = await fetch('https://api.github.com/gists?per_page=100', {
-      headers: { Authorization: `token ${GITHUB_TOKEN}`, Accept: 'application/vnd.github.v3+json' }
-    });
-    const gists = await res.json();
-    const found = Array.isArray(gists) && gists.find(g => g.description === GIST_DESCRIPTION && g.files[GIST_FILENAME]);
-    if (found) {
-      _gistId = found.id;
-      localStorage.setItem('nn4_gist_id', _gistId);
-      return _gistId;
-    }
-  } catch(e) {}
-  // Create new gist
-  try {
-    const res = await fetch('https://api.github.com/gists', {
-      method: 'POST',
-      headers: { Authorization: `token ${GITHUB_TOKEN}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        description: GIST_DESCRIPTION,
-        public: true,
-        files: { [GIST_FILENAME]: { content: JSON.stringify({ notes: [], updated: Date.now() }) } }
-      })
-    });
-    const g = await res.json();
-    if (g.id) {
-      _gistId = g.id;
-      localStorage.setItem('nn4_gist_id', _gistId);
-      return _gistId;
-    }
-  } catch(e) {}
-  return null;
-}
-
-// ── Gist'dan ma'lumot olish ──────────────────────
-async function fetchCommunityNotes() {
-  const id = await getOrCreateGist();
-  if (!id) return [];
-  try {
-    const res = await fetch(`https://api.github.com/gists/${id}`, {
-      headers: { Authorization: `token ${GITHUB_TOKEN}`, Accept: 'application/vnd.github.v3+json', 'Cache-Control': 'no-cache' }
-    });
-    const g = await res.json();
-    const raw = g.files?.[GIST_FILENAME]?.content;
-    if (!raw) return [];
-    const data = JSON.parse(raw);
-    return Array.isArray(data.notes) ? data.notes : [];
-  } catch(e) { return []; }
-}
-
-// ── Gist'ga yozish ───────────────────────────────
-async function saveCommunityNotes(notesList) {
-  const id = await getOrCreateGist();
-  if (!id) return false;
-  try {
-    const res = await fetch(`https://api.github.com/gists/${id}`, {
-      method: 'PATCH',
-      headers: { Authorization: `token ${GITHUB_TOKEN}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ files: { [GIST_FILENAME]: { content: JSON.stringify({ notes: notesList, updated: Date.now() }) } } })
-    });
-    return res.ok;
-  } catch(e) { return false; }
-}
-
-// ── Konspektni ommaviy qilish ────────────────────
-async function publishNote(noteId) {
-  const note = notes.find(n => n.id === noteId);
-  if (!note) return;
-
-  // Show publish modal
-  document.getElementById('pub-modal-overlay').style.display = 'flex';
+// ── Konspektni Jamoatga chiqarish ─────────────────
+function showPublishPicker() {
+  const myNotes = notes.filter(n => n.title && n.title.trim());
+  if (!myNotes.length) { toast("Avval sarlavhali konspekt yarating", 'warn'); return; }
+  
+  let overlay = document.getElementById('pub-modal-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'pub-modal-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+    overlay.innerHTML = '<div style="background:#0e1520;border:1px solid #253045;border-radius:18px;padding:22px;width:100%;max-width:420px;max-height:80vh;overflow-y:auto" id="pub-modal-content"></div>';
+    document.body.appendChild(overlay);
+  }
+  overlay.style.display = 'flex';
+  overlay.onclick = (e) => { if(e.target===overlay) overlay.style.display='none'; };
   document.getElementById('pub-modal-content').innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <div style="font-size:16px;font-weight:700;color:#ecf2ff">🌐 Jamoatga nashr qilish</div>
-      <button class="ibtn" onclick="document.getElementById('pub-modal-overlay').style.display='none'" style="font-size:13px;padding:4px 8px">✕</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-size:15px;font-weight:700;color:#ecf2ff">📤 Qaysi konspektni ulashish?</div>
+      <button class="ibtn" onclick="(document.getElementById('pub-modal-overlay')||{style:{}}).style.display='none'" style="font-size:13px;padding:4px 8px">✕</button>
+    </div>
+    <div style="max-height:55vh;overflow-y:auto">
+      ${myNotes.map(n => {
+        const div = document.createElement('div'); div.innerHTML = n.content||'';
+        const words = wc(div.innerText || div.textContent || '');
+        const alreadyPub = getCommunity().some(c => c.sourceId === n.id);
+        return `<div onclick="openPublishForm('${n.id}')"
+          style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid ${alreadyPub?'rgba(34,201,122,.3)':'var(--border)'};margin-bottom:7px;cursor:pointer;transition:.15s;background:${alreadyPub?'rgba(34,201,122,.05)':'transparent'}"
+          onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='${alreadyPub?'rgba(34,201,122,.3)':'var(--border)'}'">
+          <div style="width:10px;height:10px;border-radius:50%;background:${n.color||'#5b8dee'};flex-shrink:0"></div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600;color:#ecf2ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(n.title)}</div>
+            <div style="font-size:11px;color:var(--muted)">${esc(n.subject)} · ${words} so'z ${alreadyPub?'· <span style="color:var(--green)">✅ Nashr qilingan</span>':''}</div>
+          </div>
+          <span style="font-size:11px;color:var(--accent);flex-shrink:0">Ulashish →</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function openPublishForm(noteId) {
+  if (!noteId) { showPublishPicker(); return; }
+  const n = notes.find(x => x.id === noteId);
+  if (!n) { showPublishPicker(); return; }
+  
+  // Get or create modal
+  let overlay = document.getElementById('pub-modal-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'pub-modal-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+    overlay.innerHTML = '<div style="background:#0e1520;border:1px solid #253045;border-radius:18px;padding:22px;width:100%;max-width:420px;max-height:80vh;overflow-y:auto" id="pub-modal-content"></div>';
+    document.body.appendChild(overlay);
+  }
+  overlay.style.display = 'flex';
+  overlay.onclick = (e) => { if(e.target===overlay) overlay.style.display='none'; };
+  document.getElementById('pub-modal-content').innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+      <button class="ibtn" onclick="showPublishPicker()" style="font-size:13px;padding:4px 8px">←</button>
+      <div style="font-size:15px;font-weight:700;color:#ecf2ff">🌐 Jamoatga nashr qilish</div>
+      <button class="ibtn" onclick="(document.getElementById('pub-modal-overlay')||{style:{}}).style.display='none'" style="font-size:13px;padding:4px 8px;margin-left:auto">✕</button>
     </div>
     <div style="background:rgba(91,141,238,.08);border:1px solid rgba(91,141,238,.2);border-radius:10px;padding:12px;margin-bottom:14px">
-      <div style="font-size:13px;font-weight:600;color:#ecf2ff;margin-bottom:3px">${esc(note.title)||'Nomsiz'}</div>
-      <div style="font-size:12px;color:var(--muted)">${esc(note.subject)} · ${wc(note.content)} so'z</div>
+      <div style="font-size:13px;font-weight:600;color:#ecf2ff;margin-bottom:2px">${esc(n.title)}</div>
+      <div style="font-size:12px;color:var(--muted)">${esc(n.subject)}</div>
     </div>
     <div class="form-group" style="margin-bottom:12px">
-      <span class="lbl">Muallif ismi (ko'rinadigan)</span>
-      <input class="inp" id="pub-author" placeholder="Ismi Sharif" value="${esc(currentProfile?.name||'')}"/>
+      <span class="lbl">Muallif ismi</span>
+      <input class="inp" id="pub-author" placeholder="Ismi Familiya" value="${esc(currentProfile?.name || '')}"/>
     </div>
-    <div class="form-group" style="margin-bottom:12px">
+    <div class="form-group" style="margin-bottom:14px">
       <span class="lbl">Universitet / Kurs (ixtiyoriy)</span>
       <input class="inp" id="pub-uni" placeholder="ToshTibTibbiyot · 3-kurs"/>
     </div>
     <div style="background:rgba(240,165,0,.08);border:1px solid rgba(240,165,0,.2);border-radius:8px;padding:10px;margin-bottom:14px;font-size:12px;color:var(--amber)">
-      ⚠️ Nashr qilingan konspekt GitHub Gist'da ommaviy saqlanadi. Hamma ko'ra oladi.
+      ⚠️ Nashr qilingan konspekt bu qurilmaning brauzerida ko'rinadi. Export/Import orqali boshqalarga ulashish mumkin.
     </div>
+    <div id="pub-prog" style="font-size:12px;min-height:16px;margin-bottom:8px;text-align:center;color:var(--green)"></div>
     <div style="display:flex;gap:8px">
-      <button class="ghost" style="flex:1" onclick="document.getElementById('pub-modal-overlay').style.display='none'">Bekor</button>
+      <button class="ghost" style="flex:1" onclick="(document.getElementById('pub-modal-overlay')||{style:{}}).style.display='none'">Bekor</button>
       <button class="btn btn-p" style="flex:1;justify-content:center" onclick="confirmPublish('${noteId}')">🚀 Nashr qilish</button>
     </div>`;
 }
 
-async function confirmPublish(noteId) {
-  const note = notes.find(n => n.id === noteId);
-  if (!note) return;
+function confirmPublish(noteId) {
+  const n = notes.find(x => x.id === noteId);
+  if (!n) return;
   const author = document.getElementById('pub-author')?.value?.trim() || 'Anonim';
   const uni = document.getElementById('pub-uni')?.value?.trim() || '';
-  const btn = document.querySelector('#pub-modal-content .btn-p');
-  if (btn) { btn.textContent = '⏳ Yuklanmoqda...'; btn.disabled = true; }
+  const prog = document.getElementById('pub-prog');
+  if (prog) prog.textContent = '⏳ Nashr qilinmoqda...';
 
-  // Prepare note for community (strip large images to save space)
+  const div = document.createElement('div'); div.innerHTML = n.content||'';
+  const plainText = div.innerText || div.textContent || '';
+
   const pubNote = {
-    id: 'pub_' + note.id + '_' + Date.now(),
-    title: note.title || 'Nomsiz',
-    content: note.content || '',
-    subject: note.subject,
-    color: note.color || '#5b8dee',
-    tags: note.tags || [],
+    id: 'pub_' + uid(),
+    sourceId: n.id,
+    title: n.title || 'Nomsiz',
+    content: n.content || '',
+    plainText: plainText.slice(0, 500),
+    subject: n.subject || 'Nevrologiya',
+    color: n.color || '#5b8dee',
+    tags: n.tags || [],
+    images: (n.images || []).slice(0, 3),
     author,
     uni,
     avatar: author.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2),
     likes: 0,
-    publishedAt: Date.now(),
-    images: (note.images || []).slice(0, 2).map(img => ({ url: img.url?.slice(0,500)||'', name: img.name||'' }))
+    views: 0,
+    commentsCount: 0,
+    publishedAt: Date.now()
   };
 
-  const existing = await fetchCommunityNotes();
-  const updated = [pubNote, ...existing].slice(0, 200); // max 200 ta
-  const ok = await saveCommunityNotes(updated);
+  const existing = getCommunity();
+  // Remove old version if re-publishing
+  const filtered = existing.filter(x => x.sourceId !== noteId);
+  saveCommunity([pubNote, ...filtered].slice(0, 300));
 
-  document.getElementById('pub-modal-overlay').style.display = 'none';
-  if (ok) {
+  // Mark note as published
+  const ni = notes.findIndex(x => x.id === noteId);
+  if (ni >= 0) { notes[ni].isPublished = true; save(); }
+
+  if (prog) prog.textContent = '✅ Nashr qilindi!';
+  setTimeout(() => {
+    document.getElementById('pub-modal-overlay').style.display = 'none';
     toast('Jamoatga nashr qilindi 🚀');
-    // Mark note as published
-    note.isPublished = true;
-    const i = notes.findIndex(x => x.id === noteId);
-    if (i >= 0) notes[i] = note;
-    save();
-  } else {
-    toast('Xato yuz berdi. Internet borligini tekshiring', 'err');
-  }
+    if (view === 'comm') rComm();
+  }, 700);
 }
 
-// ── Like bosish (localStorage) ───────────────────
-function toggleCommLike(noteId, btn) {
-  if (_commLikes[noteId]) {
-    delete _commLikes[noteId];
-    if (btn) { btn.classList.remove('liked'); btn.innerHTML = `🤍 ${parseInt(btn.dataset.count||0)}`; }
-  } else {
-    _commLikes[noteId] = true;
-    if (btn) { btn.classList.add('liked'); btn.innerHTML = `❤️ ${parseInt(btn.dataset.count||0)+1}`; }
-    toast('Like bosildi ❤️');
-  }
-  localStorage.setItem('nn4_comm_likes', JSON.stringify(_commLikes));
-}
-
-// ── Community sahifasi ───────────────────────────
-async function rComm() {
+// ── Community sahifasi ─────────────────────────────
+function rComm() {
+  const comm = getCommunity();
   document.getElementById('main').innerHTML = `
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
     <div>
       <div style="font-family:'Instrument Serif',serif;font-size:24px;font-style:italic;color:#ecf2ff">🌐 Jamoat konspektlari</div>
-      <div style="font-size:13px;color:var(--muted);margin-top:2px">Barcha foydalanuvchilar ulashgan konspektlar</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:2px">${comm.length} ta konspekt ulashilgan</div>
     </div>
-    <button class="btn btn-s btn-sm" onclick="showPublishPicker()">📤 O'z konspektimni ulashish</button>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="ghost btn-sm" onclick="editProfileName()" style="font-size:12px">✍️ ${getProfileName()}</button>
+      <button class="btn btn-p btn-sm" onclick="showPublishPicker()">📤 Ulashish</button>
+    </div>
   </div>
   <div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:16px;padding-bottom:2px" id="comm-filters">
-    <div class="fchip on" onclick="setCommFilter('all',this)">✨ Hammasi</div>
-    <div class="fchip" onclick="setCommFilter('new',this)">🆕 Yangi</div>
-    <div class="fchip" onclick="setCommFilter('hot',this)">🔥 Mashhur</div>
-    ${['Nevrologiya','Anatomiya','Fiziologiya','Biokimyo','Farmakologiya'].map(s=>`<div class="fchip" onclick="setCommFilter('${s}',this)">${s}</div>`).join('')}
+    <div class="fchip ${_commFilter==='all'?'on':''}" onclick="setCommFilter('all',this)">✨ Hammasi</div>
+    <div class="fchip ${_commFilter==='hot'?'on':''}" onclick="setCommFilter('hot',this)">🔥 Mashhur</div>
+    <div class="fchip ${_commFilter==='new'?'on':''}" onclick="setCommFilter('new',this)">🆕 Yangi</div>
+    ${['Nevrologiya','Anatomiya','Fiziologiya','Biokimyo','Farmakologiya','Patologiya'].map(s =>
+      `<div class="fchip ${_commFilter===s?'on':''}" onclick="setCommFilter('${s}',this)">${s}</div>`
+    ).join('')}
   </div>
-  <div id="comm-list">
-    ${[1,2,3].map(()=>`<div class="sk-card"><div class="skeleton" style="height:14px;width:50%;margin-bottom:8px"></div><div class="skeleton" style="height:12px;width:100%;margin-bottom:5px"></div><div class="skeleton" style="height:12px;width:70%"></div></div>`).join('')}
-  </div>`;
-  await loadCommNotes();
-}
-
-let _allCommNotes = [];
-
-async function loadCommNotes() {
-  _allCommNotes = await fetchCommunityNotes();
+  <div id="comm-list"></div>`;
   renderCommList();
 }
 
@@ -1727,18 +1821,18 @@ function setCommFilter(val, el) {
 }
 
 function renderCommList() {
-  let list = [..._allCommNotes];
-  if (_commFilter === 'new') list = list.sort((a,b) => b.publishedAt - a.publishedAt);
-  else if (_commFilter === 'hot') list = list.sort((a,b) => (b.likes||0) - (a.likes||0));
+  let list = getCommunity();
+  if (_commFilter === 'hot') list = [...list].sort((a,b) => (b.likes||0)-(a.likes||0));
+  else if (_commFilter === 'new') list = [...list].sort((a,b) => b.publishedAt-a.publishedAt);
   else if (_commFilter !== 'all') list = list.filter(n => n.subject === _commFilter);
 
   const el = document.getElementById('comm-list');
   if (!el) return;
   if (!list.length) {
     el.innerHTML = `<div style="text-align:center;padding:60px 16px">
-      <div style="font-size:48px;margin-bottom:12px">📭</div>
-      <div style="font-size:16px;font-weight:700;color:#4a6080;margin-bottom:8px">Hali konspekt yo'q</div>
-      <div style="font-size:13px;color:var(--dim);margin-bottom:16px">Birinchi bo'lib o'z konspektingizni ulashing!</div>
+      <div style="font-size:52px;margin-bottom:14px">📭</div>
+      <div style="font-size:18px;font-weight:700;color:#4a6080;margin-bottom:8px">Hali konspekt yo'q</div>
+      <div style="font-size:13px;color:var(--dim);margin-bottom:18px">Birinchi bo'lib o'z konspektingizni ulashing!</div>
       <button class="btn btn-p" onclick="showPublishPicker()">📤 Konspekt ulashish</button>
     </div>`;
     return;
@@ -1747,108 +1841,603 @@ function renderCommList() {
 }
 
 function commCardHTML(n) {
-  const liked = !!_commLikes[n.id];
-  const likeCount = (n.likes||0) + (liked ? 1 : 0);
-  const fd2 = (ts) => { if(!ts)return''; const d=new Date(ts); const diff=Math.floor((Date.now()-d)/1000); if(diff<60)return'Hozirgina'; if(diff<3600)return Math.floor(diff/60)+' daqiqa oldin'; if(diff<86400)return Math.floor(diff/3600)+' soat oldin'; return Math.floor(diff/86400)+' kun oldin'; };
-  // strip HTML for preview
-  const div = document.createElement('div');
-  div.innerHTML = n.content || '';
-  const plainText = div.innerText || div.textContent || '';
+  const myLikes = getMyLikes();
+  const liked = !!myLikes[n.id];
+  const likes = (n.likes||0);
+  const cmts = getComments(n.id).length;
+  const timeAgo = (ts) => {
+    const d = Math.floor((Date.now()-ts)/1000);
+    if(d<60)return 'Hozirgina';
+    if(d<3600)return Math.floor(d/60)+' daqiqa oldin';
+    if(d<86400)return Math.floor(d/3600)+' soat oldin';
+    if(d<604800)return Math.floor(d/86400)+' kun oldin';
+    return new Date(ts).toLocaleDateString('uz-UZ',{day:'2-digit',month:'short'});
+  };
 
-  return `<div class="comm-card">
+  return `<div class="comm-card" id="cc-${n.id}">
     <div class="comm-header">
-      <div class="comm-avatar">${esc(n.avatar||'?')}</div>
+      <div class="comm-avatar" style="background:linear-gradient(135deg,${n.color||'#5b8dee'},${n.color||'#7c5cbf'})">${esc(n.avatar||'?')}</div>
       <div class="comm-user">
         <div class="comm-username">${esc(n.author||'Anonim')}</div>
-        <div class="comm-meta">${esc(n.uni||'')}${n.uni?' · ':''}${fd2(n.publishedAt)}</div>
+        <div class="comm-meta">${n.uni?esc(n.uni)+' · ':''}${timeAgo(n.publishedAt)}</div>
       </div>
       <span style="background:${n.color||'#5b8dee'}18;color:${n.color||'#5b8dee'};border-radius:20px;padding:2px 9px;font-size:11px;font-weight:600">${esc(n.subject||'')}</span>
     </div>
-    <div class="comm-body">
-      <div class="comm-title" onclick="showCommDetail('${n.id}')">${esc(n.title)}</div>
-      <div class="comm-content">${esc(plainText)}</div>
+    <div class="comm-body" onclick="openCommDetail('${n.id}')" style="cursor:pointer">
+      <div class="comm-title">${esc(n.title)}</div>
+      <div class="comm-content">${esc(n.plainText||'')}</div>
+      ${(n.images||[]).length?`<div style="display:grid;grid-template-columns:${n.images.length===1?'1fr':n.images.length===2?'1fr 1fr':'1fr 1fr'};gap:3px;margin-top:8px;border-radius:8px;overflow:hidden">
+        ${n.images.slice(0,2).map(img=>`<img src="${esc(img.url||img)}" style="width:100%;height:${n.images.length===1?'220':'140'}px;object-fit:cover;display:block" loading="lazy" onerror="this.style.display='none'"/>`).join('')}
+      </div>`:''}
     </div>
-    ${(n.tags||[]).length ? `<div style="padding:0 14px 8px;display:flex;gap:5px;flex-wrap:wrap">${(n.tags||[]).slice(0,4).map(t=>`<span class="comm-tag">#${esc(t)}</span>`).join('')}</div>` : ''}
+    ${(n.tags||[]).length?`<div style="padding:6px 14px;display:flex;gap:5px;flex-wrap:wrap">
+      ${(n.tags||[]).slice(0,5).map(t=>`<span class="comm-tag">#${esc(t)}</span>`).join('')}
+    </div>`:''}
     <div class="comm-footer">
-      <button class="comm-likes ${liked?'liked':''}" data-count="${n.likes||0}"
-        id="cl-${n.id}"
-        onclick="toggleCommLike('${n.id}',this)">
-        ${liked?'❤️':'🤍'} ${likeCount}
+      <button class="comm-likes ${liked?'liked':''}" id="cl-${n.id}" onclick="toggleCommLike('${n.id}')">
+        ${liked?'❤️':'🤍'} ${liked?likes+1:likes}
       </button>
-      <button class="comm-likes" onclick="showCommDetail('${n.id}')">💬 O'qish</button>
+      <button class="comm-likes" onclick="openCommDetail('${n.id}','comments')">
+        💬 ${cmts} izoh
+      </button>
+      <button class="comm-likes" onclick="openCommDetail('${n.id}')">
+        👁 ${n.views||0}
+      </button>
       <div style="flex:1"></div>
-      <button class="comm-likes" onclick="copyCommLink('${n.id}')">↗ Ulashish</button>
+      <button class="comm-likes" onclick="shareComm('${n.id}')">↗ Ulashish</button>
+      <button class="comm-likes" style="color:var(--red)" onclick="deleteCommNote('${n.id}')">🗑</button>
     </div>
   </div>`;
 }
 
-function showCommDetail(noteId) {
-  const n = _allCommNotes.find(x => x.id === noteId);
+// ── Like ───────────────────────────────────────────
+function toggleCommLike(noteId) {
+  const myLikes = getMyLikes();
+  const comm = getCommunity();
+  const ni = comm.findIndex(x => x.id === noteId);
+  if (ni < 0) return;
+  const liked = !!myLikes[noteId];
+  if (liked) {
+    delete myLikes[noteId];
+    comm[ni].likes = Math.max((comm[ni].likes||0)-1, 0);
+  } else {
+    myLikes[noteId] = true;
+    comm[ni].likes = (comm[ni].likes||0)+1;
+  }
+  saveMyLikes(myLikes);
+  saveCommunity(comm);
+  // Update button
+  const btn = document.getElementById(`cl-${noteId}`);
+  if (btn) {
+    btn.classList.toggle('liked', !liked);
+    btn.innerHTML = (!liked?'❤️':'🤍') + ' ' + comm[ni].likes;
+  }
+  if (!liked) toast('❤️ Like bosildi');
+}
+
+// ── Ko'rishlar soni ────────────────────────────────
+function incViews(noteId) {
+  const comm = getCommunity();
+  const ni = comm.findIndex(x => x.id === noteId);
+  if (ni < 0) return;
+  comm[ni].views = (comm[ni].views||0)+1;
+  saveCommunity(comm);
+}
+
+// ── Detail + Izohlar ───────────────────────────────
+function openCommDetail(noteId, tab='read') {
+  incViews(noteId);
+  const n = getCommunity().find(x => x.id === noteId);
   if (!n) return;
-  const overlay = document.getElementById('pub-modal-overlay');
-  const content = document.getElementById('pub-modal-content');
-  overlay.style.display = 'flex';
-  const div = document.createElement('div'); div.innerHTML = n.content||''; const plain = div.innerText||'';
-  content.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+  const myLikes = getMyLikes();
+  const liked = !!myLikes[n.id];
+  const comments = getComments(noteId);
+  const timeAgo = (ts) => {
+    const d = Math.floor((Date.now()-ts)/1000);
+    if(d<60)return 'Hozirgina';
+    if(d<3600)return Math.floor(d/60)+' daqiqa oldin';
+    if(d<86400)return Math.floor(d/3600)+' soat oldin';
+    return Math.floor(d/86400)+' kun oldin';
+  };
+
+  document.getElementById('pub-modal-overlay').style.display = 'flex';
+  document.getElementById('pub-modal-content').style.maxWidth = '560px';
+  document.getElementById('pub-modal-content').innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+      <button class="ibtn" onclick="(document.getElementById('pub-modal-overlay')||{style:{}}).style.display='none';document.getElementById('pub-modal-content').style.maxWidth='';rComm()" style="font-size:13px;padding:4px 8px">←</button>
       <span style="background:${n.color||'#5b8dee'}18;color:${n.color||'#5b8dee'};border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600">${esc(n.subject)}</span>
-      <button class="ibtn" onclick="document.getElementById('pub-modal-overlay').style.display='none'" style="font-size:13px;padding:4px 8px">✕</button>
+      <div style="flex:1"></div>
+      <button class="ibtn" onclick="(document.getElementById('pub-modal-overlay')||{style:{}}).style.display='none';document.getElementById('pub-modal-content').style.maxWidth=''" style="font-size:13px;padding:4px 8px">✕</button>
     </div>
-    <div style="font-family:'Instrument Serif',serif;font-size:20px;font-style:italic;color:#ecf2ff;margin-bottom:8px">${esc(n.title)}</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">✍️ ${esc(n.author||'Anonim')} ${n.uni?'· '+esc(n.uni):''}</div>
-    <div class="rich-editor" style="pointer-events:none;max-height:50vh;overflow-y:auto;border:1px solid var(--border);border-radius:var(--rs);padding:14px;font-size:13px" id="comm-detail-body"></div>
-    ${(n.tags||[]).length?`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:10px">${(n.tags||[]).map(t=>`<span class="comm-tag">#${esc(t)}</span>`).join('')}</div>`:''}
-    <div style="display:flex;gap:8px;margin-top:14px">
-      <button class="ghost" style="flex:1" onclick="document.getElementById('pub-modal-overlay').style.display='none'">Yopish</button>
-      <button class="btn btn-s" style="flex:1;justify-content:center" onclick="saveCommNote('${n.id}')">💾 O'zimga saqlash</button>
+
+    <!-- Author -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,${n.color||'#5b8dee'},${n.color||'#7c5cbf'});display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0">${esc(n.avatar||'?')}</div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#ecf2ff">${esc(n.author||'Anonim')}</div>
+        <div style="font-size:11px;color:var(--muted)">${n.uni?esc(n.uni)+' · ':''}${timeAgo(n.publishedAt)} · 👁 ${n.views||0}</div>
+      </div>
+    </div>
+
+    <!-- Title -->
+    <div style="font-family:'Instrument Serif',serif;font-size:22px;font-style:italic;color:#ecf2ff;margin-bottom:8px">${esc(n.title)}</div>
+    ${(n.tags||[]).length?`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">${(n.tags||[]).map(t=>`<span class="comm-tag">#${esc(t)}</span>`).join('')}</div>`:''}
+
+    <!-- Tab -->
+    <div style="display:flex;gap:0;background:var(--surface);border-radius:10px;padding:3px;margin-bottom:14px">
+      <button id="tab-read" class="auth-tab ${tab==='read'?'on':''}" onclick="switchCommTab('read','${n.id}')">📖 Konspekt</button>
+      <button id="tab-comments" class="auth-tab ${tab==='comments'?'on':''}" onclick="switchCommTab('comments','${n.id}')">💬 Izohlar (${comments.length})</button>
+    </div>
+
+    <!-- Content -->
+    <div id="comm-tab-content" style="max-height:45vh;overflow-y:auto"></div>
+
+    <!-- Actions -->
+    <div style="display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+      <button class="comm-likes ${liked?'liked':''}" id="det-like-${n.id}" onclick="toggleCommLike('${n.id}');this.classList.toggle('liked');const c=getCommunity().find(x=>x.id==='${n.id}');this.innerHTML=(getMyLikes()['${n.id}']?'❤️':'🤍')+' '+(c?c.likes:0)" style="font-size:14px;padding:8px 14px;border:1px solid var(--border);border-radius:10px">
+        ${liked?'❤️':'🤍'} ${liked?n.likes+1:n.likes}
+      </button>
+      <button class="comm-likes" onclick="saveCommToMine('${n.id}')" style="font-size:13px;padding:8px 14px;border:1px solid var(--border);border-radius:10px">💾 Saqlash</button>
+      <button class="comm-likes" onclick="shareComm('${n.id}')" style="font-size:13px;padding:8px 14px;border:1px solid var(--border);border-radius:10px">↗ Ulashish</button>
     </div>`;
-  // Render rich content
-  const body = document.getElementById('comm-detail-body');
-  if (body) {
-    if ((n.content||'').trim().startsWith('<')) body.innerHTML = n.content;
-    else body.innerHTML = (n.content||'').split('\n').map(l=>l.trim()?`<p>${l}</p>`:'<p><br></p>').join('');
+
+  renderCommTab(tab, n, comments);
+}
+
+function switchCommTab(tab, noteId) {
+  document.getElementById('tab-read')?.classList.toggle('on', tab==='read');
+  document.getElementById('tab-comments')?.classList.toggle('on', tab==='comments');
+  const n = getCommunity().find(x=>x.id===noteId);
+  if (!n) return;
+  renderCommTab(tab, n, getComments(noteId));
+}
+
+function renderCommTab(tab, n, comments) {
+  const el = document.getElementById('comm-tab-content');
+  if (!el) return;
+  if (tab === 'read') {
+    el.innerHTML = `<div class="rich-editor" id="comm-det-body" contenteditable="false" style="pointer-events:none;font-size:14px;line-height:1.85"></div>
+    ${(n.images||[]).length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:12px">
+      ${(n.images||[]).map(img=>`<img src="${esc(img.url||img)}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;cursor:zoom-in" onclick="showLB('${esc(img.url||img)}')" loading="lazy" onerror="this.style.display='none'"/>`).join('')}
+    </div>`:''}`;
+    setTimeout(() => {
+      const body = document.getElementById('comm-det-body');
+      if (!body) return;
+      const cnt = n.content||'';
+      if (cnt.trim().startsWith('<')||cnt.includes('<p')||cnt.includes('<h')) body.innerHTML=cnt;
+      else body.innerHTML = cnt.split('\n').map(l=>l.trim()?`<p>${esc(l)}</p>`:'').join('');
+    }, 30);
+  } else {
+    // Comments tab
+    const timeAgo = (ts) => {const d=Math.floor((Date.now()-ts)/1000);if(d<60)return 'Hozirgina';if(d<3600)return Math.floor(d/60)+' daqiqa oldin';return Math.floor(d/86400)+' kun oldin';};
+    el.innerHTML = `
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <input class="inp" id="cmt-inp-${n.id}" placeholder="Izoh yozing..." onkeydown="if(event.key==='Enter')addComment('${n.id}')"/>
+        <button class="btn btn-p btn-sm" onclick="addComment('${n.id}')">Yuborish</button>
+      </div>
+      <div id="cmts-${n.id}">
+        ${comments.length ? comments.map(c=>`
+          <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#5b8dee,#7c5cbf);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">${esc((c.author||'?')[0].toUpperCase())}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;font-weight:600;color:#ecf2ff;margin-bottom:2px">${esc(c.author||'Anonim')} <span style="color:var(--dim);font-weight:400">· ${timeAgo(c.ts)}</span></div>
+              <div style="font-size:13px;color:#d0dff5;line-height:1.6">${esc(c.text)}</div>
+            </div>
+          </div>`).join('')
+        : '<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Hali izoh yo\'q. Birinchi bo\'ling!</div>'}
+      </div>`;
+    setTimeout(()=>document.getElementById(`cmt-inp-${n.id}`)?.focus(),50);
   }
 }
 
-function saveCommNote(noteId) {
-  const cn = _allCommNotes.find(x => x.id === noteId);
-  if (!cn) return;
+function addComment(noteId) {
+  const inp = document.getElementById(`cmt-inp-${noteId}`);
+  const text = inp?.value?.trim();
+  if (!text) return;
+  const author = currentProfile?.name || 'Anonim';
+  const comment = { id: uid(), author, text, ts: Date.now() };
+  const cmts = [...getComments(noteId), comment];
+  saveComments(noteId, cmts);
+
+  // Update commentsCount
+  const comm = getCommunity();
+  const ni = comm.findIndex(x=>x.id===noteId);
+  if (ni>=0) { comm[ni].commentsCount = cmts.length; saveCommunity(comm); }
+
+  inp.value = '';
+  // Re-render comments
+  const timeAgo = (ts) => {const d=Math.floor((Date.now()-ts)/1000);if(d<60)return 'Hozirgina';return Math.floor(d/60)+' daqiqa oldin';};
+  const wrap = document.getElementById(`cmts-${noteId}`);
+  if (wrap) {
+    const newHtml = `<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#5b8dee,#7c5cbf);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">${esc(author[0]?.toUpperCase()||'?')}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:600;color:#ecf2ff;margin-bottom:2px">${esc(author)} <span style="color:var(--dim);font-weight:400">· Hozirgina</span></div>
+        <div style="font-size:13px;color:#d0dff5;line-height:1.6">${esc(text)}</div>
+      </div>
+    </div>`;
+    const noComments = wrap.querySelector('div[style*="text-align:center"]');
+    if (noComments) wrap.innerHTML = '';
+    wrap.innerHTML += newHtml;
+  }
+  // Update comment button in card
+  const cBtn = document.querySelector(`#cc-${noteId} .comm-likes:nth-child(2)`);
+  if (cBtn) cBtn.innerHTML = `💬 ${cmts.length} izoh`;
+  toast('Izoh qoshildi 💬');
+}
+
+function saveCommToMine(noteId) {
+  const n = getCommunity().find(x=>x.id===noteId);
+  if (!n) return;
   const newNote = {
-    id: uid(), title: cn.title + ' (jamoat)',
-    content: cn.content||'', subject: cn.subject||'Nevrologiya',
-    color: cn.color||'#5b8dee', tags: cn.tags||[],
-    images: [], pinned: false, starred: false,
-    progress: 'new', createdAt: Date.now(), updatedAt: Date.now()
+    id: uid(), title: n.title + ' (jamoat)',
+    content: n.content||'', subject: n.subject||'Nevrologiya',
+    color: n.color||'#5b8dee', tags: n.tags||[], images: n.images||[],
+    pinned: false, starred: false, progress: 'new',
+    createdAt: Date.now(), updatedAt: Date.now()
   };
   notes.unshift(newNote); save();
   document.getElementById('pub-modal-overlay').style.display = 'none';
+  document.getElementById('pub-modal-content').style.maxWidth = '';
   toast("Konspekt o'zingizga saqlandi 💾");
 }
 
-function copyCommLink(noteId) {
-  const txt = `NeurоNotepad: ${_allCommNotes.find(x=>x.id===noteId)?.title||'Konspekt'}\nhttps://gist.github.com/${GITHUB_USERNAME}/${_gistId}`;
-  navigator.clipboard?.writeText(txt).then(()=>toast('Havola nusxalandi ↗')).catch(()=>toast('Nusxalab oling: gist.github.com/'+GITHUB_USERNAME+'/'+(_gistId||'')));
+function deleteCommNote(noteId) {
+  if (!confirm("Jamoatdan o'chirasizmi?")) return;
+  const comm = getCommunity().filter(x => x.id !== noteId);
+  saveCommunity(comm);
+  // Remove card from DOM
+  const card = document.getElementById('cc-' + noteId);
+  if (card) card.remove();
+  // Update count
+  try {
+    const countEl = document.querySelector('#main > div > div > div > div:last-child');
+    if (countEl) countEl.textContent = comm.length + ' ta konspekt ulashilgan';
+  } catch(e) {}
+  toast("O'chirildi", 'err');
+  // If comm page is empty now, refresh
+  const list = document.getElementById('comm-list');
+  if (list && !list.children.length) renderCommList();
 }
 
-function showPublishPicker() {
-  if (!notes.length) { toast("Avval konspekt yarating",'warn'); return; }
-  document.getElementById('pub-modal-overlay').style.display = 'flex';
-  document.getElementById('pub-modal-content').innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-      <div style="font-size:15px;font-weight:700;color:#ecf2ff">📤 Qaysi konspektni ulashish?</div>
-      <button class="ibtn" onclick="document.getElementById('pub-modal-overlay').style.display='none'" style="font-size:13px;padding:4px 8px">✕</button>
-    </div>
-    <div style="max-height:55vh;overflow-y:auto">
-      ${notes.map(n=>`<div onclick="publishNote('${n.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);margin-bottom:7px;cursor:pointer;transition:.15s" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border)'">
-        <div style="width:10px;height:10px;border-radius:50%;background:${n.color||'#5b8dee'};flex-shrink:0"></div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600;color:#ecf2ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(n.title)||'Nomsiz'}</div>
-          <div style="font-size:11px;color:var(--muted)">${esc(n.subject)} · ${wc(n.content)} so'z${n.isPublished?' · ✅ Nashr qilingan':''}</div>
-        </div>
-        <span style="font-size:11px;color:var(--accent)">Ulashish →</span>
-      </div>`).join('')}
-    </div>`;
+function shareComm(noteId) {
+  const n = getCommunity().find(x=>x.id===noteId);
+  if (!n) return;
+  const text = `NeurоNotepad: ${n.title}\nMuallif: ${n.author||'Anonim'}\nFan: ${n.subject}`;
+  navigator.clipboard?.writeText(text).then(()=>toast('Nusxalandi ↗')).catch(()=>{});
 }
+
+// Profile nomi olish uchun yengilroq funksiya
+let currentProfile = JSON.parse(localStorage.getItem('nn4_profile') || 'null');
+function getProfileName() { return currentProfile?.name || 'Anonim'; }
+
+function editProfileName() {
+  const name = prompt("Ismingizni kiriting (izoh va nashrda ko'rinadi):", getProfileName());
+  if (name && name.trim()) {
+    currentProfile = { ...(currentProfile||{}), name: name.trim() };
+    localStorage.setItem('nn4_profile', JSON.stringify(currentProfile));
+    toast('Profil saqlandi: ' + name.trim() + ' ✓');
+    if (view === 'comm') rComm();
+  }
+}
+
+// ══════════════════════════════════════════════════
+// 🃏 SPACED REPETITION ENGINE
+// ══════════════════════════════════════════════════
+let srData = JSON.parse(localStorage.getItem('nn4_sr') || '{}');
+
+const SR_INTERVALS = { easy: 7, medium: 3, hard: 1 }; // kunlar
+
+function srAnswer(noteId, ease) {
+  const now = Date.now();
+  const prev = srData[noteId] || {};
+  const days = SR_INTERVALS[ease] || 1;
+  // Adaptive interval: if easy again, double the interval
+  let interval = days;
+  if (ease === 'easy' && prev.ease === 'easy') {
+    interval = Math.min((prev.interval || days) * 2, 60);
+  }
+  srData[noteId] = {
+    ease,
+    interval,
+    nextReview: now + interval * 86400000,
+    lastReview: now,
+    reviewCount: (prev.reviewCount || 0) + 1
+  };
+  localStorage.setItem('nn4_sr', JSON.stringify(srData));
+}
+
+function srNextDate(ease) {
+  const days = SR_INTERVALS[ease] || 1;
+  const d = new Date(Date.now() + days * 86400000);
+  return d.toLocaleDateString('uz-UZ', { day:'2-digit', month:'short' });
+}
+
+function srDueCount() {
+  const now = Date.now();
+  return notes.filter(n => n.title && n.content && (srData[n.id]?.nextReview || 0) <= now).length;
+}
+
+// ══════════════════════════════════════════════════
+// 👁 O'QISH REJIMI (Reading Mode)
+// ══════════════════════════════════════════════════
+function openReadMode(noteId) {
+  const n = notes.find(x => x.id === noteId);
+  if (!n) return;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'read-mode-wrap';
+  wrap.id = 'read-mode';
+
+  const progress = document.createElement('div');
+  progress.className = 'read-progress';
+  progress.id = 'read-prog';
+
+  wrap.innerHTML = `
+    <div class="read-mode-bar no-print">
+      <button class="ghost btn-sm" onclick="closeReadMode()">← Orqaga</button>
+      <div style="flex:1;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(n.title)}</div>
+      <button class="ibtn no-print" onclick="printNote('${n.id}')" title="Chop etish" style="font-size:13px;padding:5px 9px">🖨️</button>
+      <button class="ibtn no-print" onclick="changeFontSize(-1)" title="Kichikroq" style="font-size:13px;padding:5px 9px">A−</button>
+      <button class="ibtn no-print" onclick="changeFontSize(1)" title="Kattaroq" style="font-size:13px;padding:5px 9px">A+</button>
+      <button class="ibtn no-print" onclick="closeReadMode()" style="font-size:14px;padding:5px 10px">✕</button>
+    </div>
+    <div class="read-mode-inner" id="read-inner">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+        <span class="chip" style="background:${n.color||'#5b8dee'}18;color:${n.color||'#5b8dee'}">${esc(n.subject)}</span>
+        ${(n.tags||[]).map(t=>`<span class="chip" style="background:#2d3f5818;color:var(--muted)">#${esc(t)}</span>`).join('')}
+        <span style="font-size:11px;color:var(--dim);display:flex;align-items:center">${fd(n.updatedAt)}</span>
+      </div>
+      <div class="read-mode-title">${esc(n.title)}</div>
+      <div class="rich-editor" id="read-content" contenteditable="false" style="font-size:16px;line-height:2;margin-top:16px;pointer-events:none"></div>
+      ${(n.images||[]).length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:20px">
+        ${(n.images||[]).map(img=>`<img src="${esc(img.url||img)}" style="width:100%;border-radius:10px;border:1px solid var(--border)" loading="lazy"/>`).join('')}
+      </div>`:''}
+    </div>`;
+
+  wrap.prepend(progress);
+  document.body.appendChild(wrap);
+  document.body.style.overflow = 'hidden';
+
+  // Render content
+  setTimeout(() => {
+    const el = document.getElementById('read-content');
+    if (el) {
+      const cnt = n.content || '';
+      if (cnt.trim().startsWith('<') || cnt.includes('<p') || cnt.includes('<h'))
+        el.innerHTML = cnt;
+      else
+        el.innerHTML = cnt.split('\n').map(l => l.trim() ? `<p>${l}</p>` : '<p><br></p>').join('');
+    }
+  }, 50);
+
+  // Reading progress bar
+  const inner = document.getElementById('read-inner');
+  wrap.addEventListener('scroll', () => {
+    const prog = document.getElementById('read-prog');
+    if (!prog || !inner) return;
+    const scrolled = wrap.scrollTop;
+    const total = inner.scrollHeight - wrap.clientHeight;
+    const pct = total > 0 ? Math.round(scrolled / total * 100) : 100;
+    prog.style.width = pct + '%';
+  });
+
+  // Keyboard: ESC to close
+  wrap._keyHandler = (e) => { if (e.key === 'Escape') closeReadMode(); };
+  document.addEventListener('keydown', wrap._keyHandler);
+}
+
+function closeReadMode() {
+  const wrap = document.getElementById('read-mode');
+  if (wrap) {
+    document.removeEventListener('keydown', wrap._keyHandler);
+    wrap.remove();
+  }
+  document.body.style.overflow = '';
+}
+
+let _readFontSize = 16;
+function changeFontSize(delta) {
+  _readFontSize = Math.max(12, Math.min(24, _readFontSize + delta));
+  const el = document.getElementById('read-content');
+  if (el) el.style.fontSize = _readFontSize + 'px';
+}
+
+// ══════════════════════════════════════════════════
+// 🖨️ PRINT / PDF
+// ══════════════════════════════════════════════════
+function printNote(noteId) {
+  const n = notes.find(x => x.id === noteId);
+  if (!n) return;
+
+  // Create print-only content
+  const printWin = window.open('', '_blank', 'width=800,height=600');
+  if (!printWin) { toast("Popup bloklangan! Brauzer ruxsat bering", 'err'); return; }
+
+  const cnt = n.content || '';
+  let htmlContent = '';
+  if (cnt.trim().startsWith('<') || cnt.includes('<p') || cnt.includes('<h'))
+    htmlContent = cnt;
+  else
+    htmlContent = cnt.split('\n').map(l => l.trim() ? `<p>${l}</p>` : '<br>').join('');
+
+  const imgs = (n.images || []).map(img =>
+    `<img src="${img.url||img}" style="max-width:100%;margin:8px 0;border-radius:6px"/>`
+  ).join('');
+
+  printWin.document.write(`<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8"/>
+<title>${n.title || 'Konspekt'}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Georgia,serif;font-size:14px;line-height:1.8;color:#000;padding:30px 40px;max-width:800px;margin:0 auto}
+  .meta{color:#555;font-size:12px;margin-bottom:6px;display:flex;gap:12px;flex-wrap:wrap;padding-bottom:10px;border-bottom:2px solid #000}
+  h1{font-size:26px;font-style:italic;margin:16px 0 10px;color:#000}
+  h1,h2,h3{color:#000}
+  h2{font-size:20px;margin:14px 0 6px}
+  h3{font-size:16px;margin:10px 0 4px}
+  p{margin:5px 0}
+  strong,b{font-weight:700}
+  em,i{font-style:italic}
+  code{background:#f5f5f5;padding:1px 5px;border-radius:3px;font-family:monospace;font-size:12px}
+  pre{background:#f5f5f5;padding:10px;border-radius:6px;margin:8px 0;overflow:hidden}
+  blockquote{border-left:3px solid #333;padding:8px 14px;margin:8px 0;background:#f9f9f9;font-style:italic;color:#444}
+  ul,ol{padding-left:20px;margin:6px 0}
+  li{margin:3px 0}
+  table{border-collapse:collapse;width:100%;margin:8px 0}
+  td,th{border:1px solid #ccc;padding:6px 10px;font-size:13px}
+  th{background:#f0f0f0;font-weight:700}
+  mark{background:#fff3cd;padding:0 3px}
+  hr{border:none;border-top:1px solid #ccc;margin:12px 0}
+  img{max-width:100%}
+  .footer{margin-top:30px;padding-top:12px;border-top:1px solid #ccc;font-size:11px;color:#888}
+  @media print{body{padding:15px}}
+</style>
+</head><body>
+  <div class="meta">
+    <span>📚 ${n.subject||'Nevrologiya'}</span>
+    <span>📅 ${new Date(n.updatedAt||Date.now()).toLocaleDateString('uz-UZ')}</span>
+    ${(n.tags||[]).length?`<span>🏷 ${n.tags.join(', ')}</span>`:''}
+  </div>
+  <h1>${n.title||'Nomsiz'}</h1>
+  <div>${htmlContent}</div>
+  ${imgs?`<div style="margin-top:16px">${imgs}</div>`:''}
+  <div class="footer">NeurоNotepad orqali yaratildi · ${new Date().toLocaleDateString('uz-UZ')}</div>
+</body></html>`);
+  printWin.document.close();
+  printWin.focus();
+  setTimeout(() => { printWin.print(); }, 500);
+}
+
+// ══════════════════════════════════════════════════
+// 🔍 GLOBAL SEARCH (Ctrl+K)
+// ══════════════════════════════════════════════════
+let _gSearchTimer = null;
+
+function openGlobalSearch() {
+  if (document.getElementById('gsearch-overlay')) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'gsearch-overlay';
+  overlay.id = 'gsearch-overlay';
+  overlay.onclick = (e) => { if (e.target === overlay) closeGlobalSearch(); };
+  overlay.innerHTML = `
+    <div class="gsearch-box">
+      <input class="gsearch-inp" id="gs-inp" placeholder="Konspekt, mavzu, teg bo'yicha qidirish..." autocomplete="off"
+        oninput="gsSearch(this.value)"
+        onkeydown="gsKeyNav(event)"/>
+      <div id="gs-results" style="max-height:60vh;overflow-y:auto"></div>
+      <div style="padding:8px 16px;font-size:11px;color:var(--dim);border-top:1px solid var(--border);display:flex;gap:12px">
+        <span>↑↓ Navigatsiya</span><span>Enter — Ochish</span><span>Esc — Yopish</span>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(() => document.getElementById('gs-inp')?.focus(), 50);
+  document.addEventListener('keydown', _gsKeyClose);
+  gsSearch('');
+}
+
+function _gsKeyClose(e) { if (e.key === 'Escape') closeGlobalSearch(); }
+
+function closeGlobalSearch() {
+  document.getElementById('gsearch-overlay')?.remove();
+  document.removeEventListener('keydown', _gsKeyClose);
+}
+
+let _gsSelected = -1;
+
+function gsSearch(q) {
+  clearTimeout(_gSearchTimer);
+  _gSearchTimer = setTimeout(() => {
+    const res = document.getElementById('gs-results');
+    if (!res) return;
+    _gsSelected = -1;
+    const query = q.toLowerCase().trim();
+
+    // Search notes
+    let matches = notes.filter(n => {
+      if (!query) return true;
+      const div = document.createElement('div'); div.innerHTML = n.content||'';
+      const text = div.innerText || '';
+      return (n.title||'').toLowerCase().includes(query) ||
+             text.toLowerCase().includes(query) ||
+             (n.subject||'').toLowerCase().includes(query) ||
+             (n.tags||[]).some(t => t.toLowerCase().includes(query));
+    }).slice(0, 12);
+
+    // Also search Neuro topics
+    const topicMatches = [];
+    if (query) {
+      NEURO.forEach(sec => {
+        sec.topics.forEach(t => {
+          if (t.name.toLowerCase().includes(query) || t.d.toLowerCase().includes(query)) {
+            topicMatches.push({ ...t, section: sec.sec, color: sec.col });
+          }
+        });
+      });
+    }
+
+    if (!matches.length && !topicMatches.length) {
+      res.innerHTML = `<div style="padding:20px;text-align:center;color:var(--dim);font-size:13px">"${esc(q)}" bo'yicha hech narsa topilmadi</div>`;
+      return;
+    }
+
+    function highlight(text, q) {
+      if (!q) return esc(text);
+      const idx = text.toLowerCase().indexOf(q.toLowerCase());
+      if (idx < 0) return esc(text);
+      return esc(text.slice(0, idx)) + `<span class="gsearch-hl">${esc(text.slice(idx, idx+q.length))}</span>` + esc(text.slice(idx+q.length));
+    }
+
+    let html = '';
+    if (matches.length) {
+      html += `<div style="padding:6px 16px 4px;font-size:10px;color:var(--dim);font-weight:700;letter-spacing:1px;text-transform:uppercase">📝 KONSPEKTLAR</div>`;
+      html += matches.map(n => {
+        const div = document.createElement('div'); div.innerHTML = n.content||'';
+        const preview = (div.innerText||'').slice(0,80);
+        return `<div class="gsearch-result" onclick="closeGlobalSearch();go('detail','${n.id}')">
+          <div style="width:10px;height:10px;border-radius:50%;background:${n.color||'#5b8dee'};flex-shrink:0"></div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600;color:#ecf2ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${highlight(n.title||'Nomsiz',q)}</div>
+            <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(n.subject)} · ${preview}</div>
+          </div>
+          <span style="font-size:10px;color:var(--dim);flex-shrink:0">${fd(n.updatedAt)}</span>
+        </div>`;
+      }).join('');
+    }
+
+    if (topicMatches.length) {
+      html += `<div style="padding:6px 16px 4px;font-size:10px;color:var(--dim);font-weight:700;letter-spacing:1px;text-transform:uppercase">🧠 NEVROLOGIYA MAVZULARI</div>`;
+      html += topicMatches.slice(0, 5).map(t =>
+        `<div class="gsearch-result" onclick="closeGlobalSearch();go('neuro')">
+          <div style="font-size:16px;flex-shrink:0">🧠</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600;color:#ecf2ff">${highlight(t.name,q)}</div>
+            <div style="font-size:11px;color:var(--muted)">${esc(t.section)} · ${esc(t.d)}</div>
+          </div>
+          <span style="font-size:10px;color:${t.color};flex-shrink:0">Nevrologiya</span>
+        </div>`
+      ).join('');
+    }
+
+    res.innerHTML = html;
+  }, 200);
+}
+
+function gsKeyNav(e) {
+  const items = document.querySelectorAll('.gsearch-result');
+  if (e.key === 'ArrowDown') { _gsSelected = Math.min(_gsSelected+1, items.length-1); }
+  else if (e.key === 'ArrowUp') { _gsSelected = Math.max(_gsSelected-1, 0); }
+  else if (e.key === 'Enter' && _gsSelected >= 0) { items[_gsSelected]?.click(); return; }
+  else return;
+  items.forEach((el,i) => { el.style.background = i===_gsSelected?'rgba(91,141,238,.12)':''; });
+  items[_gsSelected]?.scrollIntoView({block:'nearest'});
+}
+
+// Ctrl+K shortcut
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey||e.metaKey) && e.key==='k') { e.preventDefault(); openGlobalSearch(); }
+});
 
 renderDynFans();
 rHome();
