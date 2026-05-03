@@ -284,6 +284,10 @@ button:active{transform:scale(.97)}
 .gsearch-result:last-child{border-bottom:none}
 .gsearch-hl{color:var(--accent);font-weight:600}
 </style>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -413,6 +417,139 @@ button:active{transform:scale(.97)}
 </div>
 
 <script>
+
+// ══════════════════════════════════════════════════
+// 🔥 FIREBASE CONFIG
+// ══════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyAOUYKEkHZHGQV9hN0JQ6XRg5YR-AYT2AA",
+  authDomain: "mednotepad-b8f74.firebaseapp.com",
+  databaseURL: "https://mednotepad-b8f74-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "mednotepad-b8f74",
+  storageBucket: "mednotepad-b8f74.firebasestorage.app",
+  messagingSenderId: "245843842131",
+  appId: "1:245843842131:web:77958f4eb9fba54a3762a6"
+};
+
+// Firebase xavfsiz ishga tushirish
+let db = null;
+let _firebaseReady = false;
+
+function initFirebase() {
+  try {
+    if (typeof firebase !== 'undefined') {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.database();
+      _firebaseReady = true;
+      console.log('Firebase ulandi ✅');
+    } else {
+      console.warn('Firebase SDK yuklanmadi — offline rejimda ishlaydi');
+    }
+  } catch(e) {
+    console.warn('Firebase init xato:', e.message);
+  }
+}
+// DOM tayyor bo'lgach init qilamiz
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initFirebase);
+} else {
+  initFirebase();
+}
+
+// ── Firebase Community Functions ──────────────────
+
+async function getCommunityFromDB() {
+  if (!_firebaseReady || !db) return getCommunity();
+  try {
+    const snap = await db.ref('community').orderByChild('publishedAt').limitToLast(100).get();
+    if (!snap.exists()) return getCommunity(); // fallback if empty
+    const data = snap.val();
+    return Object.values(data).sort((a,b) => b.publishedAt - a.publishedAt);
+  } catch(e) {
+    console.error('Firebase read xato:', e);
+    return getCommunity();
+  }
+}
+
+async function saveToDB(note) {
+  if (!_firebaseReady || !db) return false;
+  try {
+    await db.ref('community/' + note.id).set(note);
+    return true;
+  } catch(e) {
+    console.error('Firebase write xato:', e);
+    return false;
+  }
+}
+
+async function deleteFromDB(noteId) {
+  if (!_firebaseReady || !db) return false;
+  try {
+    await db.ref('community/' + noteId).remove();
+    return true;
+  } catch(e) {
+    console.error('Firebase delete xato:', e);
+    return false;
+  }
+}
+
+async function updateLikeInDB(noteId, likes) {
+  if (!_firebaseReady || !db) return;
+  try { await db.ref('community/' + noteId + '/likes').set(likes); } catch(e) {}
+}
+
+async function updateViewsInDB(noteId, views) {
+  if (!_firebaseReady || !db) return;
+  try { await db.ref('community/' + noteId + '/views').set(views); } catch(e) {}
+}
+
+async function saveCommentToDB(noteId, comment) {
+  if (!_firebaseReady || !db) return false;
+  try {
+    await db.ref('comments/' + noteId + '/' + comment.id).set(comment);
+    const snap = await db.ref('comments/' + noteId).get();
+    const count = snap.exists() ? Object.keys(snap.val()).length : 1;
+    await db.ref('community/' + noteId + '/commentsCount').set(count);
+    return true;
+  } catch(e) {
+    console.error('Comment save xato:', e);
+    return false;
+  }
+}
+
+async function getCommentsFromDB(noteId) {
+  if (!_firebaseReady || !db) return getComments(noteId);
+  try {
+    const snap = await db.ref('comments/' + noteId).get();
+    if (!snap.exists()) return getComments(noteId);
+    return Object.values(snap.val()).sort((a,b) => a.ts - b.ts);
+  } catch(e) {
+    return getComments(noteId);
+  }
+}
+
+// Real-time listener for community feed
+let _commListener = null;
+function startCommListener() {
+  if (!_firebaseReady || !db || _commListener) return;
+  _commListener = db.ref('community').orderByChild('publishedAt').limitToLast(50);
+  _commListener.on('child_added', (snap) => {
+    const note = snap.val();
+    // Add to local cache if not exists
+    const existing = getCommunity();
+    if (!existing.find(x => x.id === note.id)) {
+      saveCommunity([note, ...existing]);
+      if (view === 'comm') {
+        const list = document.getElementById('comm-list');
+        if (list && list.children.length > 0) {
+          const card = document.createElement('div');
+          card.innerHTML = commCardHTML(note);
+          list.insertBefore(card.firstChild, list.firstChild);
+        }
+      }
+    }
+  });
+}
 const COLORS=['#5b8dee','#7c5cbf','#22c97a','#f0a500','#e05555','#d966a8','#20b2aa','#f97316','#06b6d4','#84cc16'];
 const PS=['new','learning','review','done'];
 const PL={new:'Yangi',learning:"O'rganilmoqda",review:'Takrorlash',done:"O'rganildi"};
@@ -1740,7 +1877,7 @@ function openPublishForm(noteId) {
     </div>`;
 }
 
-function confirmPublish(noteId) {
+async function confirmPublish(noteId) {
   const n = notes.find(x => x.id === noteId);
   if (!n) return;
   const author = document.getElementById('pub-author')?.value?.trim() || 'Anonim';
@@ -1770,31 +1907,47 @@ function confirmPublish(noteId) {
     publishedAt: Date.now()
   };
 
+  if (prog) prog.textContent = '⏳ Firebase ga yuklanmoqda...';
+
+  // Save to Firebase + localStorage
   const existing = getCommunity();
-  // Remove old version if re-publishing
   const filtered = existing.filter(x => x.sourceId !== noteId);
   saveCommunity([pubNote, ...filtered].slice(0, 300));
+
+  // Firebase ga saqlash
+  const dbOk = await saveToDB(pubNote);
 
   // Mark note as published
   const ni = notes.findIndex(x => x.id === noteId);
   if (ni >= 0) { notes[ni].isPublished = true; save(); }
 
-  if (prog) prog.textContent = '✅ Nashr qilindi!';
+  if (prog) prog.textContent = dbOk ? '✅ Hammaga korinadi!' : '✅ Saqlandi (offline)';
   setTimeout(() => {
-    document.getElementById('pub-modal-overlay').style.display = 'none';
-    toast('Jamoatga nashr qilindi 🚀');
+    (document.getElementById('pub-modal-overlay')||{style:{}}).style.display = 'none';
+    toast(dbOk ? '🚀 Barcha qurilmalarda korinadi!' : '✅ Nashr qilindi');
     if (view === 'comm') rComm();
   }, 700);
 }
 
 // ── Community sahifasi ─────────────────────────────
-function rComm() {
-  const comm = getCommunity();
+async function rComm() {
+  // Show loading first
+  document.getElementById('main').innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">⏳ Yuklanmoqda...</div>';
+
+  // Load from Firebase
+  let comm = [];
+  try {
+    comm = await getCommunityFromDB();
+    if (comm.length > 0) saveCommunity(comm); // sync to localStorage
+  } catch(e) {
+    comm = getCommunity(); // fallback
+  }
+
   document.getElementById('main').innerHTML = `
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
     <div>
       <div style="font-family:'Instrument Serif',serif;font-size:24px;font-style:italic;color:#ecf2ff">🌐 Jamoat konspektlari</div>
-      <div style="font-size:13px;color:var(--muted);margin-top:2px">${comm.length} ta konspekt ulashilgan</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:2px">${comm.length} ta konspekt ulashilgan <span style="font-size:11px;color:${_firebaseReady?'var(--green)':'var(--amber)'}">${_firebaseReady?'🔥 Firebase ulangan':'📱 Offline rejim'}</span></div>
     </div>
     <div style="display:flex;gap:6px;align-items:center">
       <button class="ghost btn-sm" onclick="editProfileName()" style="font-size:12px">✍️ ${getProfileName()}</button>
@@ -1907,12 +2060,14 @@ function toggleCommLike(noteId) {
   saveMyLikes(myLikes);
   saveCommunity(comm);
   // Update button
-  const btn = document.getElementById(`cl-${noteId}`);
+  const btn = document.getElementById('cl-' + noteId);
   if (btn) {
     btn.classList.toggle('liked', !liked);
     btn.innerHTML = (!liked?'❤️':'🤍') + ' ' + comm[ni].likes;
   }
   if (!liked) toast('❤️ Like bosildi');
+  // Sync to Firebase
+  updateLikeInDB(noteId, comm[ni].likes);
 }
 
 // ── Ko'rishlar soni ────────────────────────────────
@@ -1922,10 +2077,11 @@ function incViews(noteId) {
   if (ni < 0) return;
   comm[ni].views = (comm[ni].views||0)+1;
   saveCommunity(comm);
+  updateViewsInDB(noteId, comm[ni].views);
 }
 
 // ── Detail + Izohlar ───────────────────────────────
-function openCommDetail(noteId, tab='read') {
+async function openCommDetail(noteId, tab='read') {
   incViews(noteId);
   const n = getCommunity().find(x => x.id === noteId);
   if (!n) return;
@@ -2044,6 +2200,9 @@ function addComment(noteId) {
   const ni = comm.findIndex(x=>x.id===noteId);
   if (ni>=0) { comm[ni].commentsCount = cmts.length; saveCommunity(comm); }
 
+  // Save to Firebase
+  saveCommentToDB(noteId, comment);
+
   inp.value = '';
   // Re-render comments
   const timeAgo = (ts) => {const d=Math.floor((Date.now()-ts)/1000);if(d<60)return 'Hozirgina';return Math.floor(d/60)+' daqiqa oldin';};
@@ -2086,6 +2245,7 @@ function deleteCommNote(noteId) {
   if (!confirm("Jamoatdan o'chirasizmi?")) return;
   const comm = getCommunity().filter(x => x.id !== noteId);
   saveCommunity(comm);
+  deleteFromDB(noteId); // Firebase dan ham o'chir
   // Remove card from DOM
   const card = document.getElementById('cc-' + noteId);
   if (card) card.remove();
@@ -2440,6 +2600,7 @@ document.addEventListener('keydown', e => {
 });
 
 renderDynFans();
+startCommListener();
 rHome();
 </script>
 
