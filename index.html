@@ -2,6 +2,9 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8"/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
 <title>NeurоNotepad</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
@@ -450,10 +453,24 @@ function initFirebase() {
   }
 }
 // DOM tayyor bo'lgach init qilamiz
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initFirebase);
-} else {
+async function initAndStart() {
   initFirebase();
+  // Wait for firebase to be ready
+  let tries = 0;
+  while (!_firebaseReady && tries < 20) {
+    await new Promise(r => setTimeout(r, 100));
+    tries++;
+  }
+  if (_firebaseReady) {
+    startCommListener();
+    console.log('Firebase listener boshlandi ✅');
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAndStart);
+} else {
+  initAndStart();
 }
 
 // ── Firebase Community Functions ──────────────────
@@ -535,25 +552,42 @@ async function getCommentsFromDB(noteId) {
 let _commListener = null;
 function startCommListener() {
   if (!_firebaseReady || !db || _commListener) return;
-  _commListener = db.ref('community').orderByChild('publishedAt').limitToLast(50);
+  _commListener = db.ref('community').orderByChild('publishedAt').limitToLast(100);
   _commListener.on('value', (snap) => {
-    // Full refresh when ANY change happens in Firebase
-    if (!snap.exists()) return;
-    const data = snap.val();
-    const list = Object.values(data).sort((a,b) => b.publishedAt - a.publishedAt);
-    saveCommunity(list);
-    // Update UI if on comm page
+    let list = [];
+    if (snap.exists()) {
+      const data = snap.val();
+      list = Object.values(data).sort((a,b) => b.publishedAt - a.publishedAt);
+      saveCommunity(list);
+    } else {
+      saveCommunity([]);
+    }
+    // Auto-update UI if on comm page
     if (view === 'comm') {
       const commList = document.getElementById('comm-list');
       if (commList) {
-        commList.innerHTML = list.map(n => commCardHTML(n)).join('');
-      }
-      // Update count
-      const countEl = document.querySelector('#main > div > div:first-child > div:last-child');
-      if (countEl && countEl.textContent.includes('ta konspekt')) {
-        // update count
+        if (!list.length) {
+          commList.innerHTML = `<div style="text-align:center;padding:60px 16px">
+            <div style="font-size:52px;margin-bottom:14px">📭</div>
+            <div style="font-size:18px;font-weight:700;color:#4a6080;margin-bottom:8px">Hali konspekt yo'q</div>
+            <div style="font-size:13px;color:var(--dim);margin-bottom:18px">Birinchi bo'lib o'z konspektingizni ulashing!</div>
+            <button class="btn btn-p" onclick="showPublishPicker()">📤 Konspekt ulashish</button>
+          </div>`;
+        } else {
+          commList.innerHTML = list.map(n => commCardHTML(n)).join('');
+        }
+        // Update count in header
+        const subtitle = document.querySelector('#main div[style*="font-size:13px"][style*="color:var(--muted)"]');
+        if (subtitle) {
+          subtitle.innerHTML = `${list.length} ta konspekt ulashilgan <span style="font-size:11px;color:var(--green)">🔥 Firebase ulangan</span>`;
+        }
       }
     }
+  });
+
+  // Also listen for errors
+  _commListener.on('cancel', (err) => {
+    console.error('Firebase listener xato:', err);
   });
 }
 const COLORS=['#5b8dee','#7c5cbf','#22c97a','#f0a500','#e05555','#d966a8','#20b2aa','#f97316','#06b6d4','#84cc16'];
@@ -2611,7 +2645,6 @@ document.addEventListener('keydown', e => {
 });
 
 renderDynFans();
-startCommListener();
 rHome();
 </script>
 
