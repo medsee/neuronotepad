@@ -842,15 +842,31 @@ const firebaseConfig = {
 
 // Firebase xavfsiz ishga tushirish
 let db = null;
+let auth = null;
 let _firebaseReady = false;
+let _authReady = false;
 
 function initFirebase() {
   try {
     if (typeof firebase !== 'undefined') {
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.database();
-      _firebaseReady = true;
-      console.log('Firebase ulandi ✅');
+      // Agar allaqachon init qilingan bo'lsa
+      if (firebase.apps.length === 0) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      try {
+        db = firebase.database();
+        _firebaseReady = true;
+        console.log('Firebase DB ulandi ✅');
+      } catch(e) {
+        console.warn('Firebase DB xato:', e.message);
+      }
+      try {
+        auth = firebase.auth();
+        _authReady = true;
+        console.log('Firebase Auth tayyor ✅');
+      } catch(e) {
+        console.warn('Firebase Auth xato:', e.message);
+      }
     } else {
       console.warn('Firebase SDK yuklanmadi — offline rejimda ishlaydi');
     }
@@ -861,7 +877,11 @@ function initFirebase() {
 // DOM tayyor bo'lgach init qilamiz
 async function initAndStart() {
   initFirebase();
-  // Wait for firebase to be ready
+  // Auth - DB dan mustaqil ishga tushadi
+  if (_authReady) {
+    initGoogleAuth();
+  }
+  // DB uchun kutamiz
   let tries = 0;
   while (!_firebaseReady && tries < 20) {
     await new Promise(r => setTimeout(r, 100));
@@ -869,7 +889,6 @@ async function initAndStart() {
   }
   if (_firebaseReady) {
     startCommListener();
-    initGoogleAuth();
     console.log('Firebase listener boshlandi ✅');
   }
 }
@@ -880,12 +899,11 @@ async function initAndStart() {
 let currentGoogleUser = null;
 
 function initGoogleAuth() {
-  if (!_firebaseReady) return;
-  firebase.auth().onAuthStateChanged(user => {
+  if (!_authReady || !auth) return;
+  auth.onAuthStateChanged(user => {
     currentGoogleUser = user;
     updateAuthUI(user);
     if (user) {
-      // Sync google profile to currentProfile
       currentProfile = {
         ...(currentProfile || {}),
         name: user.displayName || currentProfile?.name || 'Anonim',
@@ -924,23 +942,33 @@ function handleAuthClick() {
 }
 
 async function signInWithGoogle() {
-  if (!_firebaseReady) { toast("Firebase ulanmadi", 'err'); return; }
+  if (!_authReady || !auth) { 
+    toast("Firebase Auth yuklanmadi. Sahifani qayta yuklang.", 'err'); 
+    return; 
+  }
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.addScope('profile');
     provider.addScope('email');
-    await firebase.auth().signInWithPopup(provider);
+    provider.setCustomParameters({ prompt: 'select_account' });
+    await auth.signInWithPopup(provider);
     toast("✅ Muvaffaqiyatli kirdingiz!");
   } catch(e) {
-    if (e.code !== 'auth/popup-closed-by-user') {
-      toast("Kirish xatosi: " + e.message, 'err');
+    console.error('Auth xato:', e);
+    if (e.code === 'auth/popup-closed-by-user') return;
+    if (e.code === 'auth/unauthorized-domain') {
+      toast("Domain ruxsat berilmagan. Firebase Console → Auth → Authorized domains ga medsee.github.io qo'shing", 'err');
+    } else if (e.code === 'auth/operation-not-allowed') {
+      toast("Google auth yoqilmagan. Firebase Console → Auth → Sign-in method → Google → Enable", 'err');
+    } else {
+      toast("Xato: " + (e.code || e.message), 'err');
     }
   }
 }
 
 async function signOutGoogle() {
-  if (!_firebaseReady) return;
-  await firebase.auth().signOut();
+  if (!_authReady || !auth) return;
+  await auth.signOut();
   currentGoogleUser = null;
   toast("Chiqildi");
 }
