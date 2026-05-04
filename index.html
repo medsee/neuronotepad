@@ -2985,7 +2985,9 @@ function commCardHTML(n) {
       </button>
       <div style="flex:1"></div>
       <button class="comm-likes" onclick="shareComm('${n.id}')">↗ Ulashish</button>
-      <button class="comm-likes" style="color:var(--red)" onclick="deleteCommNote('${n.id}')">🗑</button>
+      ${(currentGoogleUser && currentGoogleUser.uid === n.authorUid) || (!n.authorUid && notes.some(x => x.id === n.sourceId))
+        ? `<button class="comm-likes" style="color:var(--red)" onclick="deleteCommNote('${n.id}')">🗑</button>`
+        : ''}
     </div>
   </div>`;
 }
