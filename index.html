@@ -6,7 +6,7 @@
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
-<title>NeurоNotepad</title>
+<title>MedNotepad</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
@@ -696,7 +696,7 @@ body::before{
 
 <div id="topbar">
   <div class="logo" onclick="go('home')">
-    <div class="logo-box">🧠</div>NeurоNotepad
+    <div class="logo-box">🧠</div>MedNotepad
   </div>
 
   <div class="nav-area" id="desktop-nav">
@@ -955,17 +955,67 @@ async function signInWithGoogle() {
     provider.setCustomParameters({ prompt: 'select_account' });
     await auth.signInWithPopup(provider);
     toast("✅ Muvaffaqiyatli kirdingiz!");
+    const pop = document.getElementById('user-menu-pop');
+    if (pop) pop.remove();
   } catch(e) {
     console.error('Auth xato:', e);
     if (e.code === 'auth/popup-closed-by-user') return;
-    if (e.code === 'auth/unauthorized-domain') {
-      toast("Domain ruxsat berilmagan. Firebase Console → Auth → Authorized domains ga medsee.github.io qo'shing", 'err');
-    } else if (e.code === 'auth/operation-not-allowed') {
-      toast("Google auth yoqilmagan. Firebase Console → Auth → Sign-in method → Google → Enable", 'err');
+    if (e.code === 'auth/configuration-not-found' || e.code === 'auth/operation-not-allowed') {
+      showAuthSetupModal();
+    } else if (e.code === 'auth/unauthorized-domain') {
+      showAuthSetupModal('domain');
     } else {
       toast("Xato: " + (e.code || e.message), 'err');
     }
   }
+}
+
+function showAuthSetupModal(type) {
+  let overlay = document.getElementById('auth-setup-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'auth-setup-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+    document.body.appendChild(overlay);
+  }
+  overlay.style.display = 'flex';
+  overlay.onclick = e => { if (e.target === overlay) overlay.style.display = 'none'; };
+
+  const steps = type === 'domain' ? `
+    <div style="font-size:14px;font-weight:700;color:#ecf2ff;margin-bottom:12px">🌐 Domain ruxsat berilmagan</div>
+    <div style="background:rgba(61,127,255,.08);border:1px solid rgba(61,127,255,.2);border-radius:12px;padding:14px;margin-bottom:14px">
+      <div style="font-size:12px;color:var(--muted);line-height:1.8">
+        <b style="color:#ecf2ff">1.</b> <a href="https://console.firebase.google.com" target="_blank" style="color:var(--accent)">Firebase Console</a> → <b>mednotepad-b8f74</b><br>
+        <b style="color:#ecf2ff">2.</b> <b>Authentication</b> → <b>Settings</b><br>
+        <b style="color:#ecf2ff">3.</b> <b>Authorized domains</b> → <b>Add domain</b><br>
+        <b style="color:#ecf2ff">4.</b> <code style="background:rgba(0,0,0,.4);padding:2px 6px;border-radius:4px">medsee.github.io</code> kiriting → <b>Add</b>
+      </div>
+    </div>` : `
+    <div style="font-size:14px;font-weight:700;color:#ecf2ff;margin-bottom:12px">🔧 Firebase Authentication sozlanmagan</div>
+    <div style="background:rgba(61,127,255,.08);border:1px solid rgba(61,127,255,.2);border-radius:12px;padding:14px;margin-bottom:14px">
+      <div style="font-size:12px;color:var(--muted);line-height:2">
+        <b style="color:#ecf2ff">1.</b> <a href="https://console.firebase.google.com/project/mednotepad-b8f74/authentication" target="_blank" style="color:var(--accent)">Firebase Console → Authentication</a> oching<br>
+        <b style="color:#ecf2ff">2.</b> <b>"Get started"</b> tugmasini bosing<br>
+        <b style="color:#ecf2ff">3.</b> <b>Sign-in method</b> → <b>Google</b> tanlang<br>
+        <b style="color:#ecf2ff">4.</b> <b>Enable</b> qilib, email tanlang → <b>Save</b><br>
+        <b style="color:#ecf2ff">5.</b> <b>Settings → Authorized domains</b> → <code style="background:rgba(0,0,0,.4);padding:2px 6px;border-radius:4px">medsee.github.io</code> qo'shing
+      </div>
+    </div>`;
+
+  overlay.innerHTML = `
+  <div style="background:#0e1520;border:1px solid #253045;border-radius:20px;padding:24px;width:100%;max-width:440px">
+    <div style="font-size:32px;text-align:center;margin-bottom:14px">⚙️</div>
+    <div style="font-size:17px;font-weight:700;color:#ecf2ff;text-align:center;margin-bottom:6px">Firebase sozlash kerak</div>
+    <div style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:18px">Bir martalik sozlash, 2 daqiqa</div>
+    ${steps}
+    <div style="background:rgba(240,165,0,.08);border:1px solid rgba(240,165,0,.15);border-radius:10px;padding:10px;margin-bottom:16px;font-size:12px;color:var(--amber)">
+      💡 Sozlagandan so'ng sahifani yangilang va qayta kirish tugmasini bosing
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="document.getElementById('auth-setup-overlay').style.display='none'" style="flex:1;background:transparent;border:1px solid var(--border2);border-radius:12px;padding:10px;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--font)">Yopish</button>
+      <a href="https://console.firebase.google.com/project/mednotepad-b8f74/authentication" target="_blank" style="flex:1;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;padding:10px;font-size:13px;color:#fff;cursor:pointer;font-family:var(--font);font-weight:600;text-decoration:none;display:flex;align-items:center;justify-content:center">🔗 Firebase ochish</a>
+    </div>
+  </div>`;
 }
 
 async function signOutGoogle() {
@@ -2239,7 +2289,7 @@ function rProfile() {
 
   <!-- App info -->
   <div style="text-align:center;padding:16px;color:var(--dim);font-size:11px;line-height:1.8">
-    <div style="font-family:var(--serif);font-size:15px;color:var(--muted);margin-bottom:4px;font-style:italic">NeurоNotepad</div>
+    <div style="font-family:var(--serif);font-size:15px;color:var(--muted);margin-bottom:4px;font-style:italic">MedNotepad</div>
     Tibbiy talabalar uchun aqlli konspekt tizimi<br>
     Firebase • Google Auth • Offline-first
   </div>
@@ -2314,7 +2364,7 @@ function confirmClearAll() {
 // ── EXPORT / IMPORT ───────────────────────────────────────────────
 function exportData(){
   const b=new Blob([JSON.stringify({notes,customSubj,topicProg},null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='neuronotepad_backup.json';a.click();
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='mednotepad_backup.json';a.click();
   toast('Eksport qilindi ⬇');
 }
 function importData(e){
@@ -3160,7 +3210,7 @@ function deleteCommNote(noteId) {
 function shareComm(noteId) {
   const n = getCommunity().find(x=>x.id===noteId);
   if (!n) return;
-  const text = `NeurоNotepad: ${n.title}\nMuallif: ${n.author||'Anonim'}\nFan: ${n.subject}`;
+  const text = `MedNotepad: ${n.title}\nMuallif: ${n.author||'Anonim'}\nFan: ${n.subject}`;
   navigator.clipboard?.writeText(text).then(()=>toast('Nusxalandi ↗')).catch(()=>{});
 }
 
@@ -3360,7 +3410,7 @@ function printNote(noteId) {
   <h1>${n.title||'Nomsiz'}</h1>
   <div>${htmlContent}</div>
   ${imgs?`<div style="margin-top:16px">${imgs}</div>`:''}
-  <div class="footer">NeurоNotepad orqali yaratildi · ${new Date().toLocaleDateString('uz-UZ')}</div>
+  <div class="footer">MedNotepad orqali yaratildi · ${new Date().toLocaleDateString('uz-UZ')}</div>
 </body></html>`);
   printWin.document.close();
   printWin.focus();
