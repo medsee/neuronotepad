@@ -690,6 +690,7 @@ body::before{
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 
@@ -712,6 +713,13 @@ body::before{
     <input type="file" accept=".json" id="impf" style="display:none" onchange="importData(event)"/>
     <button class="ghost exp-btn" onclick="document.getElementById('impf').click()" style="font-size:12px;padding:6px 11px">⬆</button>
     <button class="btn btn-p btn-sm" onclick="newNote()">+ Yangi</button>
+    <!-- Google Auth Button -->
+    <div id="auth-btn-wrap" style="margin-left:4px">
+      <button class="ghost" id="auth-btn" onclick="handleAuthClick()" style="display:flex;align-items:center;gap:7px;padding:6px 12px;font-size:12px;white-space:nowrap">
+        <span id="auth-avatar" style="display:none;width:24px;height:24px;border-radius:50%;overflow:hidden;flex-shrink:0"><img id="auth-photo" style="width:100%;height:100%;object-fit:cover"/></span>
+        <span id="auth-label">🔐 Kirish</span>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -861,8 +869,109 @@ async function initAndStart() {
   }
   if (_firebaseReady) {
     startCommListener();
+    initGoogleAuth();
     console.log('Firebase listener boshlandi ✅');
   }
+}
+
+// ══════════════════════════════════════════════════
+// 🔐 GOOGLE AUTH
+// ══════════════════════════════════════════════════
+let currentGoogleUser = null;
+
+function initGoogleAuth() {
+  if (!_firebaseReady) return;
+  firebase.auth().onAuthStateChanged(user => {
+    currentGoogleUser = user;
+    updateAuthUI(user);
+    if (user) {
+      // Sync google profile to currentProfile
+      currentProfile = {
+        ...(currentProfile || {}),
+        name: user.displayName || currentProfile?.name || 'Anonim',
+        email: user.email,
+        photo: user.photoURL,
+        uid: user.uid
+      };
+      localStorage.setItem('nn4_profile', JSON.stringify(currentProfile));
+    }
+  });
+}
+
+function updateAuthUI(user) {
+  const label = document.getElementById('auth-label');
+  const avatarWrap = document.getElementById('auth-avatar');
+  const photo = document.getElementById('auth-photo');
+  if (!label) return;
+  if (user) {
+    label.textContent = user.displayName?.split(' ')[0] || 'Profil';
+    if (user.photoURL && avatarWrap && photo) {
+      photo.src = user.photoURL;
+      avatarWrap.style.display = 'block';
+    }
+  } else {
+    label.textContent = '🔐 Kirish';
+    if (avatarWrap) avatarWrap.style.display = 'none';
+  }
+}
+
+function handleAuthClick() {
+  if (currentGoogleUser) {
+    showUserMenu();
+  } else {
+    signInWithGoogle();
+  }
+}
+
+async function signInWithGoogle() {
+  if (!_firebaseReady) { toast("Firebase ulanmadi", 'err'); return; }
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.addScope('profile');
+    provider.addScope('email');
+    await firebase.auth().signInWithPopup(provider);
+    toast("✅ Muvaffaqiyatli kirdingiz!");
+  } catch(e) {
+    if (e.code !== 'auth/popup-closed-by-user') {
+      toast("Kirish xatosi: " + e.message, 'err');
+    }
+  }
+}
+
+async function signOutGoogle() {
+  if (!_firebaseReady) return;
+  await firebase.auth().signOut();
+  currentGoogleUser = null;
+  toast("Chiqildi");
+}
+
+function showUserMenu() {
+  const existing = document.getElementById('user-menu-pop');
+  if (existing) { existing.remove(); return; }
+  const user = currentGoogleUser;
+  const pop = document.createElement('div');
+  pop.id = 'user-menu-pop';
+  pop.style.cssText = `position:fixed;top:58px;right:16px;background:rgba(11,17,32,.98);border:1px solid var(--border2);border-radius:16px;padding:16px;z-index:999;min-width:220px;box-shadow:0 16px 48px rgba(0,0,0,.6);backdrop-filter:blur(20px)`;
+  pop.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+      ${user?.photoURL ? `<img src="${user.photoURL}" style="width:40px;height:40px;border-radius:50%;object-fit:cover"/>` : `<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff">${(user?.displayName||'U')[0]}</div>`}
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#ecf2ff">${esc(user?.displayName || 'Foydalanuvchi')}</div>
+        <div style="font-size:11px;color:var(--muted)">${esc(user?.email || '')}</div>
+      </div>
+    </div>
+    <button onclick="document.getElementById('user-menu-pop')?.remove();showPublishPicker()" style="width:100%;background:rgba(61,127,255,.12);border:1px solid rgba(61,127,255,.2);border-radius:10px;padding:9px 14px;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;margin-bottom:8px;font-family:var(--font)">📤 Konspekt nashr qilish</button>
+    <button onclick="document.getElementById('user-menu-pop')?.remove();signOutGoogle()" style="width:100%;background:rgba(255,77,106,.08);border:1px solid rgba(255,77,106,.15);border-radius:10px;padding:9px 14px;color:var(--red);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;font-family:var(--font)">🚪 Chiqish</button>
+  `;
+  document.body.appendChild(pop);
+  setTimeout(() => {
+    document.addEventListener('click', function closeMenu(e) {
+      if (!pop.contains(e.target) && e.target.id !== 'auth-btn') {
+        pop.remove();
+        document.removeEventListener('click', closeMenu);
+      }
+    });
+  }, 100);
 }
 
 if (document.readyState === 'loading') {
@@ -2233,7 +2342,36 @@ let _commFilter = 'all';
 let _openCommentId = null;
 
 // ── Konspektni Jamoatga chiqarish ─────────────────
+function showLoginRequiredModal() {
+  let overlay = document.getElementById('pub-modal-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'pub-modal-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+    overlay.innerHTML = '<div style="background:#0e1520;border:1px solid #253045;border-radius:18px;padding:28px;width:100%;max-width:380px;text-align:center" id="pub-modal-content"></div>';
+    document.body.appendChild(overlay);
+  }
+  overlay.style.display = 'flex';
+  overlay.onclick = (e) => { if(e.target===overlay) overlay.style.display='none'; };
+  document.getElementById('pub-modal-content').innerHTML = `
+    <div style="font-size:48px;margin-bottom:14px">🔐</div>
+    <div style="font-size:17px;font-weight:700;color:#ecf2ff;margin-bottom:8px">Kirish talab etiladi</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:22px;line-height:1.6">Konspekt nashr qilish uchun Google hisobingiz bilan kiring. Bu sizning konspektlaringiz muallifi sifatida ko'rsatiladi.</div>
+    <button onclick="(document.getElementById('pub-modal-overlay')||{style:{}}).style.display='none';signInWithGoogle()"
+      style="width:100%;background:#fff;border:none;border-radius:12px;padding:12px 18px;font-size:14px;font-weight:600;color:#1a1a2e;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;font-family:var(--font)">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+      Google bilan kirish
+    </button>
+    <button onclick="(document.getElementById('pub-modal-overlay')||{style:{}}).style.display='none'" style="width:100%;background:transparent;border:1px solid var(--border2);border-radius:12px;padding:10px;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--font)">Bekor qilish</button>
+  `;
+}
+
 function showPublishPicker() {
+  // Google login talab qilinadi
+  if (!currentGoogleUser) {
+    showLoginRequiredModal();
+    return;
+  }
   const myNotes = notes.filter(n => n.title && n.title.trim());
   if (!myNotes.length) { toast("Avval sarlavhali konspekt yarating", 'warn'); return; }
   
@@ -2299,15 +2437,20 @@ function openPublishForm(noteId) {
     </div>
     <div class="form-group" style="margin-bottom:12px">
       <span class="lbl">Muallif ismi</span>
-      <input class="inp" id="pub-author" placeholder="Ismi Familiya" value="${esc(currentProfile?.name || '')}"/>
+      <input class="inp" id="pub-author" placeholder="Ismi Familiya" value="${esc(currentGoogleUser?.displayName || currentProfile?.name || '')}" ${currentGoogleUser ? 'readonly style="opacity:.7;cursor:not-allowed"' : ''}/>
     </div>
     <div class="form-group" style="margin-bottom:14px">
       <span class="lbl">Universitet / Kurs (ixtiyoriy)</span>
       <input class="inp" id="pub-uni" placeholder="ToshTibTibbiyot · 3-kurs"/>
     </div>
+    ${currentGoogleUser ? `
+    <div style="background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.2);border-radius:8px;padding:10px;margin-bottom:14px;font-size:12px;color:var(--green);display:flex;align-items:center;gap:8px">
+      ${currentGoogleUser.photoURL ? `<img src="${currentGoogleUser.photoURL}" style="width:24px;height:24px;border-radius:50%"/>` : ''}
+      ✅ ${esc(currentGoogleUser.email)} sifatida nashr qilinadi
+    </div>` : `
     <div style="background:rgba(240,165,0,.08);border:1px solid rgba(240,165,0,.2);border-radius:8px;padding:10px;margin-bottom:14px;font-size:12px;color:var(--amber)">
       ⚠️ Nashr qilingan konspekt bu qurilmaning brauzerida ko'rinadi. Export/Import orqali boshqalarga ulashish mumkin.
-    </div>
+    </div>`}
     <div id="pub-prog" style="font-size:12px;min-height:16px;margin-bottom:8px;text-align:center;color:var(--green)"></div>
     <div style="display:flex;gap:8px">
       <button class="ghost" style="flex:1" onclick="(document.getElementById('pub-modal-overlay')||{style:{}}).style.display='none'">Bekor</button>
@@ -2337,6 +2480,9 @@ async function confirmPublish(noteId) {
     tags: n.tags || [],
     images: (n.images || []).slice(0, 3),
     author,
+    authorUid: currentGoogleUser?.uid || null,
+    authorPhoto: currentGoogleUser?.photoURL || null,
+    authorEmail: currentGoogleUser?.email || null,
     uni,
     avatar: author.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2),
     likes: 0,
@@ -2452,7 +2598,7 @@ function commCardHTML(n) {
 
   return `<div class="comm-card" id="cc-${n.id}">
     <div class="comm-header">
-      <div class="comm-avatar" style="background:linear-gradient(135deg,${n.color||'#5b8dee'},${n.color||'#7c5cbf'})">${esc(n.avatar||'?')}</div>
+      <div class="comm-avatar" style="background:linear-gradient(135deg,${n.color||'#5b8dee'},${n.color||'#7c5cbf'});overflow:hidden;display:flex;align-items:center;justify-content:center">${n.authorPhoto ? `<img src="${esc(n.authorPhoto)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>` : esc(n.avatar||'?')}</div>
       <div class="comm-user">
         <div class="comm-username">${esc(n.author||'Anonim')}</div>
         <div class="comm-meta">${n.uni?esc(n.uni)+' · ':''}${timeAgo(n.publishedAt)}</div>
