@@ -369,6 +369,28 @@ a{color:var(--accent)}
 .ovl{position:fixed;inset:0;background:rgba(2,5,12,.75);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)}
 .mdl{background:rgba(11,17,32,.97);border:1px solid var(--border2);border-radius:20px;padding:24px;width:100%;max-width:340px;box-shadow:0 24px 60px rgba(0,0,0,.5);backdrop-filter:blur(20px)}
 
+.top-r{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
+
+/* ── DESKTOP NAV ──────────────────────────── */
+#desktop-nav{
+  display:flex;align-items:center;gap:4px;flex:1;justify-content:center;
+}
+.nb{
+  background:transparent;border:none;border-radius:12px;
+  padding:7px 14px;font-size:13px;color:var(--muted);
+  font-weight:500;cursor:pointer;transition:all .18s;
+  font-family:var(--font);position:relative;
+  display:flex;align-items:center;gap:5px;
+}
+.nb:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.nb.on{
+  background:rgba(61,127,255,.12);color:var(--accent);
+  font-weight:600;
+}
+@media(max-width:700px){
+  #desktop-nav{display:none!important}
+}
+
 /* ── MOBILE NAV ──────────────────────────── */
 #mbar{
   display:none;position:fixed;bottom:0;left:0;right:0;
@@ -674,6 +696,15 @@ body::before{
 <div id="topbar">
   <div class="logo" onclick="go('home')">
     <div class="logo-box">🧠</div>NeurоNotepad
+  </div>
+
+  <div class="nav-area" id="desktop-nav">
+    <button class="nb on" id="nb-home" onclick="go('home')">🏠 Bosh</button>
+    <button class="nb" id="nb-comm" onclick="go('comm')">🌐 Jamoat</button>
+    <button class="nb" id="nb-neuro" onclick="go('neuro')">🧠 Nevro</button>
+    <button class="nb" id="nb-flash" onclick="go('flash')" style="position:relative">🃏 Flash<span id="sr-badge-d" style="display:none;position:absolute;top:2px;right:-4px;background:var(--red);border-radius:50%;width:7px;height:7px;box-shadow:0 0 6px rgba(255,77,106,.7)"></span></button>
+    <button class="nb" id="nb-prog" onclick="go('prog')">📈 Progress</button>
+    <button class="nb" id="nb-stats" onclick="go('stats')">📊 Stat</button>
   </div>
 
   <div class="top-r">
@@ -2115,7 +2146,7 @@ function go(v,arg){
   // Update SR badge
   setTimeout(()=>{
     const cnt=srDueCount();
-    ['sr-badge','sr-badge-m'].forEach(id=>{
+    ['sr-badge','sr-badge-m','sr-badge-d'].forEach(id=>{
       const el=document.getElementById(id);
       if(el)el.style.display=cnt>0?'block':'none';
     });
