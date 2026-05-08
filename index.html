@@ -2321,50 +2321,52 @@ async function sendChatMsg() {
   const text = inp?.value?.trim();
   if (!text || !_activeChatId || !currentGoogleUser || !_firebaseReady) return;
 
+  // Darhol tozalaymiz — foydalanuvchi kutmasin
   inp.value = '';
-  inp.style.borderColor = 'var(--border)';
+  inp.style.height = 'auto';
+  inp.focus();
 
   const myUid = currentGoogleUser.uid;
   const other = _activeOtherUser;
   const chatId = _activeChatId;
   const ts = Date.now();
-  const msgId = ts.toString(36) + Math.random().toString(36).slice(2, 7);
+  const msgId = 'msg_' + ts.toString(36) + Math.random().toString(36).slice(2, 8);
 
-  const msg = {
-    id: msgId,
-    text,
-    senderUid: myUid,
-    senderName: currentGoogleUser.displayName || currentProfile?.name || 'Anonim',
-    ts,
-    read: false
+  const myInfo = {
+    name: currentGoogleUser.displayName || currentProfile?.name || 'Anonim',
+    photo: currentGoogleUser.photoURL || currentProfile?.customPhoto || ''
+  };
+  const otherInfo = {
+    name: other.name || 'Anonim',
+    photo: other.photo || ''
   };
 
   try {
-    // Xabarni yozamiz
-    await db.ref(`messages/${chatId}/${msgId}`).set(msg);
+    // 1) Avval chat metadata va members ni yozamiz (rules uchun zarur)
+    const metaUpdates = {};
+    metaUpdates[`chats/${chatId}/members/${myUid}`] = myInfo;
+    metaUpdates[`chats/${chatId}/members/${other.uid}`] = otherInfo;
+    metaUpdates[`chats/${chatId}/lastMessage`] = text.slice(0, 80);
+    metaUpdates[`chats/${chatId}/updatedAt`] = ts;
+    metaUpdates[`chats/${chatId}/unread/${other.uid}`] = firebase.database.ServerValue.increment(1);
+    await db.ref().update(metaUpdates);
 
-    // Chat meta — har bir maydonni alohida update qilamiz (members to'liq yozilishi uchun)
-    const myInfo = {
-      name: currentGoogleUser.displayName || currentProfile?.name || 'Anonim',
-      photo: currentGoogleUser.photoURL || currentProfile?.customPhoto || ''
-    };
-    const otherInfo = {
-      name: other.name || 'Anonim',
-      photo: other.photo || ''
-    };
+    // 2) Keyin xabarni yozamiz (members endi mavjud — rules o'tadi)
+    await db.ref(`messages/${chatId}/${msgId}`).set({
+      id: msgId,
+      text,
+      senderUid: myUid,
+      senderName: myInfo.name,
+      ts,
+      read: false
+    });
 
-    const updates = {};
-    updates[`chats/${chatId}/members/${myUid}`] = myInfo;
-    updates[`chats/${chatId}/members/${other.uid}`] = otherInfo;
-    updates[`chats/${chatId}/lastMessage`] = text.slice(0, 80);
-    updates[`chats/${chatId}/updatedAt`] = ts;
-    updates[`chats/${chatId}/unread/${other.uid}`] = firebase.database.ServerValue.increment(1);
-
-    await db.ref().update(updates);
     updateMsgBadge();
   } catch(e) {
-    toast('Xabar yuborishda xato: ' + (e.message || e.code), 'err');
     console.error('sendChatMsg error:', e);
+    // Xabar qaytaramiz — foydalanuvchi qayta yozishi uchun
+    inp.value = text;
+    toast('Xabar yuborilmadi: ' + (e.code || e.message), 'err');
   }
 }
 
