@@ -2138,8 +2138,7 @@ async function loadChatsList() {
     if (!list) {
       if (_chatsRef && _chatsListener) {
         _chatsRef.off('value', _chatsListener);
-        _chatsListener = null;
-        _chatsRef = null;
+        _chatsListener = null; _chatsRef = null;
       }
       return;
     }
@@ -2148,8 +2147,15 @@ async function loadChatsList() {
     if (snap.exists()) {
       snap.forEach(child => {
         const chat = child.val();
-        if (chat.members && chat.members[myUid]) {
-          myChats.push({ id: child.key, ...chat });
+        if (!chat) return;
+        // chatId o'zida myUid bo'lsa — bu mening chatim
+        const chatKey = child.key || '';
+        const uidInKey = chatKey.includes(myUid);
+        // members ichida myUid bo'lsa
+        const members = chat.members || {};
+        const uidInMembers = members[myUid] !== undefined;
+        if (uidInKey || uidInMembers) {
+          myChats.push({ id: chatKey, ...chat });
         }
       });
       myChats.sort((a, b) => (b.updatedAt||0) - (a.updatedAt||0));
@@ -2159,37 +2165,52 @@ async function loadChatsList() {
       list.innerHTML = `
       <div style="text-align:center;padding:60px 20px">
         <div style="font-size:48px;margin-bottom:14px">📭</div>
-        <div style="font-family:var(--serif);font-size:18px;font-style:italic;color:#4a6080;margin-bottom:8px">Hali xabar yo'q</div>
+        <div style="font-family:var(--serif);font-size:18px;font-style:italic;color:#4a6080;margin-bottom:8px">Hali xabar yo\`q</div>
         <div style="font-size:13px;color:var(--dim)">Jamoat postlarida ✉️ Xabar tugmasini bosib suhbat boshlang</div>
       </div>`;
       return;
     }
 
     list.innerHTML = myChats.map(chat => {
-      const otherUid = Object.keys(chat.members).find(u => u !== myUid) || '';
-      const other = chat.members[otherUid] || {};
+      const members = chat.members || {};
+      // otherUid — members dan yoki chatId dan topamiz
+      let otherUid = Object.keys(members).find(u => u !== myUid) || '';
+      if (!otherUid) {
+        // chatId = uid1_uid2 formatida
+        const parts = (chat.id||'').split('_');
+        otherUid = parts.find(p => p !== myUid) || '';
+      }
+      const other = members[otherUid] || { name: 'Anonim', photo: '' };
       const lastMsg = chat.lastMessage || '';
       const lastTs = chat.updatedAt ? timeAgoShort(chat.updatedAt) : '';
       const unread = chat.unread?.[myUid] || 0;
       const initials = (other.name||'?')[0].toUpperCase();
+      const avatarBorder = unread ? 'var(--accent)' : 'transparent';
       const avatarHTML = other.photo
-        ? `<img src="${esc(other.photo)}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid ${unread?'var(--accent)':'transparent'}"/>`
-        : `<div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;border:2px solid ${unread?'var(--accent)':'transparent'}">${initials}</div>`;
+        ? `<img src="${esc(other.photo)}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid ${avatarBorder}"/>`
+        : `<div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;border:2px solid ${avatarBorder}">${initials}</div>`;
+
+      const borderClr = unread ? 'rgba(61,127,255,.25)' : 'var(--border)';
+      const bgClr = unread ? 'rgba(61,127,255,.07)' : 'var(--card)';
+
+      const nameWeight = unread ? '800' : '600';
+      const msgColor = unread ? 'var(--text)' : 'var(--muted)';
+      const msgWeight = unread ? '600' : '400';
 
       return `<div onclick="openChatRoom('${chat.id}','${otherUid}','${esc(other.name||'Anonim')}','${esc(other.photo||'')}')"
-        style="display:flex;align-items:center;gap:13px;padding:14px 16px;border-radius:18px;border:1px solid ${unread?'rgba(61,127,255,.25)':'var(--border)'};margin-bottom:8px;cursor:pointer;transition:.18s;background:${unread?'rgba(61,127,255,.07)':'var(--card)'}"
+        style="display:flex;align-items:center;gap:13px;padding:14px 16px;border-radius:18px;border:1px solid ${borderClr};margin-bottom:8px;cursor:pointer;transition:.18s;background:${bgClr}"
         onmouseenter="this.style.borderColor='rgba(61,127,255,.35)';this.style.background='rgba(61,127,255,.08)'"
-        onmouseleave="this.style.borderColor='${unread?'rgba(61,127,255,.25)':'var(--border)'}';this.style.background='${unread?'rgba(61,127,255,.07)':'var(--card)'}'">
+        onmouseleave="this.style.borderColor='${borderClr}';this.style.background='${bgClr}'">
         <div style="position:relative;flex-shrink:0">
           ${avatarHTML}
           ${unread ? `<div style="position:absolute;top:-4px;right:-4px;background:var(--red);border-radius:50%;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;border:2px solid var(--bg);padding:0 4px">${unread}</div>` : ''}
         </div>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-            <div style="font-size:14px;font-weight:${unread?'800':'600'};color:#ecf2ff">${esc(other.name||'Anonim')}</div>
+            <div style="font-size:14px;font-weight:${nameWeight};color:#ecf2ff">${esc(other.name||'Anonim')}</div>
             <div style="font-size:11px;color:var(--dim);flex-shrink:0;margin-left:8px">${lastTs}</div>
           </div>
-          <div style="font-size:12px;color:${unread?'var(--text)':'var(--muted)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:${unread?'600':'400'}">${esc(lastMsg) || '<i style="opacity:.5">Xabar yo\'q</i>'}</div>
+          <div style="font-size:12px;color:${msgColor};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:${msgWeight}">${esc(lastMsg) || '<i style="opacity:.5">Xabar yo\'q</i>'}</div>
         </div>
         <div style="font-size:18px;color:var(--muted);flex-shrink:0">›</div>
       </div>`;
