@@ -2363,9 +2363,11 @@ function listenChatMsgs(chatId, otherUid, otherName, otherPhoto) {
 async function sendChatMsg() {
   const inp = document.getElementById('chat-inp');
   const text = inp?.value?.trim();
-  if (!text || !_activeChatId || !currentGoogleUser || !_firebaseReady) return;
+  if (!text) return;
+  if (!_activeChatId || !_activeOtherUser) { toast('Chat topilmadi', 'err'); return; }
+  if (!currentGoogleUser) { toast('Iltimos kiring', 'err'); return; }
+  if (!_firebaseReady || !db) { toast('Firebase ulanmadi', 'err'); return; }
 
-  // Darhol tozalaymiz — foydalanuvchi kutmasin
   inp.value = '';
   inp.style.height = 'auto';
   inp.focus();
@@ -2374,41 +2376,36 @@ async function sendChatMsg() {
   const other = _activeOtherUser;
   const chatId = _activeChatId;
   const ts = Date.now();
-  const msgId = 'msg_' + ts.toString(36) + Math.random().toString(36).slice(2, 8);
-
-  const myInfo = {
-    name: currentGoogleUser.displayName || currentProfile?.name || 'Anonim',
-    photo: currentGoogleUser.photoURL || currentProfile?.customPhoto || ''
-  };
-  const otherInfo = {
-    name: other.name || 'Anonim',
-    photo: other.photo || ''
-  };
+  const msgId = 'msg_' + ts.toString(36) + '_' + Math.random().toString(36).slice(2, 7);
 
   try {
-    // 1) Avval chat metadata va members ni yozamiz (rules uchun zarur)
-    const metaUpdates = {};
-    metaUpdates[`chats/${chatId}/members/${myUid}`] = myInfo;
-    metaUpdates[`chats/${chatId}/members/${other.uid}`] = otherInfo;
-    metaUpdates[`chats/${chatId}/lastMessage`] = text.slice(0, 80);
-    metaUpdates[`chats/${chatId}/updatedAt`] = ts;
-    metaUpdates[`chats/${chatId}/unread/${other.uid}`] = firebase.database.ServerValue.increment(1);
-    await db.ref().update(metaUpdates);
-
-    // 2) Keyin xabarni yozamiz (members endi mavjud — rules o'tadi)
-    await db.ref(`messages/${chatId}/${msgId}`).set({
-      id: msgId,
-      text,
-      senderUid: myUid,
-      senderName: myInfo.name,
-      ts,
-      read: false
+    // Step 1: members yozamiz (rules uchun)
+    await db.ref(`chats/${chatId}/members/${myUid}`).set({
+      name: currentGoogleUser.displayName || currentProfile?.name || 'Anonim',
+      photo: currentGoogleUser.photoURL || currentProfile?.customPhoto || ''
+    });
+    await db.ref(`chats/${chatId}/members/${other.uid}`).set({
+      name: other.name || 'Anonim',
+      photo: other.photo || ''
     });
 
-    updateMsgBadge();
+    // Step 2: xabar yozamiz
+    await db.ref(`messages/${chatId}/${msgId}`).set({
+      id: msgId, text,
+      senderUid: myUid,
+      senderName: currentGoogleUser.displayName || currentProfile?.name || 'Anonim',
+      ts, read: false
+    });
+
+    // Step 3: chat meta
+    await db.ref(`chats/${chatId}`).update({
+      lastMessage: text.slice(0, 80),
+      updatedAt: ts
+    });
+    await db.ref(`chats/${chatId}/unread/${other.uid}`).transaction(v => (v || 0) + 1);
+
   } catch(e) {
-    console.error('sendChatMsg error:', e);
-    // Xabar qaytaramiz — foydalanuvchi qayta yozishi uchun
+    console.error('sendChatMsg error:', e.code, e.message);
     inp.value = text;
     toast('Xabar yuborilmadi: ' + (e.code || e.message), 'err');
   }
