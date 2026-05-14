@@ -2095,28 +2095,51 @@ async function rMsg() {
   <div style="font-family:var(--serif);font-size:22px;font-style:italic;color:#ecf2ff;margin-bottom:16px">💬 Xabarlar</div>
   <div id="chats-list"><div style="text-align:center;padding:40px;color:var(--muted)">Yuklanmoqda...</div></div>`;
 
+  // Firebase tayyor bo'lishini kutamiz
+  if (!_firebaseReady || !db) {
+    let tries = 0;
+    while ((!_firebaseReady || !db) && tries < 30) {
+      await new Promise(r => setTimeout(r, 200));
+      tries++;
+    }
+  }
+
+  if (!_firebaseReady || !db) {
+    const list = document.getElementById('chats-list');
+    if (list) list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--red)">⚠️ Firebase ulanmadi. Sahifani yangilang.</div>`;
+    return;
+  }
+
   loadChatsList();
 }
 
 let _chatsListener = null;
+let _chatsRef = null;
 
 async function loadChatsList() {
-  if (!_firebaseReady || !db || !currentGoogleUser) return;
+  if (!_firebaseReady || !db || !currentGoogleUser) {
+    const list = document.getElementById('chats-list');
+    if (list) list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">Firebase ulanmadi</div>`;
+    return;
+  }
   const myUid = currentGoogleUser.uid;
 
-  // Eski listenerni o'chiramiz
-  if (_chatsListener) {
-    db.ref('chats').off('value', _chatsListener);
+  // Eski listenerni to'g'ri o'chiramiz
+  if (_chatsRef && _chatsListener) {
+    _chatsRef.off('value', _chatsListener);
     _chatsListener = null;
+    _chatsRef = null;
   }
 
-  _chatsListener = db.ref('chats').orderByChild('updatedAt').on('value', snap => {
+  _chatsRef = db.ref('chats');
+
+  _chatsListener = _chatsRef.on('value', snap => {
     const list = document.getElementById('chats-list');
     if (!list) {
-      // Sahifa o'zgardi — listenerni o'chiramiz
-      if (_chatsListener) {
-        db.ref('chats').off('value', _chatsListener);
+      if (_chatsRef && _chatsListener) {
+        _chatsRef.off('value', _chatsListener);
         _chatsListener = null;
+        _chatsRef = null;
       }
       return;
     }
@@ -3183,7 +3206,7 @@ function go(v,arg){
   // Stop chat/chats listener when leaving msg view
   if(view==='msg' && v!=='msg'){
     if (_chatMsgRef && _chatMsgHandler) { _chatMsgRef.off('value', _chatMsgHandler); _chatMsgRef = null; _chatMsgHandler = null; }
-    if (_chatsListener) { db?.ref('chats').off('value', _chatsListener); _chatsListener = null; }
+    if (_chatsRef && _chatsListener) { _chatsRef.off('value', _chatsListener); _chatsListener = null; _chatsRef = null; }
     _activeChatId = null;
     _activeOtherUser = null;
   }
