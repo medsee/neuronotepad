@@ -2148,13 +2148,12 @@ async function loadChatsList() {
       snap.forEach(child => {
         const chat = child.val();
         if (!chat) return;
-        // chatId o'zida myUid bo'lsa — bu mening chatim
         const chatKey = child.key || '';
-        const uidInKey = chatKey.includes(myUid);
-        // members ichida myUid bo'lsa
         const members = chat.members || {};
-        const uidInMembers = members[myUid] !== undefined;
-        if (uidInKey || uidInMembers) {
+        // chatId = uid1_uid2 — split bilan aniq tekshiramiz
+        const inKey = chatKey.split('_').some(part => part === myUid);
+        const inMembers = myUid in members;
+        if (inKey || inMembers) {
           myChats.push({ id: chatKey, ...chat });
         }
       });
@@ -2291,15 +2290,22 @@ let _chatMsgRef = null;
 let _chatMsgHandler = null;
 
 function listenChatMsgs(chatId, otherUid, otherName, otherPhoto) {
-  if (!_firebaseReady || !db) return;
-
-  // Eski listenerni to'xtatamiz
-  if (_chatMsgRef && _chatMsgHandler) {
-    _chatMsgRef.off('value', _chatMsgHandler);
+  if (!_firebaseReady || !db) { 
+    setTimeout(() => listenChatMsgs(chatId, otherUid, otherName, otherPhoto), 500);
+    return; 
   }
 
-  const myUid = currentGoogleUser.uid;
-  const ref = db.ref(`messages/${chatId}`).orderByChild('ts').limitToLast(200);
+  if (_chatMsgRef && _chatMsgHandler) {
+    _chatMsgRef.off('value', _chatMsgHandler);
+    _chatMsgRef = null;
+    _chatMsgHandler = null;
+  }
+
+  const myUid = currentGoogleUser?.uid;
+  if (!myUid) return;
+
+  // orderByChild ishlatmaymiz — index kerak qiladi
+  const ref = db.ref(`messages/${chatId}`);
   _chatMsgRef = ref;
   let isFirst = true;
 
@@ -2307,31 +2313,34 @@ function listenChatMsgs(chatId, otherUid, otherName, otherPhoto) {
     const box = document.getElementById('chat-msgs');
     if (!box) {
       ref.off('value', _chatMsgHandler);
+      _chatMsgRef = null;
+      _chatMsgHandler = null;
       return;
     }
 
-    // Scroll pastda ekanini tekshiramiz
-    const wasAtBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+    const wasAtBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
 
     let msgs = [];
     if (snap.exists()) {
-      snap.forEach(c => msgs.push(c.val()));
-      msgs.sort((a, b) => (a.ts||0) - (b.ts||0));
+      snap.forEach(c => {
+        const v = c.val();
+        if (v && v.ts) msgs.push(v);
+      });
+      msgs.sort((a, b) => a.ts - b.ts);
     }
 
     if (!msgs.length) {
       box.innerHTML = `<div style="text-align:center;padding:40px 20px">
         <div style="font-size:40px;margin-bottom:10px">👋</div>
-        <div style="font-size:13px;color:var(--dim);line-height:1.7">Suhbatni boshlang!<br><span style="font-size:11px;opacity:.6">🔒 Xabarlar faqat siz ikkovingizga ko'rinadi</span></div>
+        <div style="font-size:13px;color:var(--dim);line-height:1.7">Suhbatni boshlang!<br>
+        <span style="font-size:11px;opacity:.6">🔒 Xabarlar faqat siz ikkovingizga ko'rinadi</span></div>
       </div>`;
       return;
     }
 
-    // Xabarlarni render qilamiz
     box.innerHTML = msgs.map((m, i) => {
       const isMe = m.senderUid === myUid;
       const time = new Date(m.ts).toLocaleTimeString('uz-UZ', {hour:'2-digit', minute:'2-digit'});
-      // Sana belgisi (kun o'zgarganda)
       const prevMsg = msgs[i-1];
       const showDate = !prevMsg || new Date(m.ts).toDateString() !== new Date(prevMsg.ts).toDateString();
       const dateLabel = showDate ? `<div style="text-align:center;margin:10px 0 6px"><span style="background:rgba(255,255,255,.06);border-radius:20px;padding:3px 12px;font-size:10px;color:var(--muted)">${new Date(m.ts).toLocaleDateString('uz-UZ',{day:'2-digit',month:'short'})}</span></div>` : '';
@@ -2341,22 +2350,26 @@ function listenChatMsgs(chatId, otherUid, otherName, otherPhoto) {
         : `<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0">${(otherName||'?')[0].toUpperCase()}</div>`)
         : '';
 
-      return `${dateLabel}<div style="display:flex;flex-direction:${isMe?'row-reverse':'row'};align-items:flex-end;gap:7px;margin-bottom:4px">
+      const isMe_ = isMe;
+      return `${dateLabel}<div style="display:flex;flex-direction:${isMe_?'row-reverse':'row'};align-items:flex-end;gap:7px;margin-bottom:4px">
         ${avatarHTML}
-        <div style="max-width:75%;min-width:60px;background:${isMe?'linear-gradient(135deg,#3d7fff,#6c3fff)':'rgba(255,255,255,.06)'};border:1px solid ${isMe?'transparent':'rgba(255,255,255,.08)'};border-radius:${isMe?'18px 18px 4px 18px':'18px 18px 18px 4px'};padding:10px 13px;box-shadow:0 2px 10px rgba(0,0,0,.25)">
-          <div style="font-size:13px;color:${isMe?'#fff':'var(--text)'};line-height:1.55;word-break:break-word;white-space:pre-wrap">${esc(m.text)}</div>
-          <div style="font-size:10px;color:${isMe?'rgba(255,255,255,.55)':'var(--dim)'};margin-top:5px;text-align:right;display:flex;align-items:center;justify-content:flex-end;gap:3px">${time}${isMe?(m.read?'<span style="color:rgba(100,200,255,.8)">✓✓</span>':'<span style="opacity:.5">✓</span>')  :''}</div>
+        <div style="max-width:75%;min-width:60px;background:${isMe_?'linear-gradient(135deg,#3d7fff,#6c3fff)':'rgba(255,255,255,.06)'};border:1px solid ${isMe_?'transparent':'rgba(255,255,255,.08)'};border-radius:${isMe_?'18px 18px 4px 18px':'18px 18px 18px 4px'};padding:10px 13px;box-shadow:0 2px 10px rgba(0,0,0,.25)">
+          <div style="font-size:13px;color:${isMe_?'#fff':'var(--text)'};line-height:1.55;word-break:break-word;white-space:pre-wrap">${esc(m.text||'')}</div>
+          <div style="font-size:10px;color:${isMe_?'rgba(255,255,255,.55)':'var(--dim)'};margin-top:5px;text-align:right;display:flex;align-items:center;justify-content:flex-end;gap:3px">${time}${isMe_?(m.read?'<span style="color:rgba(100,200,255,.8)">✓✓</span>':'<span style="opacity:.5">✓</span>'):''}</div>
         </div>
       </div>`;
     }).join('');
 
-    // Birinchi yuklanishda yoki pastda bo'lsa — scroll pastga
     if (isFirst || wasAtBottom) {
       box.scrollTop = box.scrollHeight;
       isFirst = false;
     }
 
     markChatRead(chatId);
+  }, err => {
+    console.error('listenChatMsgs error:', err.code, err.message);
+    const box = document.getElementById('chat-msgs');
+    if (box) box.innerHTML = `<div style="text-align:center;padding:30px;color:var(--red)">⚠️ Xabarlarni yuklashda xato: ${err.code}</div>`;
   });
 }
 
@@ -2378,36 +2391,34 @@ async function sendChatMsg() {
   const ts = Date.now();
   const msgId = 'msg_' + ts.toString(36) + '_' + Math.random().toString(36).slice(2, 7);
 
+  const myName = currentGoogleUser.displayName || currentProfile?.name || 'Anonim';
+  const myPhoto = currentGoogleUser.photoURL || currentProfile?.customPhoto || '';
+
   try {
-    // Step 1: members yozamiz (rules uchun)
-    await db.ref(`chats/${chatId}/members/${myUid}`).set({
-      name: currentGoogleUser.displayName || currentProfile?.name || 'Anonim',
-      photo: currentGoogleUser.photoURL || currentProfile?.customPhoto || ''
-    });
-    await db.ref(`chats/${chatId}/members/${other.uid}`).set({
-      name: other.name || 'Anonim',
-      photo: other.photo || ''
-    });
+    // Hammasi bir vaqtda — atomic update
+    const updates = {};
+    updates[`chats/${chatId}/members/${myUid}/name`] = myName;
+    updates[`chats/${chatId}/members/${myUid}/photo`] = myPhoto;
+    updates[`chats/${chatId}/members/${other.uid}/name`] = other.name || 'Anonim';
+    updates[`chats/${chatId}/members/${other.uid}/photo`] = other.photo || '';
+    updates[`chats/${chatId}/lastMessage`] = text.slice(0, 80);
+    updates[`chats/${chatId}/updatedAt`] = ts;
+    updates[`messages/${chatId}/${msgId}/id`] = msgId;
+    updates[`messages/${chatId}/${msgId}/text`] = text;
+    updates[`messages/${chatId}/${msgId}/senderUid`] = myUid;
+    updates[`messages/${chatId}/${msgId}/senderName`] = myName;
+    updates[`messages/${chatId}/${msgId}/ts`] = ts;
+    updates[`messages/${chatId}/${msgId}/read`] = false;
 
-    // Step 2: xabar yozamiz
-    await db.ref(`messages/${chatId}/${msgId}`).set({
-      id: msgId, text,
-      senderUid: myUid,
-      senderName: currentGoogleUser.displayName || currentProfile?.name || 'Anonim',
-      ts, read: false
-    });
+    await db.ref().update(updates);
 
-    // Step 3: chat meta
-    await db.ref(`chats/${chatId}`).update({
-      lastMessage: text.slice(0, 80),
-      updatedAt: ts
-    });
+    // unread alohida (transaction kerak)
     await db.ref(`chats/${chatId}/unread/${other.uid}`).transaction(v => (v || 0) + 1);
 
   } catch(e) {
     console.error('sendChatMsg error:', e.code, e.message);
     inp.value = text;
-    toast('Xabar yuborilmadi: ' + (e.code || e.message), 'err');
+    toast('Yuborilmadi: ' + (e.code || e.message), 'err');
   }
 }
 
