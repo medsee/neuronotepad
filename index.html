@@ -432,6 +432,7 @@ a{color:var(--accent)}
     <button class="nb" id="nb-comm" onclick="go('comm')">🌐 Jamoat</button>
     <button class="nb" id="nb-neuro" onclick="go('neuro')">🧠 Nevro</button>
     <button class="nb" id="nb-flash" onclick="go('flash')" style="position:relative">🃏 Flash<span id="sr-badge-d" style="display:none;position:absolute;top:2px;right:-4px;background:var(--red);border-radius:50%;width:7px;height:7px;box-shadow:0 0 6px rgba(255,77,106,.7)"></span></button>
+    <button class="nb" id="nb-groups" onclick="go('groups')" style="position:relative">👥 Guruhlar</button>
     <button class="nb" id="nb-msg" onclick="go('msg')" style="position:relative">💬 Xabarlar<span id="msg-badge-d" style="display:none;position:absolute;top:2px;right:-4px;background:var(--red);border-radius:50%;width:7px;height:7px;box-shadow:0 0 6px rgba(255,77,106,.7)"></span></button>
     <button class="nb" id="nb-stats" onclick="go('stats')">📊 Stat</button>
     <button class="nb" id="nb-profile" onclick="go('profile')">👤 Profil</button>
@@ -461,6 +462,7 @@ a{color:var(--accent)}
   <button class="mb" id="mb-comm" onclick="go('comm')"><span class="mi">🌐</span>Jamoat</button>
   <button class="mb" id="mb-neuro" onclick="go('neuro')"><span class="mi">🧠</span>Nevro</button>
   <button class="mb" id="mb-flash" onclick="go('flash')" style="position:relative"><span class="mi">🃏</span>Flash<span id="sr-badge-m" style="display:none;position:absolute;top:4px;right:10px;background:var(--red);border-radius:50%;width:7px;height:7px;box-shadow:0 0 6px rgba(255,77,106,.7)"></span></button>
+  <button class="mb" id="mb-groups" onclick="go('groups')"><span class="mi">👥</span>Guruhlar</button>
   <button class="mb" id="mb-msg" onclick="go('msg')" style="position:relative"><span class="mi">💬</span>Xabarlar<span id="msg-badge-m" style="display:none;position:absolute;top:4px;right:6px;background:var(--red);border-radius:50%;width:7px;height:7px;box-shadow:0 0 6px rgba(255,77,106,.7)"></span></button>
   <button class="mb" id="mb-stats" onclick="go('stats')"><span class="mi">📊</span>Stat</button>
   <button class="mb" id="mb-profile" onclick="go('profile')"><span class="mi">👤</span>Profil</button>
@@ -1350,7 +1352,7 @@ function rEditor(){
   const n=editing;
   const subs=asubj();
   document.getElementById('main').innerHTML=`
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap" id="editor-toolbar">
     <button class="ghost btn-sm" onclick="saveNote();go('home')">← Orqaga</button>
     <input id="etit" class="inp" value="${esc(n.title)}" placeholder="Mavzu sarlavhasi..."
       style="flex:1;font-size:16px;font-weight:700;background:transparent;border:none;padding:4px 0;min-width:100px;outline:none"
@@ -1359,6 +1361,7 @@ function rEditor(){
     <button class="ibtn" onclick="saveNote();go('detail','${n.id}')" title="Ko'rish">👁</button>
     <button class="ibtn" title="PDF eksport" onclick="saveNote();exportNotePDF('${n.id}')">📄</button>
     <button class="ibtn" title="QR kod" onclick="showQRModal('${n.id}')">🔲</button>
+    <button class="ibtn" title="Birgalikda tahrirlash" onclick="startCollabSession('${n.id}')" style="color:var(--green);border-color:rgba(0,232,122,.3);font-size:12px;font-weight:700;gap:4px;padding:7px 10px">🔗 Hamkorlik</button>
     <button class="ibtn" style="color:var(--red);border-color:rgba(224,85,85,.3)" onclick="showDel('${n.id}')">🗑</button>
   </div>
   <div class="ewrap">
@@ -3095,7 +3098,7 @@ function go(v,arg){
     });
   },100);
   view=v;
-  ['home','comm','neuro','flash','msg','stats','profile'].forEach(k=>{
+  ['home','comm','neuro','flash','groups','msg','stats','profile'].forEach(k=>{
     document.getElementById('nb-'+k)?.classList.toggle('on',k===v);
     document.getElementById('mb-'+k)?.classList.toggle('on',k===v);
   });
@@ -3108,6 +3111,7 @@ function go(v,arg){
   else if(v==='neuro')rNeuro();
   else if(v==='flash')rFlash();
   else if(v==='msg')rMsg();
+  else if(v==='groups')showGroupsPage();
   else if(v==='prog')rProg();
   else if(v==='stats')rStats();
   else if(v==='editor')rEditor();
@@ -3739,25 +3743,8 @@ function renderCommTab(tab, n, comments) {
       else body.innerHTML = cnt.split('\n').map(l=>l.trim()?`<p>${esc(l)}</p>`:'').join('');
     }, 30);
   } else {
-    // Comments tab
-    const timeAgo = (ts) => {const d=Math.floor((Date.now()-ts)/1000);if(d<60)return 'Hozirgina';if(d<3600)return Math.floor(d/60)+' daqiqa oldin';return Math.floor(d/86400)+' kun oldin';};
-    el.innerHTML = `
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <input class="inp" id="cmt-inp-${n.id}" placeholder="Izoh yozing..." onkeydown="if(event.key==='Enter')addComment('${n.id}')"/>
-        <button class="btn btn-p btn-sm" onclick="addComment('${n.id}')">Yuborish</button>
-      </div>
-      <div id="cmts-${n.id}">
-        ${comments.length ? comments.map(c=>`
-          <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#5b8dee,#7c5cbf);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">${esc((c.author||'?')[0].toUpperCase())}</div>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:12px;font-weight:600;color:#ecf2ff;margin-bottom:2px">${esc(c.author||'Anonim')} <span style="color:var(--dim);font-weight:400">· ${timeAgo(c.ts)}</span></div>
-              <div style="font-size:13px;color:#d0dff5;line-height:1.6">${esc(c.text)}</div>
-            </div>
-          </div>`).join('')
-        : '<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Hali izoh yo\'q. Birinchi bo\'ling!</div>'}
-      </div>`;
-    setTimeout(()=>document.getElementById(`cmt-inp-${n.id}`)?.focus(),50);
+    // ✨ Yangi izoh tizimi — Firebase real-time + threading + likes
+    renderComments(n.id, el);
   }
 }
 
@@ -4669,6 +4656,710 @@ setTimeout(() => {
   setInterval(checkSubscriptionUpdates, 300000);
   setTimeout(checkSubscriptionUpdates, 5000);
 }, 1000);
+
+// ════════════════════════════════════════════════════════════════
+// 💬 GURUH CHATI (Group Chat) — Firebase Real-time
+// ════════════════════════════════════════════════════════════════
+let _groupChatRef = null;
+let _groupChatHandler = null;
+let _activeGroupId = null;
+
+// Guruhlar ro'yxatini Firebase'dan olish
+async function loadGroups() {
+  if (!_firebaseReady || !db) return [];
+  try {
+    const snap = await db.ref('groups').orderByChild('updatedAt').get();
+    const groups = [];
+    if (snap.exists()) {
+      snap.forEach(c => groups.push({ id: c.key, ...c.val() }));
+      groups.sort((a, b) => (b.updatedAt||0) - (a.updatedAt||0));
+    }
+    return groups;
+  } catch(e) { console.error('loadGroups:', e); return []; }
+}
+
+// Guruh yaratish
+async function createGroup(name, subject, emoji) {
+  if (!currentGoogleUser) { signInWithGoogle(); return; }
+  if (!_firebaseReady || !db) { toast('Firebase ulanmadi', 'err'); return; }
+  const uid_ = currentGoogleUser.uid;
+  const groupId = 'grp_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const group = {
+    id: groupId, name, subject: subject||'Umumiy', emoji: emoji||'📚',
+    creatorUid: uid_,
+    creatorName: currentGoogleUser.displayName || currentProfile?.name || 'Anonim',
+    members: { [uid_]: {
+      name: currentGoogleUser.displayName || currentProfile?.name || 'Anonim',
+      photo: currentGoogleUser.photoURL || currentProfile?.customPhoto || '',
+      joinedAt: Date.now(), role: 'admin'
+    }},
+    memberCount: 1, lastMessage: '', updatedAt: Date.now(), createdAt: Date.now()
+  };
+  await db.ref(`groups/${groupId}`).set(group);
+  toast('✅ Guruh yaratildi!', 'ok');
+  openGroupChat(groupId, group);
+}
+
+// Guruhga qo'shilish
+async function joinGroup(groupId) {
+  if (!currentGoogleUser) { signInWithGoogle(); return; }
+  if (!_firebaseReady || !db) return;
+  const uid_ = currentGoogleUser.uid;
+  const memberData = {
+    name: currentGoogleUser.displayName || currentProfile?.name || 'Anonim',
+    photo: currentGoogleUser.photoURL || currentProfile?.customPhoto || '',
+    joinedAt: Date.now(), role: 'member'
+  };
+  await db.ref(`groups/${groupId}/members/${uid_}`).set(memberData);
+  await db.ref(`groups/${groupId}/memberCount`).transaction(v => (v||0) + 1);
+  toast('✅ Guruhga qo\'shildingiz!', 'ok');
+}
+
+// Guruhdan chiqish
+async function leaveGroup(groupId) {
+  if (!currentGoogleUser || !_firebaseReady || !db) return;
+  if (!confirm('Guruhdan chiqmoqchimisiz?')) return;
+  await db.ref(`groups/${groupId}/members/${currentGoogleUser.uid}`).remove();
+  await db.ref(`groups/${groupId}/memberCount`).transaction(v => Math.max(0, (v||1) - 1));
+  if (_groupChatHandler && _groupChatRef) { _groupChatRef.off('value', _groupChatHandler); }
+  _activeGroupId = null;
+  toast('Guruhdan chiqdingiz');
+  showGroupsPage();
+}
+
+// Guruh chati sahifasi
+async function showGroupsPage() {
+  const main = document.getElementById('main');
+  if (!main) return;
+
+  main.innerHTML = `
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+    <div>
+      <div style="font-family:var(--serif);font-size:24px;font-style:italic;color:#ecf2ff;font-weight:400">💬 Guruh chatlari</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">Birgalikda o'qish xonalari</div>
+    </div>
+    ${currentGoogleUser ? `<button onclick="showCreateGroupModal()" style="background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;padding:11px 20px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:7px;box-shadow:0 4px 18px rgba(77,138,255,.35)">➕ Guruh yaratish</button>` : ''}
+  </div>
+  <div id="groups-list"><div style="text-align:center;padding:40px;color:var(--muted)">Yuklanmoqda...</div></div>`;
+
+  const groups = await loadGroups();
+  const el = document.getElementById('groups-list');
+  if (!el) return;
+
+  if (!groups.length) {
+    el.innerHTML = `
+    <div style="text-align:center;padding:60px 20px">
+      <div style="font-size:56px;margin-bottom:16px">💬</div>
+      <div style="font-family:var(--serif);font-size:20px;font-style:italic;color:var(--muted);margin-bottom:8px">Hali guruh yo'q</div>
+      <div style="font-size:13px;color:var(--dim);margin-bottom:20px">Birinchi guruhni yarating va do'stlaringizni taklif qiling</div>
+      ${currentGoogleUser ? `<button onclick="showCreateGroupModal()" style="background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;padding:12px 24px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--font)">➕ Guruh yaratish</button>` : `<button onclick="signInWithGoogle()" style="background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;padding:12px 24px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--font)">🔐 Kirish kerak</button>`}
+    </div>`;
+    return;
+  }
+
+  const myUid = currentGoogleUser?.uid;
+  el.innerHTML = groups.map(g => {
+    const isMember = myUid && g.members?.[myUid];
+    const memberCount = g.memberCount || Object.keys(g.members||{}).length;
+    const subColors = {'Anatomiya':'#e05c6c','Farmakologiya':'#5b8dee','Patologiya':'#f59e0b','Fiziologiya':'#10b981','Jarrohlik':'#8b5cf6','Klinika':'#06b6d4','Umumiy':'#64748b'};
+    const col = subColors[g.subject] || '#5b8dee';
+    return `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:18px;margin-bottom:12px;cursor:pointer;transition:all .2s;border-left:4px solid ${col}"
+      onmouseenter="this.style.borderColor='${col}';this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 30px rgba(0,0,0,.2)'"
+      onmouseleave="this.style.borderColor='var(--border)';this.style.borderLeftColor='${col}';this.style.transform='';this.style.boxShadow=''"
+      onclick="openGroupChat('${g.id}',${JSON.stringify(g).replace(/'/g,'\\u0027')})">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:50px;height:50px;border-radius:16px;background:linear-gradient(135deg,${col}22,${col}11);border:1px solid ${col}33;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${g.emoji||'📚'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div style="font-size:15px;font-weight:700;color:#ecf2ff">${esc(g.name)}</div>
+            <div style="font-size:11px;color:var(--muted)">${g.updatedAt ? timeAgoShort(g.updatedAt) : ''}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span style="background:${col}18;color:${col};border:1px solid ${col}33;border-radius:20px;padding:2px 9px;font-size:10px;font-weight:700">${esc(g.subject||'Umumiy')}</span>
+            <span style="font-size:11px;color:var(--muted)">👥 ${memberCount} a'zo</span>
+            ${isMember ? `<span style="background:rgba(0,232,122,.12);color:var(--green);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700">✅ A'zo</span>` : ''}
+          </div>
+          <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(g.lastMessage||'Hali xabar yo\'q')}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Guruh yaratish modali
+function showCreateGroupModal() {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)';
+  overlay.onclick = e => { if(e.target===overlay) overlay.remove(); };
+  const subjectsList = ['Anatomiya','Farmakologiya','Patologiya','Fiziologiya','Jarrohlik','Mikrobiologiya','Klinika','Umumiy','Nevrologiya','Kardiologiya'];
+  const emojis = ['📚','🧠','💊','🦴','❤️','🔬','🩺','⚕️','🧬','💉','🫀','🫁'];
+  overlay.innerHTML = `
+  <div style="background:#0b1222;border:1px solid rgba(61,127,255,.2);border-radius:24px;width:100%;max-width:440px;box-shadow:0 24px 72px rgba(0,0,0,.8);overflow:hidden">
+    <div style="padding:22px 24px 16px;border-bottom:1px solid rgba(61,127,255,.1);background:linear-gradient(135deg,rgba(77,138,255,.08),rgba(124,79,255,.05));display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:11px;font-weight:800;color:rgba(77,138,255,.7);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">YANGI GURUH</div>
+        <div style="font-family:var(--serif);font-size:22px;font-style:italic;color:#ecf2ff;font-weight:400">💬 Guruh yaratish</div>
+      </div>
+      <button onclick="this.closest('[style*=fixed]').remove()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:50%;width:34px;height:34px;color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div style="padding:20px 22px">
+      <div style="margin-bottom:14px">
+        <span class="lbl">Emoji tanlang</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+          ${emojis.map((e,i) => `<button onclick="this.parentNode.querySelectorAll('button').forEach(b=>b.style.background='transparent');this.style.background='rgba(77,138,255,.2)';document.getElementById('grp-emoji').value='${e}'" style="font-size:22px;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:${i===0?'rgba(77,138,255,.2)':'transparent'};cursor:pointer;transition:.15s">${e}</button>`).join('')}
+        </div>
+        <input type="hidden" id="grp-emoji" value="📚"/>
+      </div>
+      <div style="margin-bottom:14px">
+        <span class="lbl">Guruh nomi <span style="color:var(--red)">*</span></span>
+        <input class="inp" id="grp-name" placeholder="Masalan: Nevrologiya 3-kurs" maxlength="50"/>
+      </div>
+      <div style="margin-bottom:18px">
+        <span class="lbl">Fan yo'nalishi</span>
+        <select class="inp" id="grp-subject" style="cursor:pointer">
+          ${subjectsList.map(s => `<option value="${s}">${s}</option>`).join('')}
+        </select>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button onclick="this.closest('[style*=fixed]').remove()" style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;font-family:var(--font)">Bekor</button>
+        <button onclick="
+          const n=document.getElementById('grp-name').value.trim();
+          const s=document.getElementById('grp-subject').value;
+          const e=document.getElementById('grp-emoji').value;
+          if(!n){document.getElementById('grp-name').style.borderColor='var(--red)';return;}
+          this.textContent='⏳ Yaratilmoqda...';this.disabled=true;
+          this.closest('[style*=fixed]').remove();
+          createGroup(n,s,e);"
+          style="flex:2;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--font);box-shadow:0 4px 18px rgba(77,138,255,.35)">✅ Yaratish</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(() => document.getElementById('grp-name')?.focus(), 100);
+}
+
+// Guruh chat xonasi
+function openGroupChat(groupId, groupData) {
+  if (typeof groupData === 'string') {
+    try { groupData = JSON.parse(groupData); } catch(e) { return; }
+  }
+  _activeGroupId = groupId;
+  const g = groupData;
+  const myUid = currentGoogleUser?.uid;
+  const isMember = myUid && g.members?.[myUid];
+  const isAdmin = myUid && g.members?.[myUid]?.role === 'admin';
+  const memberCount = g.memberCount || Object.keys(g.members||{}).length;
+  const subColors = {'Anatomiya':'#e05c6c','Farmakologiya':'#5b8dee','Patologiya':'#f59e0b','Fiziologiya':'#10b981','Jarrohlik':'#8b5cf6','Umumiy':'#64748b'};
+  const col = subColors[g.subject] || '#5b8dee';
+
+  document.getElementById('main').innerHTML = `
+  <div style="display:flex;flex-direction:column;height:calc(100dvh - 120px);max-width:780px;margin:0 auto">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0 14px;border-bottom:1px solid var(--border);flex-shrink:0">
+      <button onclick="showGroupsPage()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:var(--muted);font-size:18px;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s">←</button>
+      <div style="width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,${col}22,${col}11);border:1px solid ${col}44;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${g.emoji||'📚'}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:15px;font-weight:800;color:#ecf2ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(g.name)}</div>
+        <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px">
+          <span style="background:${col}18;color:${col};border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700">${esc(g.subject||'')}</span>
+          <span>👥 ${memberCount} a'zo</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px">
+        ${!isMember ? `<button onclick="joinGroup('${groupId}').then(()=>openGroupChat('${groupId}',${JSON.stringify(g).replace(/'/g,"\\u0027")}))" style="background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;padding:8px 14px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--font)">+ Qo'shilish</button>` : ''}
+        <button onclick="showGroupMembers('${groupId}',${JSON.stringify(g).replace(/'/g,"\\u0027")})" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px 12px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;font-family:var(--font)">👥 ${memberCount}</button>
+        ${isMember && !isAdmin ? `<button onclick="leaveGroup('${groupId}')" style="background:rgba(255,77,106,.08);border:1px solid rgba(255,77,106,.15);border-radius:12px;padding:8px 12px;font-size:12px;font-weight:700;color:var(--red);cursor:pointer;font-family:var(--font)">Chiqish</button>` : ''}
+      </div>
+    </div>
+    <!-- Messages -->
+    <div id="grp-msgs" style="flex:1;overflow-y:auto;padding:14px 0 8px;display:flex;flex-direction:column;gap:2px;scrollbar-width:thin;scrollbar-color:var(--border2) transparent"></div>
+    <!-- Input -->
+    ${isMember ? `
+    <div style="display:flex;gap:8px;padding:10px 0 4px;border-top:1px solid var(--border);flex-shrink:0;align-items:flex-end">
+      <textarea id="grp-inp" placeholder="Guruhga xabar yozing..." rows="1"
+        style="flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:22px;padding:11px 16px;font-size:14px;color:var(--text);font-family:var(--font);outline:none;resize:none;max-height:120px;overflow-y:auto;line-height:1.4;transition:.2s"
+        onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+        oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendGroupMsg('${groupId}')}"></textarea>
+      <button onclick="sendGroupMsg('${groupId}')" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 14px rgba(77,138,255,.4)">➤</button>
+    </div>` : `
+    <div style="padding:12px;text-align:center;color:var(--muted);font-size:13px;border-top:1px solid var(--border)">
+      Xabar yozish uchun guruhga qo'shiling
+    </div>`}
+  </div>`;
+
+  listenGroupMsgs(groupId, g);
+  setTimeout(() => document.getElementById('grp-inp')?.focus(), 150);
+}
+
+// Guruh xabarlarini tinglash
+let _grpMsgRef = null, _grpMsgHandler = null;
+function listenGroupMsgs(groupId, g) {
+  if (!_firebaseReady || !db) return;
+  if (_grpMsgRef && _grpMsgHandler) { _grpMsgRef.off('value', _grpMsgHandler); }
+  const myUid = currentGoogleUser?.uid;
+  _grpMsgRef = db.ref(`groupMessages/${groupId}`);
+  let isFirst = true;
+  _grpMsgHandler = _grpMsgRef.on('value', snap => {
+    const box = document.getElementById('grp-msgs');
+    if (!box) { _grpMsgRef?.off('value', _grpMsgHandler); return; }
+    const wasAtBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+    let msgs = [];
+    if (snap.exists()) { snap.forEach(c => { const v=c.val(); if(v&&v.ts) msgs.push(v); }); msgs.sort((a,b)=>a.ts-b.ts); }
+    if (!msgs.length) {
+      box.innerHTML = `<div style="text-align:center;padding:40px 20px"><div style="font-size:40px;margin-bottom:10px">👋</div><div style="font-size:13px;color:var(--dim)">Suhbatni boshlang! Bu guruhga qo'shilgan hamma xabarni ko'radi.</div></div>`;
+      return;
+    }
+    box.innerHTML = msgs.map((m, i) => {
+      const isMe = m.senderUid === myUid;
+      const time = new Date(m.ts).toLocaleTimeString('uz-UZ',{hour:'2-digit',minute:'2-digit'});
+      const prevMsg = msgs[i-1];
+      const showDate = !prevMsg || new Date(m.ts).toDateString() !== new Date(prevMsg.ts).toDateString();
+      const showName = !isMe && (!prevMsg || prevMsg.senderUid !== m.senderUid);
+      const dateLabel = showDate ? `<div style="text-align:center;margin:10px 0 6px"><span style="background:rgba(255,255,255,.06);border-radius:20px;padding:3px 12px;font-size:10px;color:var(--muted)">${new Date(m.ts).toLocaleDateString('uz-UZ',{day:'2-digit',month:'short'})}</span></div>` : '';
+      const avatarHTML = !isMe ? (m.senderPhoto
+        ? `<img src="${esc(m.senderPhoto)}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;align-self:flex-end"/>`
+        : `<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0;align-self:flex-end">${(m.senderName||'?')[0].toUpperCase()}</div>`)
+        : '<div style="width:28px;flex-shrink:0"></div>';
+      return `${dateLabel}<div style="display:flex;flex-direction:${isMe?'row-reverse':'row'};align-items:flex-end;gap:6px;margin-bottom:2px">
+        ${isMe ? '' : avatarHTML}
+        <div style="max-width:78%;min-width:60px">
+          ${showName && !isMe ? `<div style="font-size:10px;color:var(--accent);font-weight:700;margin-bottom:2px;padding-left:4px">${esc(m.senderName||'')}</div>` : ''}
+          <div style="background:${isMe?'linear-gradient(135deg,#3d7fff,#6c3fff)':'rgba(255,255,255,.06)'};border:1px solid ${isMe?'transparent':'rgba(255,255,255,.07)'};border-radius:${isMe?'18px 18px 4px 18px':'18px 18px 18px 4px'};padding:10px 13px;box-shadow:0 2px 8px rgba(0,0,0,.2)">
+            <div style="font-size:13px;color:${isMe?'#fff':'var(--text)'};line-height:1.55;word-break:break-word;white-space:pre-wrap">${esc(m.text||'')}</div>
+            <div style="font-size:10px;color:${isMe?'rgba(255,255,255,.5)':'var(--dim)'};margin-top:4px;text-align:right">${time}</div>
+          </div>
+        </div>
+        ${isMe ? avatarHTML : ''}
+      </div>`;
+    }).join('');
+    if (isFirst || wasAtBottom) { box.scrollTop = box.scrollHeight; isFirst = false; }
+  }, err => {
+    const box = document.getElementById('grp-msgs');
+    if (box) box.innerHTML = `<div style="text-align:center;padding:30px;color:var(--red)">⚠️ Xato: ${err.code}</div>`;
+  });
+}
+
+// Guruh xabar yuborish
+async function sendGroupMsg(groupId) {
+  const inp = document.getElementById('grp-inp');
+  const text = inp?.value?.trim();
+  if (!text || !currentGoogleUser || !_firebaseReady || !db) return;
+  inp.value = ''; inp.style.height = 'auto'; inp.focus();
+  const ts = Date.now();
+  const msgId = 'gm_' + ts.toString(36) + '_' + Math.random().toString(36).slice(2,6);
+  const msg = {
+    id: msgId, text, ts,
+    senderUid: currentGoogleUser.uid,
+    senderName: currentGoogleUser.displayName || currentProfile?.name || 'Anonim',
+    senderPhoto: currentGoogleUser.photoURL || currentProfile?.customPhoto || ''
+  };
+  try {
+    await db.ref(`groupMessages/${groupId}/${msgId}`).set(msg);
+    await db.ref(`groups/${groupId}`).update({ lastMessage: text.slice(0,60), updatedAt: ts });
+  } catch(e) {
+    inp.value = text;
+    toast('Xabar yuborilmadi: ' + (e.code||e.message), 'err');
+  }
+}
+
+// Guruh a'zolari
+async function showGroupMembers(groupId, g) {
+  if (typeof g === 'string') { try { g = JSON.parse(g); } catch(e){ return; } }
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)';
+  overlay.onclick = e => { if(e.target===overlay) overlay.remove(); };
+  const members = Object.entries(g.members||{}).map(([uid_, m]) => ({uid: uid_, ...m}));
+  const myUid = currentGoogleUser?.uid;
+  const isAdmin = myUid && g.members?.[myUid]?.role === 'admin';
+  overlay.innerHTML = `
+  <div style="background:#0b1222;border:1px solid rgba(61,127,255,.2);border-radius:24px;width:100%;max-width:400px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 72px rgba(0,0,0,.8)">
+    <div style="padding:18px 20px;border-bottom:1px solid rgba(61,127,255,.1);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,rgba(77,138,255,.07),rgba(124,79,255,.05))">
+      <div>
+        <div style="font-size:14px;font-weight:800;color:#ecf2ff">${esc(g.emoji+' '+g.name)}</div>
+        <div style="font-size:12px;color:var(--muted)">👥 ${members.length} a'zo</div>
+      </div>
+      <button onclick="this.closest('[style*=fixed]').remove()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:50%;width:32px;height:32px;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div style="overflow-y:auto;padding:12px 16px">
+      ${members.map(m => {
+        const initials = (m.name||'?').split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2);
+        return `<div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;border:1px solid rgba(255,255,255,.05);margin-bottom:6px;background:rgba(255,255,255,.02)">
+          ${m.photo ? `<img src="${esc(m.photo)}" style="width:38px;height:38px;border-radius:50%;object-fit:cover"/>` : `<div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff">${initials}</div>`}
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;color:#ecf2ff">${esc(m.name||'Anonim')} ${m.uid===myUid?'(Siz)':''}</div>
+            <div style="font-size:11px;color:var(--muted)">${m.role==='admin'?'👑 Admin':'👤 A\'zo'}</div>
+          </div>
+          ${isAdmin && m.uid !== myUid ? `<button onclick="if(confirm('${esc(m.name)}ni guruhdan chiqarishni xohlaysizmi?')){db.ref('groups/${groupId}/members/${m.uid}').remove();db.ref('groups/${groupId}/memberCount').transaction(v=>Math.max(0,(v||1)-1));this.closest('[style*=fixed]').remove();toast('A\\'zo chiqarildi')}" style="background:rgba(255,77,106,.08);border:1px solid rgba(255,77,106,.15);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--red);cursor:pointer;font-family:var(--font)">Chiqarish</button>` : ''}
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+// Nav'ga Guruh chati qo'shish — Jamoat sahifasida ko'rish uchun
+// Jamoat sahifasiga "Guruhlar" tab qo'shamiz
+
+// ════════════════════════════════════════════════════════════════
+// ✍️ KO'P NUSXALI TAHRIRLASH (Collaborative Editing)
+// ════════════════════════════════════════════════════════════════
+let _collabRef = null;
+let _collabHandler = null;
+let _collabTypingRef = null;
+let _isCollabMode = false;
+let _collabSessionId = null;
+
+function startCollabSession(noteId) {
+  if (!currentGoogleUser) { signInWithGoogle(); return; }
+  if (!_firebaseReady || !db) { toast('Firebase kerak', 'err'); return; }
+  const sessionId = 'collab_' + noteId;
+  _collabSessionId = sessionId;
+  _isCollabMode = true;
+  toast('🔗 Hamkorlik rejimi yoqildi!', 'ok');
+  // Session link
+  const shareUrl = `${location.origin}${location.pathname}?collab=${sessionId}`;
+  showCollabShareModal(shareUrl, sessionId);
+  startCollabListener(sessionId, noteId);
+}
+
+function showCollabShareModal(url, sessionId) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9998;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px)';
+  overlay.onclick = e => { if(e.target===overlay) overlay.remove(); };
+  overlay.innerHTML = `
+  <div style="background:#0b1222;border:1px solid rgba(0,232,122,.2);border-radius:22px;padding:24px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.8)">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-size:40px;margin-bottom:10px">🔗</div>
+      <div style="font-family:var(--serif);font-size:20px;font-style:italic;color:#ecf2ff;margin-bottom:6px">Hamkorlik rejimi</div>
+      <div style="font-size:12px;color:var(--muted)">Do'stlaringizni bu konspektni birgalikda tahrirlashga taklif qiling</div>
+    </div>
+    <div style="background:rgba(0,232,122,.05);border:1px solid rgba(0,232,122,.15);border-radius:12px;padding:12px 14px;margin-bottom:14px;word-break:break-all;font-size:11px;color:var(--green);font-family:monospace">${url}</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button onclick="navigator.clipboard.writeText('${url}').then(()=>toast('📋 Nusxalandi!','ok'))" style="flex:1;background:rgba(0,232,122,.12);border:1px solid rgba(0,232,122,.25);border-radius:12px;padding:10px;font-size:13px;font-weight:700;color:var(--green);cursor:pointer;font-family:var(--font)">📋 Nusxalash</button>
+      <button onclick="this.closest('[style*=fixed]').remove()" style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;font-family:var(--font)">✓ Yopish</button>
+    </div>
+    <div id="collab-users" style="margin-top:4px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Hozir tahrirlayotganlar:</div>
+      <div id="collab-active-users" style="display:flex;gap:6px;flex-wrap:wrap">
+        <span style="font-size:12px;color:var(--muted)">Faqat siz</span>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+function startCollabListener(sessionId, noteId) {
+  if (!_firebaseReady || !db) return;
+  const n = notes.find(x => x.id === noteId);
+  if (!n) return;
+
+  // Joriy holatni Firebase'ga yozamiz
+  db.ref(`collabSessions/${sessionId}`).set({
+    noteId, title: n.title||'', content: n.content||'',
+    updatedAt: Date.now(), updatedBy: currentGoogleUser.uid,
+    users: { [currentGoogleUser.uid]: {
+      name: currentGoogleUser.displayName||currentProfile?.name||'Anonim',
+      photo: currentGoogleUser.photoURL||currentProfile?.customPhoto||'',
+      activeAt: Date.now()
+    }}
+  });
+
+  // Listener
+  if (_collabRef && _collabHandler) _collabRef.off('value', _collabHandler);
+  _collabRef = db.ref(`collabSessions/${sessionId}`);
+  _collabHandler = _collabRef.on('value', snap => {
+    if (!snap.exists()) return;
+    const data = snap.val();
+    // Boshqa odam yozsa — editorni yangilaymiz
+    if (data.updatedBy !== currentGoogleUser?.uid) {
+      const titleInp = document.getElementById('note-title');
+      const editor = document.querySelector('.rich-editor');
+      if (titleInp && data.title !== titleInp.value) titleInp.value = data.title||'';
+      if (editor && data.content !== editor.innerHTML) editor.innerHTML = data.content||'';
+      editing.title = data.title; editing.content = data.content;
+    }
+    // Online foydalanuvchilar
+    updateCollabUsers(data.users||{});
+  });
+
+  // Editor change listener — har 1.5s da Firebase'ga yuborish
+  let debounceTimer = null;
+  const richEditor = document.querySelector('.rich-editor');
+  const titleInp = document.getElementById('note-title');
+  if (richEditor) {
+    const sync = () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        if (!_isCollabMode || !_collabSessionId) return;
+        db.ref(`collabSessions/${_collabSessionId}`).update({
+          title: titleInp?.value||'', content: richEditor.innerHTML||'',
+          updatedAt: Date.now(), updatedBy: currentGoogleUser?.uid
+        });
+      }, 1500);
+    };
+    richEditor.addEventListener('input', sync);
+    if (titleInp) titleInp.addEventListener('input', sync);
+  }
+
+  // Online presence
+  const presenceRef = db.ref(`collabSessions/${sessionId}/users/${currentGoogleUser.uid}/activeAt`);
+  setInterval(() => presenceRef.set(Date.now()), 10000);
+}
+
+function updateCollabUsers(users) {
+  const el = document.getElementById('collab-active-users');
+  if (!el) return;
+  const now = Date.now();
+  const activeUsers = Object.entries(users).filter(([uid_,u]) => now - (u.activeAt||0) < 30000);
+  el.innerHTML = activeUsers.map(([uid_, u]) => {
+    const initials = (u.name||'?')[0].toUpperCase();
+    return `<div style="display:flex;align-items:center;gap:5px;background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.15);border-radius:20px;padding:4px 10px">
+      ${u.photo ? `<img src="${esc(u.photo)}" style="width:18px;height:18px;border-radius:50%;object-fit:cover"/>` : `<div style="width:18px;height:18px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff">${initials}</div>`}
+      <span style="font-size:11px;color:var(--green);font-weight:600">${esc(u.name||'Anonim')}</span>
+      <span style="width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite"></span>
+    </div>`;
+  }).join('') || '<span style="font-size:12px;color:var(--muted)">Faqat siz</span>';
+}
+
+function stopCollab() {
+  _isCollabMode = false;
+  if (_collabRef && _collabHandler) { _collabRef.off('value', _collabHandler); _collabRef = null; }
+  if (_collabSessionId && _firebaseReady && db && currentGoogleUser) {
+    db.ref(`collabSessions/${_collabSessionId}/users/${currentGoogleUser.uid}`).remove();
+  }
+  _collabSessionId = null;
+  toast('Hamkorlik rejimi o\'chirildi');
+}
+
+// Editor toolbar'ga Collab tugmasi qo'shamiz
+function addCollabBtn(noteId) {
+  const toolbar = document.getElementById('editor-toolbar');
+  if (!toolbar || toolbar.querySelector('.collab-btn')) return;
+  const btn = document.createElement('button');
+  btn.className = 'ibtn collab-btn';
+  btn.title = 'Hamkorlik rejimi';
+  btn.style.cssText = 'display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--green);border-color:rgba(0,232,122,.3)';
+  btn.innerHTML = '🔗 Birgalikda';
+  btn.onclick = () => { if(_isCollabMode) stopCollab(); else startCollabSession(noteId); };
+  toolbar.appendChild(btn);
+}
+
+// ════════════════════════════════════════════════════════════════
+// 💡 IZOH VA SHARH TIZIMI (Comments with threading)
+// ════════════════════════════════════════════════════════════════
+
+// Izoh qo'shish (Community post ga)
+async function addComment(postId, text, replyTo) {
+  if (!currentGoogleUser) { signInWithGoogle(); return; }
+  if (!text?.trim()) return;
+  if (!_firebaseReady || !db) { toast('Firebase kerak', 'err'); return; }
+  const ts = Date.now();
+  const commentId = 'cmt_' + ts.toString(36) + '_' + Math.random().toString(36).slice(2,6);
+  const comment = {
+    id: commentId, postId, text: text.trim(), ts,
+    authorUid: currentGoogleUser.uid,
+    authorName: currentGoogleUser.displayName || currentProfile?.name || 'Anonim',
+    authorPhoto: currentGoogleUser.photoURL || currentProfile?.customPhoto || '',
+    replyTo: replyTo || null,
+    likes: 0, edited: false
+  };
+  try {
+    await db.ref(`comments/${postId}/${commentId}`).set(comment);
+    // Post'dagi comment sonini yangilash
+    await db.ref(`community/${postId}/commentsCount`).transaction(v => (v||0)+1);
+    // Lokal cache
+    const comm = getCommunity();
+    const idx = comm.findIndex(p => p.id === postId);
+    if (idx >= 0) { comm[idx].commentsCount = (comm[idx].commentsCount||0)+1; saveCommunity(comm); }
+    return commentId;
+  } catch(e) { toast('Izoh qo\'shilmadi: '+(e.code||e.message), 'err'); return null; }
+}
+
+// Izohlarni yuklash
+async function loadComments(postId) {
+  if (!_firebaseReady || !db) return [];
+  try {
+    const snap = await db.ref(`comments/${postId}`).orderByChild('ts').get();
+    const comments = [];
+    if (snap.exists()) snap.forEach(c => comments.push(c.val()));
+    return comments.sort((a,b) => a.ts - b.ts);
+  } catch(e) { return []; }
+}
+
+// Izohga like
+async function likeComment(postId, commentId) {
+  if (!currentGoogleUser) { signInWithGoogle(); return; }
+  const likedKey = 'mn_cmt_likes';
+  const myLikes = JSON.parse(localStorage.getItem(likedKey)||'{}');
+  const liked = myLikes[commentId];
+  if (liked) {
+    delete myLikes[commentId];
+    await db.ref(`comments/${postId}/${commentId}/likes`).transaction(v => Math.max(0,(v||1)-1));
+  } else {
+    myLikes[commentId] = true;
+    await db.ref(`comments/${postId}/${commentId}/likes`).transaction(v => (v||0)+1);
+  }
+  localStorage.setItem(likedKey, JSON.stringify(myLikes));
+}
+
+// Izohni o'chirish
+async function deleteComment(postId, commentId) {
+  if (!currentGoogleUser || !_firebaseReady || !db) return;
+  if (!confirm('Izohni o\'chirishni xohlaysizmi?')) return;
+  await db.ref(`comments/${postId}/${commentId}`).remove();
+  await db.ref(`community/${postId}/commentsCount`).transaction(v => Math.max(0,(v||1)-1));
+  toast('Izoh o\'chirildi');
+}
+
+// Izohlar render qilish (comment tab uchun)
+async function renderComments(postId, container) {
+  if (!container) return;
+  container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">Izohlar yuklanmoqda...</div>';
+  const comments = await loadComments(postId);
+  const myUid = currentGoogleUser?.uid;
+  const likedKey = 'mn_cmt_likes';
+  const myLikes = JSON.parse(localStorage.getItem(likedKey)||'{}');
+
+  // Izohlarni thread qilamiz
+  const rootComments = comments.filter(c => !c.replyTo);
+  const replies = {};
+  comments.filter(c => c.replyTo).forEach(c => {
+    if (!replies[c.replyTo]) replies[c.replyTo] = [];
+    replies[c.replyTo].push(c);
+  });
+
+  function renderComment(c, isReply) {
+    const isMe = c.authorUid === myUid;
+    const liked = myLikes[c.id];
+    const initials = (c.authorName||'?').split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2);
+    const replyList = replies[c.id] || [];
+    return `
+    <div id="cmt-${c.id}" style="margin-bottom:${isReply?'8':'14'}px;${isReply?'margin-left:44px':''}">
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        ${c.authorPhoto ? `<img src="${esc(c.authorPhoto)}" style="width:${isReply?'28':'34'}px;height:${isReply?'28':'34'}px;border-radius:50%;object-fit:cover;flex-shrink:0;margin-top:2px"/>` : `<div style="width:${isReply?'28':'34'}px;height:${isReply?'28':'34'}px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:${isReply?'10':'12'}px;font-weight:800;color:#fff;flex-shrink:0;margin-top:2px">${initials}</div>`}
+        <div style="flex:1;min-width:0">
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:${isReply?'14':'16'}px;padding:10px 13px;position:relative">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+              <span style="font-size:12px;font-weight:800;color:${isMe?'var(--accent)':'#ecf2ff'}">${esc(c.authorName||'Anonim')}</span>
+              ${isMe?'<span style="font-size:9px;background:rgba(77,138,255,.15);color:var(--accent);border-radius:10px;padding:1px 6px;font-weight:700">SIZ</span>':''}
+              <span style="font-size:10px;color:var(--dim);margin-left:auto">${timeAgoShort(c.ts)}</span>
+            </div>
+            <div style="font-size:13px;color:var(--text);line-height:1.6;word-break:break-word;white-space:pre-wrap">${esc(c.text)}</div>
+          </div>
+          <!-- Actions -->
+          <div style="display:flex;gap:2px;margin-top:5px;padding-left:4px">
+            <button onclick="likeComment('${postId}','${c.id}');this.style.color='var(--red)';renderComments('${postId}',document.getElementById('cmt-list-${postId}'))" style="background:transparent;border:none;color:${liked?'var(--red)':'var(--muted)'};font-size:11px;font-weight:600;cursor:pointer;padding:3px 7px;border-radius:8px;transition:.15s;font-family:var(--font)" onmouseenter="this.style.background='var(--dim)'" onmouseleave="this.style.background='transparent'">
+              ${liked?'❤️':'🤍'} ${c.likes||0}
+            </button>
+            ${currentGoogleUser ? `<button onclick="showReplyInput('${postId}','${c.id}','${esc(c.authorName||'')}')" style="background:transparent;border:none;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;padding:3px 7px;border-radius:8px;transition:.15s;font-family:var(--font)" onmouseenter="this.style.background='var(--dim)'" onmouseleave="this.style.background='transparent'">💬 Javob</button>` : ''}
+            ${isMe ? `<button onclick="deleteComment('${postId}','${c.id}').then(()=>renderComments('${postId}',document.getElementById('cmt-list-${postId}')))" style="background:transparent;border:none;color:var(--red);font-size:11px;font-weight:600;cursor:pointer;padding:3px 7px;border-radius:8px;font-family:var(--font)">🗑</button>` : ''}
+          </div>
+          <!-- Reply input placeholder -->
+          <div id="reply-input-${c.id}"></div>
+          <!-- Replies -->
+          ${replyList.map(r => renderComment(r, true)).join('')}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  if (!rootComments.length) {
+    container.innerHTML = `
+    <div style="text-align:center;padding:30px 16px">
+      <div style="font-size:36px;margin-bottom:10px">💬</div>
+      <div style="font-size:13px;color:var(--muted)">Hali izoh yo'q. Birinchi izoh qoldiring!</div>
+    </div>`;
+  } else {
+    container.innerHTML = `<div id="cmt-list-${postId}">${rootComments.map(c => renderComment(c, false)).join('')}</div>`;
+  }
+
+  // Add comment input
+  const inputHTML = currentGoogleUser ? `
+  <div id="new-comment-wrap-${postId}" style="margin-top:14px;display:flex;gap:10px;align-items:flex-end">
+    <div style="width:34px;height:34px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff">
+      ${currentGoogleUser.photoURL ? `<img src="${esc(currentGoogleUser.photoURL)}" style="width:100%;height:100%;object-fit:cover"/>` : (currentGoogleUser.displayName||'U')[0].toUpperCase()}
+    </div>
+    <div style="flex:1;position:relative">
+      <textarea id="new-comment-${postId}" placeholder="Izoh yozing..." rows="1"
+        style="width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:16px;padding:10px 50px 10px 14px;font-size:13px;color:var(--text);font-family:var(--font);outline:none;resize:none;max-height:100px;overflow-y:auto;line-height:1.5;transition:.2s"
+        onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+        oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px'"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitComment('${postId}',null)}"></textarea>
+      <button onclick="submitComment('${postId}',null)" style="position:absolute;right:8px;bottom:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:50%;width:30px;height:30px;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">➤</button>
+    </div>
+  </div>` : `<div style="text-align:center;padding:12px;margin-top:12px;color:var(--muted);font-size:12px">Izoh qoldirish uchun <button onclick="signInWithGoogle()" style="background:none;border:none;color:var(--accent);font-weight:700;cursor:pointer;font-family:var(--font);font-size:12px">kiring</button></div>`;
+
+  container.insertAdjacentHTML('beforeend', inputHTML);
+}
+
+async function submitComment(postId, replyTo) {
+  const inp = document.getElementById(replyTo ? `reply-inp-${replyTo}` : `new-comment-${postId}`);
+  if (!inp) return;
+  const text = inp.value.trim();
+  if (!text) { inp.style.borderColor = 'var(--red)'; return; }
+  inp.value = ''; inp.style.height = 'auto';
+  const id = await addComment(postId, text, replyTo);
+  if (id) {
+    const container = document.getElementById(`cmt-list-${postId}`) || document.getElementById(`comm-tab-content`);
+    if (container) renderComments(postId, container.closest('[id]') || container);
+  }
+}
+
+function showReplyInput(postId, commentId, authorName) {
+  const container = document.getElementById(`reply-input-${commentId}`);
+  if (!container) return;
+  if (container.innerHTML) { container.innerHTML = ''; return; } // toggle
+  container.innerHTML = `
+  <div style="display:flex;gap:8px;align-items:flex-end;margin-top:8px">
+    <div style="flex:1;position:relative">
+      <div style="font-size:10px;color:var(--accent);font-weight:700;margin-bottom:4px">↩ ${esc(authorName)}'ga javob</div>
+      <textarea id="reply-inp-${commentId}" placeholder="Javob yozing..." rows="1"
+        style="width:100%;background:rgba(77,138,255,.06);border:1px solid rgba(77,138,255,.2);border-radius:14px;padding:9px 45px 9px 13px;font-size:12px;color:var(--text);font-family:var(--font);outline:none;resize:none;max-height:80px;line-height:1.5"
+        oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,80)+'px'"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitComment('${postId}','${commentId}')}"></textarea>
+      <button onclick="submitComment('${postId}','${commentId}')" style="position:absolute;right:8px;bottom:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:50%;width:26px;height:26px;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center">➤</button>
+    </div>
+  </div>`;
+  setTimeout(() => document.getElementById(`reply-inp-${commentId}`)?.focus(), 50);
+}
+
+// ════════════════════════════════════════════════════════════════
+// 🔗 Jamoat sahifasiga Guruh tab + Comment tizimini ulash
+// ════════════════════════════════════════════════════════════════
+
+// switchCommTab ni kengaytirish — comment tab uchun real-time
+const _origSwitchTab = typeof switchCommTab !== 'undefined' ? switchCommTab : null;
+
+// renderCommTab funksiyasini comments uchun yangilash
+const _origRenderCommTab = typeof renderCommTab !== 'undefined' ? renderCommTab : null;
+
+// Comment tab render - override
+if (typeof renderCommTab === 'function') {
+  window._origRenderCommTab2 = renderCommTab;
+  window.renderCommTab = function(tab, n, comments) {
+    if (tab === 'comments') {
+      const el = document.getElementById('comm-tab-content');
+      if (el) renderComments(n.id, el);
+    } else {
+      window._origRenderCommTab2(tab, n, comments);
+    }
+  };
+}
+
+// Jamoat sahifasiga Guruh tugmasi qo'shamiz
+const _rCommOrig = typeof rComm !== 'undefined' ? rComm : null;
+
+// Pulse animation for collab
+const pulseStyle = document.createElement('style');
+pulseStyle.textContent = `
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.8)}}
+.collab-indicator{animation:pulse 2s ease-in-out infinite}
+`;
+document.head.appendChild(pulseStyle);
+
+
 
 
 
