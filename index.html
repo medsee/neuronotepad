@@ -4817,9 +4817,7 @@ function showCreateGroupModal() {
       </div>
       <div style="margin-bottom:18px">
         <span class="lbl">Fan yo'nalishi</span>
-        <select class="inp" id="grp-subject" style="cursor:pointer">
-          ${subjectsList.map(s => `<option value="${s}">${s}</option>`).join('')}
-        </select>
+        <input class="inp" id="grp-subject" placeholder="Masalan: Nevrologiya, Kardiologiya..." value="Umumiy"/>
       </div>
       <div style="display:flex;gap:10px">
         <button onclick="this.closest('[style*=fixed]').remove()" style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;font-family:var(--font)">Bekor</button>
