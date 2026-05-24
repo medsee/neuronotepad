@@ -414,6 +414,11 @@ a{color:var(--accent)}
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <!-- PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- QR -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -438,7 +443,7 @@ a{color:var(--accent)}
     <input type="file" accept=".json" id="impf" style="display:none" onchange="importData(event)"/>
     <button class="ghost exp-btn" onclick="document.getElementById('impf').click()" style="font-size:12px;padding:6px 11px">⬆</button>
     <button class="btn btn-p btn-sm" onclick="newNote()">+ Yangi</button>
-    <div id="auth-btn-wrap" style="margin-left:4px">
+    <button class="ibtn" onclick="showTemplatesModal()" title="Shablon" style="font-size:14px">📋</button>
       <button class="ghost" id="auth-btn" onclick="handleAuthClick()" style="display:flex;align-items:center;gap:7px;padding:6px 12px;font-size:12px;white-space:nowrap">
         <span id="auth-avatar" style="display:none;width:24px;height:24px;border-radius:50%;overflow:hidden;flex-shrink:0"><img id="auth-photo" style="width:100%;height:100%;object-fit:cover"/></span>
         <span id="auth-label">🔐 Kirish</span>
@@ -1350,6 +1355,8 @@ function rEditor(){
       oninput="editing.title=this.value;onContentChange()"/>
     <button class="btn btn-p btn-sm" id="save-btn" onclick="saveNote()">💾 Saqlash</button>
     <button class="ibtn" onclick="saveNote();go('detail','${n.id}')" title="Ko'rish">👁</button>
+    <button class="ibtn" title="PDF eksport" onclick="saveNote();exportNotePDF('${n.id}')">📄</button>
+    <button class="ibtn" title="QR kod" onclick="showQRModal('${n.id}')">🔲</button>
     <button class="ibtn" style="color:var(--red);border-color:rgba(224,85,85,.3)" onclick="showDel('${n.id}')">🗑</button>
   </div>
   <div class="ewrap">
@@ -1679,6 +1686,8 @@ function rDetail(nid){
       <button class="ghost btn-sm" onclick="dupNote(notes.find(x=>x.id==='${n.id}'))">📋</button>
       <button class="ibtn" onclick="openReadMode('${n.id}')" title="O'qish rejimi">👁</button>
       <button class="ibtn" onclick="printNote('${n.id}')" title="Chop etish">🖨️</button>
+      <button class="ibtn" onclick="exportNotePDF('${n.id}')" title="PDF yuklab olish" style="color:#ff6b6b">📄</button>
+      <button class="ibtn" onclick="showQRModal('${n.id}')" title="QR kod">🔲</button>
       <button class="btn btn-s btn-sm" onclick="openPublishForm('${n.id}')">🌐 Ulashish</button>
     </div>
   </div>
@@ -2275,10 +2284,9 @@ function rStats(){
       </div>`).join('')}
     </div>
   </div>`;
+  addStatButtons();
 }
 
-// ══════════════════════════════════════════════════
-// 👤 PROFIL SAHIFASI
 // ══════════════════════════════════════════════════
 function rProfile() {
   const user = currentGoogleUser;
@@ -4089,6 +4097,588 @@ document.addEventListener('keydown', e => {
 
 renderDynFans();
 rHome();
+
+// ══════════════════════════════════════════════════════════════
+// 📄 PDF EKSPORT
+// ══════════════════════════════════════════════════════════════
+async function exportNotePDF(noteId) {
+  const n = notes.find(x => x.id === noteId);
+  if (!n) return;
+  toast('📄 PDF tayyorlanmoqda...');
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const W = 210, margin = 18, lineH = 7;
+  let y = margin;
+
+  // Header gradient bar
+  doc.setFillColor(77, 138, 255);
+  doc.rect(0, 0, W, 14, 'F');
+  doc.setFillColor(124, 79, 255);
+  doc.rect(W/2, 0, W/2, 14, 'F');
+
+  // App name
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(255, 255, 255);
+  doc.text('MedNotepad', margin, 9);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.text(new Date().toLocaleDateString('uz-UZ'), W - margin, 9, { align: 'right' });
+
+  y = 26;
+
+  // Subject badge
+  if (n.subject) {
+    doc.setFillColor(77, 138, 255);
+    doc.roundedRect(margin, y - 5, 42, 8, 2, 2, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.text(n.subject.toUpperCase(), margin + 3, y);
+    y += 10;
+  }
+
+  // Title
+  doc.setTextColor(20, 30, 50);
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'bold');
+  const titleLines = doc.splitTextToSize(n.title || 'Nomsiz', W - margin * 2);
+  doc.text(titleLines, margin, y);
+  y += titleLines.length * 9 + 4;
+
+  // Meta info
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(120, 140, 180);
+  const metaParts = [];
+  if (n.subject) metaParts.push('📚 ' + n.subject);
+  metaParts.push('📅 ' + fd(n.updatedAt));
+  const wc_ = wc(n.content);
+  if (wc_ > 0) metaParts.push('📝 ' + wc_ + " so'z");
+  doc.text(metaParts.join('   ·   '), margin, y);
+  y += 8;
+
+  // Divider
+  doc.setDrawColor(200, 215, 240);
+  doc.line(margin, y, W - margin, y);
+  y += 8;
+
+  // Content
+  doc.setTextColor(30, 45, 70);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+  const rawText = n.content
+    ? n.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+    : "Kontent yo'q";
+
+  const contentLines = doc.splitTextToSize(rawText, W - margin * 2);
+  for (const line of contentLines) {
+    if (y > 275) {
+      doc.addPage();
+      doc.setFillColor(77, 138, 255);
+      doc.rect(0, 0, W, 4, 'F');
+      y = 16;
+    }
+    doc.text(line, margin, y);
+    y += lineH;
+  }
+
+  // Tags
+  if (n.tags?.length) {
+    y += 4;
+    if (y > 270) { doc.addPage(); y = 20; }
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(77, 138, 255);
+    let tagX = margin;
+    for (const tag of n.tags) {
+      const tw = doc.getTextWidth('#' + tag) + 6;
+      if (tagX + tw > W - margin) { tagX = margin; y += 7; }
+      doc.setFillColor(230, 238, 255);
+      doc.roundedRect(tagX, y - 4.5, tw, 6, 1.5, 1.5, 'F');
+      doc.text('#' + tag, tagX + 3, y);
+      tagX += tw + 4;
+    }
+    y += 10;
+  }
+
+  // Footer
+  const pageCount = doc.getNumberOfPages();
+  for (let p = 1; p <= pageCount; p++) {
+    doc.setPage(p);
+    doc.setDrawColor(200, 215, 240);
+    doc.line(margin, 285, W - margin, 285);
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(150, 165, 195);
+    doc.text('MedNotepad — Tibbiy talabalar uchun', margin, 291);
+    doc.text(`${p} / ${pageCount}`, W - margin, 291, { align: 'right' });
+  }
+
+  const safeName = (n.title || 'konspekt').replace(/[^a-zA-Z0-9\u0400-\u04FF\u0020]/g, '_').slice(0, 40);
+  doc.save(`MedNotepad_${safeName}.pdf`);
+  toast('✅ PDF yuklandi!', 'ok');
+}
+
+// ══════════════════════════════════════════════════════════════
+// 🔲 QR KOD
+// ══════════════════════════════════════════════════════════════
+function showQRModal(noteId) {
+  const n = notes.find(x => x.id === noteId);
+  if (!n) return;
+
+  // Comm'dagi postini topamiz
+  const comm = getCommunity();
+  const pub = comm.find(p => p.sourceId === noteId);
+  const shareUrl = pub
+    ? `${location.origin}${location.pathname}?open=${pub.id}`
+    : `${location.origin}${location.pathname}`;
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)';
+  overlay.onclick = e => { if(e.target===overlay) overlay.remove(); };
+  overlay.innerHTML = `
+  <div style="background:#0b1222;border:1px solid rgba(61,127,255,.25);border-radius:24px;padding:28px;max-width:340px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.7)">
+    <div style="font-size:13px;font-weight:700;color:rgba(77,138,255,.8);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">QR KOD</div>
+    <div style="font-family:'Fraunces',serif;font-size:18px;font-style:italic;color:#ecf2ff;margin-bottom:4px">${esc(n.title||'Nomsiz')}</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:20px">${esc(n.subject||'')}</div>
+    <div id="qr-canvas" style="display:inline-flex;background:#fff;padding:14px;border-radius:16px;box-shadow:0 8px 28px rgba(0,0,0,.3)"></div>
+    <div style="margin-top:16px;font-size:11px;color:var(--muted);padding:8px 12px;background:rgba(61,127,255,.07);border-radius:10px;border:1px solid rgba(61,127,255,.12);word-break:break-all">${shareUrl}</div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button onclick="downloadQR()" style="flex:1;background:linear-gradient(135deg,#4d8aff,#7c4fff);border:none;border-radius:12px;padding:11px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--font)">⬇ Yuklab olish</button>
+      <button onclick="this.closest('[style*=fixed]').remove()" style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:11px;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--font)">Yopish</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+
+  setTimeout(() => {
+    new QRCode(document.getElementById('qr-canvas'), {
+      text: shareUrl, width: 200, height: 200,
+      colorDark: '#0a1628', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  }, 100);
+}
+
+function downloadQR() {
+  const canvas = document.querySelector('#qr-canvas canvas');
+  if (!canvas) { toast("QR topilmadi", 'err'); return; }
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = 'MedNotepad_QR.png';
+  a.click();
+  toast('✅ QR kod yuklandi!', 'ok');
+}
+
+// ══════════════════════════════════════════════════════════════
+// 📋 SHABLONLAR (Templates)
+// ══════════════════════════════════════════════════════════════
+const TEMPLATES = [
+  {
+    id: 'anat', icon: '🦴', name: 'Anatomiya', subject: 'Anatomiya',
+    color: '#e05c6c',
+    title: 'Anatomiya: [Organ nomi]',
+    content: `<h2>📍 Joylashuvi</h2><p>...</p>
+<h2>🔬 Tuzilishi</h2><p>Qismlari:<br>1. <br>2. <br>3. </p>
+<h2>⚡ Funktsiyalari</h2><p>Asosiy vazifalari:<br>• <br>• </p>
+<h2>🩸 Qon ta'minoti</h2><p>Arteriya: <br>Vena: </p>
+<h2>🧠 Innervatsiya</h2><p>Nerv: </p>
+<h2>🔗 Bog'liqlik</h2><p>Qo'shni organlar: </p>
+<h2>📝 Klinik ahamiyati</h2><p>...</p>`,
+    tags: ['anatomiya', 'morfologiya']
+  },
+  {
+    id: 'pharm', icon: '💊', name: 'Farmakologiya', subject: 'Farmakologiya',
+    color: '#5b8dee',
+    title: 'Dori: [Dori nomi]',
+    content: `<h2>💊 Dori nomi</h2><p>INN: <br>Savdo nomi: <br>Guruh: </p>
+<h2>⚙️ Ta'sir mexanizmi</h2><p>...</p>
+<h2>📋 Ko'rsatmalar</h2><p>• <br>• <br>• </p>
+<h2>🚫 Qarshi ko'rsatmalar</h2><p>• <br>• </p>
+<h2>💉 Dozasi</h2><p>Kattalarda: <br>Bolalarda: </p>
+<h2>⚠️ Nojo'ya ta'sirlar</h2><p>• <br>• </p>
+<h2>🔄 O'zaro ta'sir</h2><p>...</p>`,
+    tags: ['farmakologiya', 'dori']
+  },
+  {
+    id: 'patho', icon: '🦠', name: 'Patologiya', subject: 'Patologiya',
+    color: '#f59e0b',
+    title: 'Kasallik: [Kasallik nomi]',
+    content: `<h2>📖 Ta'rif</h2><p>...</p>
+<h2>🧬 Etiologiya</h2><p>Sabablar:<br>1. <br>2. </p>
+<h2>⚙️ Patogenez</h2><p>Mexanizm: ...</p>
+<h2>🔬 Morfologiya</h2><p>Makro: <br>Mikro: </p>
+<h2>🩺 Klinik ko'rinish</h2><p>Simptomlar:<br>• <br>• </p>
+<h2>🔍 Diagnostika</h2><p>• Laboratoriya: <br>• Instrumental: </p>
+<h2>💊 Davolash</h2><p>• Konservativ: <br>• Jarrohlik: </p>
+<h2>📊 Prognoz</h2><p>...</p>`,
+    tags: ['patologiya', 'kasallik']
+  },
+  {
+    id: 'physio', icon: '❤️', name: 'Fiziologiya', subject: 'Fiziologiya',
+    color: '#10b981',
+    title: 'Fiziologiya: [Jarayon nomi]',
+    content: `<h2>📖 Ta'rif</h2><p>...</p>
+<h2>⚙️ Mexanizm</h2><p>Bosqichlari:<br>1. <br>2. <br>3. </p>
+<h2>📊 Normativ ko'rsatkichlar</h2><p>• <br>• </p>
+<h2>🔄 Regulyatsiya</h2><p>Nerv: <br>Gumoral: </p>
+<h2>🔗 Bog'liq jarayonlar</h2><p>...</p>
+<h2>📝 Klinik ahamiyati</h2><p>...</p>`,
+    tags: ['fiziologiya']
+  },
+  {
+    id: 'surgery', icon: '🔪', name: 'Jarrohlik', subject: 'Jarrohlik',
+    color: '#8b5cf6',
+    title: 'Operatsiya: [Operatsiya nomi]',
+    content: `<h2>📋 Ko'rsatmalar</h2><p>• <br>• </p>
+<h2>🚫 Qarshi ko'rsatmalar</h2><p>• <br>• </p>
+<h2>🛠️ Kerakli asboblar</h2><p>• <br>• </p>
+<h2>👨‍⚕️ Operatsiya texnikasi</h2><p>1. <br>2. <br>3. <br>4. </p>
+<h2>💉 Anestetik ta'minot</h2><p>Anesteziya turi: </p>
+<h2>⚠️ Asoratlar</h2><p>• <br>• </p>
+<h2>🏥 Operatsiyadan keyingi parvarishlash</h2><p>...</p>`,
+    tags: ['jarrohlik', 'operatsiya']
+  },
+  {
+    id: 'case', icon: '📊', name: 'Klinik holat', subject: 'Klinika',
+    color: '#06b6d4',
+    title: 'Klinik holat: [Bemorning muammosi]',
+    content: `<h2>👤 Bemor pasporti</h2><p>Yosh: &nbsp; Jins: &nbsp; Kasb: </p>
+<h2>🩺 Shikoyatlar</h2><p>Asosiy: <br>Qo'shimcha: </p>
+<h2>📅 Anamnez</h2><p>Kasallik tarixi: <br>Hayot tarixi: <br>Allergiya: </p>
+<h2>🔍 Ob'ektiv tekshiruv</h2><p>Holati: <br>Bosim: &nbsp; Puls: &nbsp; T°: </p>
+<h2>🔬 Tekshiruvlar</h2><p>OAQ: <br>Biokimyo: <br>UST/Rentgen: </p>
+<h2>🩻 Tashxis</h2><p>Asosiy: <br>Asorat: <br>Qo'shma: </p>
+<h2>💊 Davolash rejasi</h2><p>...</p>`,
+    tags: ['klinika', 'holat']
+  },
+  {
+    id: 'micro', icon: '🦠', name: 'Mikrobiologiya', subject: 'Mikrobiologiya',
+    color: '#f59e0b',
+    title: 'Mikroorganizm: [Nom]',
+    content: `<h2>🔬 Tasnifi</h2><p>Turkum: <br>Tur: </p>
+<h2>📐 Morfologiyasi</h2><p>Shakli: <br>O'lchami: <br>Gram bo'yash: </p>
+<h2>🌡️ O'sish sharoiti</h2><p>Muhit: <br>Harorat: </p>
+<h2>🦠 Patogenlik omillari</h2><p>• <br>• </p>
+<h2>🩺 Klinik ko'rinish</h2><p>...</p>
+<h2>🔍 Diagnostika</h2><p>Namuna: <br>Usul: </p>
+<h2>💊 Davolash</h2><p>Antibiotik: </p>`,
+    tags: ['mikrobiologiya', 'infeksiya']
+  },
+  {
+    id: 'blank', icon: '📝', name: 'Bo\'sh shablon', subject: '',
+    color: '#64748b',
+    title: '',
+    content: '',
+    tags: []
+  }
+];
+
+function showTemplatesModal() {
+  const overlay = document.createElement('div');
+  overlay.id = 'tmpl-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)';
+  overlay.onclick = e => { if(e.target===overlay) overlay.remove(); };
+  overlay.innerHTML = `
+  <div style="background:#0b1222;border:1px solid rgba(61,127,255,.2);border-radius:24px;width:100%;max-width:580px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 72px rgba(0,0,0,.8)">
+    <div style="padding:22px 24px 16px;border-bottom:1px solid rgba(61,127,255,.1);background:linear-gradient(135deg,rgba(77,138,255,.07),rgba(124,79,255,.05))">
+      <div style="font-size:11px;font-weight:800;color:rgba(77,138,255,.7);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">SHABLON TANLASH</div>
+      <div style="font-family:'Fraunces',serif;font-size:22px;font-style:italic;color:#ecf2ff;font-weight:400">Konspekt shabloni</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">Tezkor boshlash uchun shablon tanlang</div>
+    </div>
+    <div style="overflow-y:auto;padding:16px 20px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">
+      ${TEMPLATES.map(t => `
+      <div onclick="applyTemplate('${t.id}')"
+        style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:18px 14px;cursor:pointer;transition:all .2s;text-align:center;border-top:3px solid ${t.color}"
+        onmouseenter="this.style.background='rgba(255,255,255,.08)';this.style.borderColor='${t.color}';this.style.transform='translateY(-3px)'"
+        onmouseleave="this.style.background='rgba(255,255,255,.04)';this.style.borderColor='rgba(255,255,255,.07)';this.style.borderTopColor='${t.color}';this.style.transform=''">
+        <div style="font-size:30px;margin-bottom:10px">${t.icon}</div>
+        <div style="font-size:13px;font-weight:700;color:#ecf2ff;margin-bottom:4px">${t.name}</div>
+        ${t.subject ? `<div style="font-size:10px;font-weight:700;color:${t.color};letter-spacing:.5px;text-transform:uppercase">${t.subject}</div>` : '<div style="font-size:10px;color:var(--muted)">Ixtiyoriy</div>'}
+      </div>`).join('')}
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+function applyTemplate(tId) {
+  const t = TEMPLATES.find(x => x.id === tId);
+  if (!t) return;
+  document.getElementById('tmpl-overlay')?.remove();
+  newNote(t);
+}
+
+// ══ SHABLON ORQALI YANGI KONSPEKT ══════════════════════
+function newNoteFromTemplate(tmpl) {
+  if (!tmpl || typeof tmpl !== 'object') { newNote(); return; }
+  const n = {
+    id: uid(),
+    title: tmpl.title || '',
+    content: tmpl.content || '',
+    subject: tmpl.subject || (typeof asubj === 'function' ? asubj()[0] : 'Nevrologiya'),
+    color: tmpl.color || COLORS[0],
+    tags: tmpl.tags || [],
+    images: [],
+    progress: 'new', starred: false, pinned: false,
+    createdAt: Date.now(), updatedAt: Date.now()
+  };
+  notes.unshift(n);
+  if (typeof save === 'function') save();
+  editing = {...n};
+  go('editor');
+}
+
+function applyTemplate(tId) {
+  const t = TEMPLATES.find(x => x.id === tId);
+  document.getElementById('tmpl-overlay')?.remove();
+  if (!t) { newNote(); return; }
+  newNoteFromTemplate(t);
+}
+
+// ══ OVERRIDE newNote — faqat template uchun emas ══
+
+// ══════════════════════════════════════════════════════════════
+// 📊 LEADERBOARD (Reyting jadvali)
+// ══════════════════════════════════════════════════════════════
+async function showLeaderboard() {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)';
+  overlay.onclick = e => { if(e.target===overlay) overlay.remove(); };
+
+  overlay.innerHTML = `
+  <div style="background:#0b1222;border:1px solid rgba(61,127,255,.2);border-radius:24px;width:100%;max-width:480px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 72px rgba(0,0,0,.8)">
+    <div style="padding:22px 24px 16px;border-bottom:1px solid rgba(61,127,255,.1);background:linear-gradient(135deg,rgba(255,179,64,.06),rgba(77,138,255,.04));display:flex;align-items:center;gap:14px">
+      <div style="font-size:36px">🏆</div>
+      <div>
+        <div style="font-family:'Fraunces',serif;font-size:22px;font-style:italic;color:#ecf2ff;font-weight:400">Reyting jadvali</div>
+        <div style="font-size:11px;color:var(--muted)">Eng faol foydalanuvchilar</div>
+      </div>
+    </div>
+    <div id="lb-tabs" style="display:flex;gap:0;padding:12px 16px 0;border-bottom:1px solid rgba(61,127,255,.1)">
+      <button class="lb-tab on" onclick="switchLBTab('likes',this)" style="flex:1;padding:9px;border:none;background:linear-gradient(135deg,#4d8aff,#7c4fff);border-radius:10px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--font);margin:0 3px 10px">❤️ Likelar</button>
+      <button class="lb-tab" onclick="switchLBTab('posts',this)" style="flex:1;padding:9px;border:none;background:rgba(255,255,255,.05);border-radius:10px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;font-family:var(--font);margin:0 3px 10px">📚 Postlar</button>
+      <button class="lb-tab" onclick="switchLBTab('views',this)" style="flex:1;padding:9px;border:none;background:rgba(255,255,255,.05);border-radius:10px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;font-family:var(--font);margin:0 3px 10px">👁 Ko'rishlar</button>
+    </div>
+    <div id="lb-content" style="overflow-y:auto;padding:16px;flex:1">
+      <div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">Yuklanmoqda...</div>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  loadLeaderboard('likes');
+}
+
+function switchLBTab(type, btn) {
+  document.querySelectorAll('.lb-tab').forEach(b => {
+    b.style.background = 'rgba(255,255,255,.05)';
+    b.style.color = 'var(--muted)';
+  });
+  btn.style.background = 'linear-gradient(135deg,#4d8aff,#7c4fff)';
+  btn.style.color = '#fff';
+  loadLeaderboard(type);
+}
+
+async function loadLeaderboard(type) {
+  const el = document.getElementById('lb-content');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted)">Yuklanmoqda...</div>';
+
+  let community = [];
+  if (_firebaseReady && db) {
+    try {
+      const snap = await db.ref('community').get();
+      if (snap.exists()) snap.forEach(c => community.push(c.val()));
+    } catch(e) {}
+  }
+  if (!community.length) community = getCommunity();
+
+  // Mualliflar bo'yicha guruhlaymiz
+  const authors = {};
+  for (const post of community) {
+    const key = post.authorUid || post.author || 'anon';
+    if (!authors[key]) authors[key] = {
+      name: post.author || 'Anonim',
+      photo: post.authorPhoto || '',
+      uni: post.uni || '',
+      uid: post.authorUid || '',
+      likes: 0, posts: 0, views: 0
+    };
+    authors[key].likes += post.likes || 0;
+    authors[key].posts += 1;
+    authors[key].views += post.views || 0;
+  }
+
+  let sorted = Object.values(authors).sort((a, b) => b[type] - a[type]).slice(0, 20);
+
+  if (!sorted.length) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px">Hali ma\'lumot yo\'q</div>';
+    return;
+  }
+
+  const medals = ['🥇', '🥈', '🥉'];
+  const typeIcon = { likes: '❤️', posts: '📚', views: '👁' };
+  const typeLabel = { likes: 'like', posts: 'post', views: "ko'rish" };
+  const myUid = currentGoogleUser?.uid;
+
+  el.innerHTML = sorted.map((a, i) => {
+    const isMe = a.uid && a.uid === myUid;
+    const initials = a.name.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2)||'?';
+    const avatarHTML = a.photo
+      ? `<img src="${esc(a.photo)}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid ${isMe?'var(--accent)':'rgba(255,255,255,.1)'}" onerror="this.style.display='none'"/>`
+      : `<div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;border:2px solid ${isMe?'var(--accent)':'transparent'}">${initials}</div>`;
+
+    return `<div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;border:1px solid ${isMe?'rgba(77,138,255,.3)':'rgba(255,255,255,.05)'};margin-bottom:8px;background:${isMe?'rgba(77,138,255,.06)':'rgba(255,255,255,.02)'};transition:.2s"
+      onmouseenter="this.style.background='rgba(77,138,255,.08)'" onmouseleave="this.style.background='${isMe?'rgba(77,138,255,.06)':'rgba(255,255,255,.02)'}'">
+      <div style="width:28px;text-align:center;font-size:${i<3?'22':'14'}px;font-weight:800;color:${i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--muted)'}">
+        ${i<3 ? medals[i] : i+1}
+      </div>
+      ${avatarHTML}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:${isMe?'800':'600'};color:${isMe?'var(--accent)':'#ecf2ff'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(a.name)}${isMe?' (Siz)':''}</div>
+        ${a.uni ? `<div style="font-size:11px;color:var(--muted)">${esc(a.uni)}</div>` : ''}
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:16px;font-weight:800;color:var(--accent)">${a[type].toLocaleString()}</div>
+        <div style="font-size:10px;color:var(--muted)">${typeIcon[type]} ${typeLabel[type]}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// 📅 HAFTALIK HISOBOT
+// ══════════════════════════════════════════════════════════════
+function showWeeklyReport() {
+  const now = Date.now();
+  const weekAgo = now - 7 * 86400000;
+  const monthAgo = now - 30 * 86400000;
+
+  const weekNotes = notes.filter(n => n.updatedAt >= weekAgo);
+  const monthNotes = notes.filter(n => n.updatedAt >= monthAgo);
+  const weekWords = weekNotes.reduce((a, n) => a + wc(n.content), 0);
+  const weekDone = weekNotes.filter(n => n.progress === 'done').length;
+
+  // Kunlik faollik (oxirgi 7 kun)
+  const days = [];
+  const dayNames = ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya'];
+  for (let i = 6; i >= 0; i--) {
+    const ds = now - i * 86400000;
+    const de = ds + 86400000;
+    const d = new Date(ds);
+    days.push({
+      label: dayNames[d.getDay() === 0 ? 6 : d.getDay() - 1],
+      date: d.toLocaleDateString('uz-UZ', {day:'2-digit', month:'short'}),
+      count: notes.filter(n => n.updatedAt >= ds && n.updatedAt < de).length
+    });
+  }
+  const maxDay = Math.max(...days.map(d => d.count), 1);
+
+  // Fan bo'yicha
+  const subj = {};
+  weekNotes.forEach(n => { const s = n.subject||'Boshqa'; subj[s] = (subj[s]||0)+1; });
+  const subjList = Object.entries(subj).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+  // Streak
+  let streak = 0;
+  for (let i = 0; i < 30; i++) {
+    const ds = now - i * 86400000;
+    const de = ds + 86400000;
+    if (notes.some(n => n.updatedAt >= ds && n.updatedAt < de)) streak++;
+    else break;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px);overflow-y:auto';
+  overlay.onclick = e => { if(e.target===overlay) overlay.remove(); };
+  overlay.innerHTML = `
+  <div style="background:#0b1222;border:1px solid rgba(61,127,255,.2);border-radius:24px;width:100%;max-width:480px;box-shadow:0 24px 72px rgba(0,0,0,.8);overflow:hidden">
+    <!-- Header -->
+    <div style="padding:24px;background:linear-gradient(135deg,rgba(77,138,255,.1),rgba(124,79,255,.07));border-bottom:1px solid rgba(61,127,255,.1)">
+      <div style="font-size:11px;font-weight:800;color:rgba(77,138,255,.7);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">HAFTALIK</div>
+      <div style="font-family:'Fraunces',serif;font-size:24px;font-style:italic;color:#ecf2ff;font-weight:400">O'quv hisoboti 📊</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">Oxirgi 7 kun natijalari</div>
+    </div>
+
+    <div style="padding:20px">
+      <!-- Stats grid -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px">
+        ${[
+          ['📝', weekNotes.length, "Konspekt\nyungilandi", 'var(--accent)'],
+          ['💬', weekWords.toLocaleString(), "So'z\nyozildi", '#9d7fff'],
+          ['🔥', streak, "Kun\nqatorida", 'var(--amber)'],
+        ].map(([ic,v,l,c]) => `
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:14px;text-align:center">
+          <div style="font-size:22px;margin-bottom:6px">${ic}</div>
+          <div style="font-size:20px;font-weight:800;color:${c};font-family:'Fraunces',serif;line-height:1">${v}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:5px;white-space:pre-line;font-weight:600;letter-spacing:.3px;text-transform:uppercase">${l}</div>
+        </div>`).join('')}
+      </div>
+
+      <!-- Activity chart -->
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:18px;margin-bottom:16px">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px">📅 Kunlik faollik</div>
+        <div style="display:flex;align-items:flex-end;gap:6px;height:72px">
+          ${days.map(d => {
+            const h = d.count === 0 ? 4 : Math.max(14, Math.round((d.count/maxDay)*68));
+            const col = d.count === 0 ? 'rgba(255,255,255,.06)' : d.count >= maxDay ? '#00e87a' : 'var(--accent)';
+            return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+              <div style="font-size:10px;color:var(--muted);font-weight:700">${d.count||''}</div>
+              <div style="width:100%;height:${h}px;background:${col};border-radius:6px;transition:.3s" title="${d.date}: ${d.count} ta"></div>
+              <div style="font-size:10px;color:var(--dim);font-weight:700">${d.label}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- Subject breakdown -->
+      ${subjList.length ? `
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:18px;margin-bottom:16px">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px">📚 Fanlar bo'yicha</div>
+        ${subjList.map(([s,c], i) => {
+          const cols = ['var(--accent)','#9d7fff','var(--green)','var(--amber)','var(--red)'];
+          const pct = Math.round((c/weekNotes.length)*100);
+          return `<div style="margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+              <span style="color:var(--text);font-weight:600">${esc(s)}</span>
+              <span style="color:${cols[i]};font-weight:700">${c} ta</span>
+            </div>
+            <div style="height:5px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden">
+              <div style="width:${pct}%;height:100%;background:${cols[i]};border-radius:4px;transition:width .5s"></div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>` : ''}
+
+      <!-- Motivation -->
+      <div style="background:linear-gradient(135deg,rgba(77,138,255,.1),rgba(124,79,255,.08));border:1px solid rgba(77,138,255,.2);border-radius:16px;padding:16px;text-align:center">
+        <div style="font-size:22px;margin-bottom:8px">${streak >= 7 ? '🏆' : streak >= 3 ? '🔥' : '💪'}</div>
+        <div style="font-size:13px;font-weight:700;color:#ecf2ff;margin-bottom:4px">
+          ${streak >= 14 ? 'Ajoyib! 2 hafta uzluksiz!' : streak >= 7 ? 'Zo\'r! Haftalik streak!' : streak >= 3 ? `${streak} kunlik streak!` : "Davom eting!"}
+        </div>
+        <div style="font-size:11px;color:var(--muted)">${weekNotes.length > 0 ? `Bu hafta ${weekNotes.length} ta konspekt yangilandi` : "Yangi konspekt yozish vaqti keldi!"}</div>
+      </div>
+
+      <button onclick="this.closest('[style*=fixed]').remove()" style="width:100%;margin-top:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;font-family:var(--font);transition:.2s" onmouseenter="this.style.background='rgba(255,255,255,.09)'" onmouseleave="this.style.background='rgba(255,255,255,.05)'">Yopish</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+// ══ STAT SAHIFASIGA HISOBOT VA LEADERBOARD TUGMALARI ══
+function addStatButtons() {
+  setTimeout(() => {
+    const main = document.getElementById('main');
+    if (!main || document.getElementById('stat-extra-btns')) return;
+    const btns = document.createElement('div');
+    btns.id = 'stat-extra-btns';
+    btns.style.cssText = 'display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap';
+    btns.innerHTML = `
+      <button onclick="showWeeklyReport()" style="flex:1;min-width:140px;background:linear-gradient(135deg,rgba(77,138,255,.15),rgba(124,79,255,.1));border:1px solid rgba(77,138,255,.25);border-radius:16px;padding:14px 18px;font-size:13px;font-weight:700;color:var(--accent);cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s" onmouseenter="this.style.background='rgba(77,138,255,.22)'" onmouseleave="this.style.background='linear-gradient(135deg,rgba(77,138,255,.15),rgba(124,79,255,.1))'">📊 Haftalik hisobot</button>
+      <button onclick="showLeaderboard()" style="flex:1;min-width:140px;background:linear-gradient(135deg,rgba(255,179,64,.12),rgba(255,107,64,.08));border:1px solid rgba(255,179,64,.25);border-radius:16px;padding:14px 18px;font-size:13px;font-weight:700;color:var(--amber);cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s" onmouseenter="this.style.background='rgba(255,179,64,.2)'" onmouseleave="this.style.background='linear-gradient(135deg,rgba(255,179,64,.12),rgba(255,107,64,.08))'">🏆 Reyting jadvali</button>`;
+    main.insertBefore(btns, main.firstChild);
+  }, 80);
+}
+
 </script>
 
 <!-- PUBLISH / COMMUNITY MODAL -->
