@@ -4668,10 +4668,13 @@ let _activeGroupId = null;
 async function loadGroups() {
   if (!_firebaseReady || !db) return [];
   try {
-    const snap = await db.ref('groups').orderByChild('updatedAt').get();
+    const snap = await db.ref('groups').get();
     const groups = [];
     if (snap.exists()) {
-      snap.forEach(c => groups.push({ id: c.key, ...c.val() }));
+      snap.forEach(c => {
+        const val = c.val();
+        if (val) groups.push({ id: c.key, ...val });
+      });
       groups.sort((a, b) => (b.updatedAt||0) - (a.updatedAt||0));
     }
     return groups;
@@ -4741,6 +4744,15 @@ async function showGroupsPage() {
     ${currentGoogleUser ? `<button onclick="showCreateGroupModal()" style="background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;padding:11px 20px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:7px;box-shadow:0 4px 18px rgba(77,138,255,.35)">➕ Guruh yaratish</button>` : ''}
   </div>
   <div id="groups-list"><div style="text-align:center;padding:40px;color:var(--muted)">Yuklanmoqda...</div></div>`;
+
+  // Firebase tayyor bo'lishini kutamiz
+  if (!_firebaseReady || !db) {
+    let tries = 0;
+    while ((!_firebaseReady || !db) && tries < 25) {
+      await new Promise(r => setTimeout(r, 200));
+      tries++;
+    }
+  }
 
   const groups = await loadGroups();
   const el = document.getElementById('groups-list');
