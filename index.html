@@ -4744,7 +4744,9 @@ async function joinGroup(groupId) {
   };
   await db.ref(`groups/${groupId}/members/${uid_}`).set(memberData);
   await db.ref(`groups/${groupId}/memberCount`).transaction(v => (v||0) + 1);
-  toast('✅ Guruhga qo\'shildingiz!', 'ok');
+  // Cache ni o'chiramiz — qayta yuklash uchun
+  if (window._groupsCache) delete window._groupsCache[groupId];
+  toast("✅ Guruhga qo'shildingiz!", 'ok');
 }
 
 // Guruhdan chiqish
@@ -4910,7 +4912,7 @@ function openGroupChat(groupId, groupData) {
         </div>
       </div>
       <div style="display:flex;gap:6px">
-        ${!isMember ? `<button onclick="joinGroup('${groupId}').then(()=>openGroupById('${groupId}'))" style="background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;padding:8px 14px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--font)">+ Qo'shilish</button>` : ''}
+        ${!isMember ? `<button onclick="this.disabled=true;this.textContent='⏳...';joinGroup('${groupId}').then(()=>{if(window._groupsCache)delete window._groupsCache['${groupId}'];openGroupById('${groupId}')})" style="background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;padding:8px 14px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--font)">+ Qo'shilish</button>` : ''}
         <button onclick="showGroupMembersById('${groupId}')" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px 12px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;font-family:var(--font)">👥 ${memberCount}</button>
         ${isMember && !isAdmin ? `<button onclick="leaveGroup('${groupId}')" style="background:rgba(255,77,106,.08);border:1px solid rgba(255,77,106,.15);border-radius:12px;padding:8px 12px;font-size:12px;font-weight:700;color:var(--red);cursor:pointer;font-family:var(--font)">Chiqish</button>` : ''}
       </div>
