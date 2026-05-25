@@ -5009,7 +5009,99 @@ async function sendGroupMsg(groupId) {
   }
 }
 
-// Guruh a'zolari
+function showMemberPopup(uid_, name, photo, role, isMe, event) {
+  event?.stopPropagation();
+  document.getElementById('member-popup')?.remove();
+
+  const pop = document.createElement('div');
+  pop.id = 'member-popup';
+  pop.style.cssText = `position:fixed;z-index:99999;background:rgba(8,14,28,.98);border:1px solid rgba(61,127,255,.3);border-radius:20px;padding:18px;min-width:250px;max-width:300px;box-shadow:0 24px 70px rgba(0,0,0,.85);backdrop-filter:blur(24px)`;
+
+  const initials = (name||'?').split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2)||'?';
+  const canMsg = currentGoogleUser && !isMe;
+  const subbed = isSubscribed(uid_);
+
+  pop.innerHTML = `
+    <!-- Avatar + Info -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.07)">
+      ${photo
+        ? `<img src="${esc(photo)}" style="width:54px;height:54px;border-radius:50%;object-fit:cover;border:2px solid ${role==='admin'?'rgba(255,179,64,.5)':'rgba(61,127,255,.4)'}"/>`
+        : `<div style="width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;border:2px solid ${role==='admin'?'rgba(255,179,64,.4)':'rgba(61,127,255,.3)'}">${initials}</div>`}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:15px;font-weight:800;color:#ecf2ff;margin-bottom:3px">${esc(name)}${isMe?' <span style="font-size:10px;background:rgba(77,138,255,.15);color:var(--accent);border-radius:8px;padding:1px 6px">SIZ</span>':''}</div>
+        <div style="font-size:12px;color:${role==='admin'?'var(--amber)':'var(--muted)'}">
+          ${role==='admin'?'👑 Admin':'👤 A\'zo'}
+        </div>
+      </div>
+      <button onclick="document.getElementById('member-popup')?.remove()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:50%;width:28px;height:28px;color:var(--muted);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
+    </div>
+
+    <!-- Buttons -->
+    ${canMsg ? `
+    <!-- Xabar yozish -->
+    <button onclick="document.getElementById('member-popup')?.remove();document.querySelector('[style*=fixed][style*=inset]')?.remove();go('msg');setTimeout(()=>openDM('${uid_}','${esc(name)}','${esc(photo)}'),150)"
+      style="width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;padding:12px 16px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;gap:9px;font-family:var(--font);box-shadow:0 4px 18px rgba(61,127,255,.35);margin-bottom:8px;transition:.18s"
+      onmouseenter="this.style.opacity='.88'" onmouseleave="this.style.opacity='1'">
+      <span style="font-size:18px">✉️</span>
+      <span>Shaxsiy xabar yozish</span>
+      <span style="margin-left:auto;font-size:11px;opacity:.7">Lichka</span>
+    </button>
+
+    <!-- Obuna -->
+    <button id="mp-sub-btn" onclick="toggleSubscribe('${uid_}','${esc(name)}','${esc(photo)}');updateSubBtnPopup(document.getElementById('mp-sub-btn'),'${uid_}')"
+      style="width:100%;background:${subbed?'rgba(0,232,122,.1)':'rgba(255,255,255,.05)'};border:1px solid ${subbed?'rgba(0,232,122,.2)':'rgba(255,255,255,.1)'};border-radius:14px;padding:11px 16px;font-size:13px;font-weight:700;color:${subbed?'var(--green)':'var(--muted)'};cursor:pointer;display:flex;align-items:center;gap:9px;font-family:var(--font);margin-bottom:8px;transition:.18s"
+      onmouseenter="this.style.background='${subbed?'rgba(0,232,122,.18)':'rgba(255,255,255,.09)'}'" onmouseleave="this.style.background='${subbed?'rgba(0,232,122,.1)':'rgba(255,255,255,.05)'}'">
+      <span style="font-size:18px">${subbed?'✅':'📌'}</span>
+      <span>${subbed?'Obunasiz':'Obuna bo\'lish'}</span>
+    </button>
+
+    <!-- Jamoat postlarini ko'rish -->
+    <button onclick="document.getElementById('member-popup')?.remove();document.querySelector('[style*=fixed][style*=inset]')?.remove();go('comm')"
+      style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:10px 16px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:9px;font-family:var(--font);transition:.18s"
+      onmouseenter="this.style.background='rgba(255,255,255,.08)'" onmouseleave="this.style.background='rgba(255,255,255,.04)'">
+      <span style="font-size:16px">📚</span> Konspektlarini ko'rish
+    </button>` : isMe ? `
+    <div style="text-align:center;padding:10px;font-size:12px;color:var(--muted)">Bu sizning profilingiz</div>
+    <button onclick="document.getElementById('member-popup')?.remove();document.querySelector('[style*=fixed][style*=inset]')?.remove();go('profile')" style="width:100%;background:rgba(77,138,255,.1);border:1px solid rgba(77,138,255,.2);border-radius:14px;padding:11px;font-size:13px;font-weight:700;color:var(--accent);cursor:pointer;font-family:var(--font)">👤 Profilimni ko'rish</button>
+    ` : `
+    <button onclick="document.getElementById('member-popup')?.remove();signInWithGoogle()" style="width:100%;background:linear-gradient(135deg,rgba(61,127,255,.15),rgba(108,63,255,.12));border:1px solid rgba(61,127,255,.25);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--accent);cursor:pointer;font-family:var(--font)">🔐 Xabar yozish uchun kiring</button>`}
+  `;
+
+  document.body.appendChild(pop);
+
+  // Smart positioning
+  requestAnimationFrame(() => {
+    const pw = pop.offsetWidth || 270;
+    const ph = pop.offsetHeight || 220;
+    const cx = event?.clientX ?? window.innerWidth/2;
+    const cy = event?.clientY ?? window.innerHeight/2;
+    let x = cx - pw/2;
+    let y = cy + 14;
+    if (x + pw > window.innerWidth - 8) x = window.innerWidth - pw - 8;
+    if (x < 8) x = 8;
+    if (y + ph > window.innerHeight - 8) y = cy - ph - 14;
+    if (y < 8) y = 8;
+    pop.style.left = x + 'px';
+    pop.style.top = y + 'px';
+    pop.style.opacity = '0';
+    pop.style.transform = 'scale(.94) translateY(-6px)';
+    pop.style.transition = 'opacity .18s, transform .18s';
+    requestAnimationFrame(() => { pop.style.opacity='1'; pop.style.transform='scale(1) translateY(0)'; });
+  });
+
+  setTimeout(() => {
+    function closePop(e) {
+      if (!pop.contains(e.target)) {
+        pop.style.opacity='0'; pop.style.transform='scale(.94)';
+        setTimeout(()=>pop.remove(),150);
+        document.removeEventListener('click', closePop);
+      }
+    }
+    document.addEventListener('click', closePop);
+  }, 120);
+}
+
+// Guruh a'zolari modali
 async function showGroupMembers(groupId, g) {
   if (typeof g === 'string') { try { g = JSON.parse(g); } catch(e){ return; } }
   const overlay = document.createElement('div');
@@ -5030,13 +5122,21 @@ async function showGroupMembers(groupId, g) {
     <div style="overflow-y:auto;padding:12px 16px">
       ${members.map(m => {
         const initials = (m.name||'?').split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2);
-        return `<div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;border:1px solid rgba(255,255,255,.05);margin-bottom:6px;background:rgba(255,255,255,.02)">
-          ${m.photo ? `<img src="${esc(m.photo)}" style="width:38px;height:38px;border-radius:50%;object-fit:cover"/>` : `<div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff">${initials}</div>`}
-          <div style="flex:1">
-            <div style="font-size:13px;font-weight:700;color:#ecf2ff">${esc(m.name||'Anonim')} ${m.uid===myUid?'(Siz)':''}</div>
-            <div style="font-size:11px;color:var(--muted)">${m.role==='admin'?'👑 Admin':'👤 A\'zo'}</div>
+        const isMe = m.uid === myUid;
+        const canMsg = currentGoogleUser && !isMe;
+        return `<div style="display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:16px;border:1px solid rgba(255,255,255,.05);margin-bottom:8px;background:rgba(255,255,255,.02);transition:.18s;cursor:pointer"
+          onmouseenter="this.style.background='rgba(77,138,255,.07)';this.style.borderColor='rgba(77,138,255,.15)'"
+          onmouseleave="this.style.background='rgba(255,255,255,.02)';this.style.borderColor='rgba(255,255,255,.05)'"
+          onclick="showMemberPopup('${m.uid}','${esc(m.name||'Anonim')}','${esc(m.photo||'')}','${m.role||'member'}',${isMe},event)">
+          ${m.photo
+            ? `<img src="${esc(m.photo)}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid ${m.role==='admin'?'rgba(255,179,64,.4)':'rgba(255,255,255,.1)'};flex-shrink:0"/>`
+            : `<div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;flex-shrink:0;border:2px solid ${m.role==='admin'?'rgba(255,179,64,.4)':'rgba(255,255,255,.1)'}">${initials}</div>`}
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:700;color:#ecf2ff">${esc(m.name||'Anonim')} ${isMe?'<span style="font-size:10px;background:rgba(77,138,255,.15);color:var(--accent);border-radius:8px;padding:1px 6px;vertical-align:middle">SIZ</span>':''}</div>
+            <div style="font-size:11px;color:${m.role==='admin'?'var(--amber)':'var(--muted)'};margin-top:2px">${m.role==='admin'?'👑 Admin':'👤 A\'zo'} ${m.joinedAt?'· '+new Date(m.joinedAt).toLocaleDateString('uz-UZ',{day:'2-digit',month:'short'}):''}</div>
           </div>
-          ${isAdmin && m.uid !== myUid ? `<button onclick="if(confirm('${esc(m.name)}ni guruhdan chiqarishni xohlaysizmi?')){db.ref('groups/${groupId}/members/${m.uid}').remove();db.ref('groups/${groupId}/memberCount').transaction(v=>Math.max(0,(v||1)-1));this.closest('[style*=fixed]').remove();toast('A\\'zo chiqarildi')}" style="background:rgba(255,77,106,.08);border:1px solid rgba(255,77,106,.15);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--red);cursor:pointer;font-family:var(--font)">Chiqarish</button>` : ''}
+          ${canMsg ? `<div style="font-size:18px;opacity:.4;transition:.15s" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='.4'">✉️</div>` : ''}
+          ${isAdmin && !isMe ? `<button onclick="event.stopPropagation();if(confirm('${esc(m.name)}ni guruhdan chiqarishni xohlaysizmi?')){db.ref('groups/${g.id}/members/${m.uid}').remove();db.ref('groups/${g.id}/memberCount').transaction(v=>Math.max(0,(v||1)-1));this.closest('[style*=fixed]').remove();toast('A\\'zo chiqarildi')}" style="background:rgba(255,77,106,.08);border:1px solid rgba(255,77,106,.15);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--red);cursor:pointer;font-family:var(--font)">Chiqarish</button>` : ''}
         </div>`;
       }).join('')}
     </div>
