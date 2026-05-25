@@ -4681,6 +4681,33 @@ async function loadGroups() {
   } catch(e) { console.error('loadGroups:', e); return []; }
 }
 
+function openGroupById(groupId) {
+  const g = window._groupsCache?.[groupId];
+  if (g) {
+    openGroupChat(groupId, g);
+  } else if (_firebaseReady && db) {
+    db.ref(`groups/${groupId}`).get().then(snap => {
+      if (snap.exists()) {
+        const data = { id: groupId, ...snap.val() };
+        if (!window._groupsCache) window._groupsCache = {};
+        window._groupsCache[groupId] = data;
+        openGroupChat(groupId, data);
+      } else toast("Guruh topilmadi", 'err');
+    }).catch(() => toast("Guruh yuklanmadi", 'err'));
+  }
+}
+
+function showGroupMembersById(groupId) {
+  const g = window._groupsCache?.[groupId];
+  if (g) {
+    showGroupMembers(groupId, g);
+  } else if (_firebaseReady && db) {
+    db.ref(`groups/${groupId}`).get().then(snap => {
+      if (snap.exists()) showGroupMembers(groupId, { id: groupId, ...snap.val() });
+    }).catch(() => {});
+  }
+}
+
 // Guruh yaratish
 async function createGroup(name, subject, emoji) {
   if (!currentGoogleUser) { signInWithGoogle(); return; }
@@ -4699,6 +4726,8 @@ async function createGroup(name, subject, emoji) {
     memberCount: 1, lastMessage: '', updatedAt: Date.now(), createdAt: Date.now()
   };
   await db.ref(`groups/${groupId}`).set(group);
+  if (!window._groupsCache) window._groupsCache = {};
+  window._groupsCache[groupId] = group;
   toast('✅ Guruh yaratildi!', 'ok');
   openGroupChat(groupId, group);
 }
@@ -4770,6 +4799,10 @@ async function showGroupsPage() {
   }
 
   const myUid = currentGoogleUser?.uid;
+  // Guruh ma'lumotlarini global saqlaymiz
+  window._groupsCache = {};
+  groups.forEach(g => { window._groupsCache[g.id] = g; });
+
   el.innerHTML = groups.map(g => {
     const isMember = myUid && g.members?.[myUid];
     const memberCount = g.memberCount || Object.keys(g.members||{}).length;
@@ -4777,9 +4810,9 @@ async function showGroupsPage() {
     const col = subColors[g.subject] || '#5b8dee';
     return `
     <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:18px;margin-bottom:12px;cursor:pointer;transition:all .2s;border-left:4px solid ${col}"
-      onmouseenter="this.style.borderColor='${col}';this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 30px rgba(0,0,0,.2)'"
-      onmouseleave="this.style.borderColor='var(--border)';this.style.borderLeftColor='${col}';this.style.transform='';this.style.boxShadow=''"
-      onclick="openGroupChat('${g.id}',${JSON.stringify(g).replace(/'/g,'\\u0027')})">
+      onmouseenter="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 30px rgba(0,0,0,.2)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow=''"
+      onclick="openGroupById('${g.id}')">
       <div style="display:flex;align-items:center;gap:14px">
         <div style="width:50px;height:50px;border-radius:16px;background:linear-gradient(135deg,${col}22,${col}11);border:1px solid ${col}33;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${g.emoji||'📚'}</div>
         <div style="flex:1;min-width:0">
@@ -4792,7 +4825,7 @@ async function showGroupsPage() {
             <span style="font-size:11px;color:var(--muted)">👥 ${memberCount} a'zo</span>
             ${isMember ? `<span style="background:rgba(0,232,122,.12);color:var(--green);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700">✅ A'zo</span>` : ''}
           </div>
-          <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(g.lastMessage||'Hali xabar yo\'q')}</div>
+          <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(g.lastMessage||"Hali xabar yo'q")}</div>
         </div>
       </div>
     </div>`;
@@ -4877,8 +4910,8 @@ function openGroupChat(groupId, groupData) {
         </div>
       </div>
       <div style="display:flex;gap:6px">
-        ${!isMember ? `<button onclick="joinGroup('${groupId}').then(()=>openGroupChat('${groupId}',${JSON.stringify(g).replace(/'/g,"\\u0027")}))" style="background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;padding:8px 14px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--font)">+ Qo'shilish</button>` : ''}
-        <button onclick="showGroupMembers('${groupId}',${JSON.stringify(g).replace(/'/g,"\\u0027")})" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px 12px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;font-family:var(--font)">👥 ${memberCount}</button>
+        ${!isMember ? `<button onclick="joinGroup('${groupId}').then(()=>openGroupById('${groupId}'))" style="background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;padding:8px 14px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--font)">+ Qo'shilish</button>` : ''}
+        <button onclick="showGroupMembersById('${groupId}')" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px 12px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;font-family:var(--font)">👥 ${memberCount}</button>
         ${isMember && !isAdmin ? `<button onclick="leaveGroup('${groupId}')" style="background:rgba(255,77,106,.08);border:1px solid rgba(255,77,106,.15);border-radius:12px;padding:8px 12px;font-size:12px;font-weight:700;color:var(--red);cursor:pointer;font-family:var(--font)">Chiqish</button>` : ''}
       </div>
     </div>
