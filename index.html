@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="uz">
 <head>
@@ -407,6 +406,56 @@ a{color:var(--accent)}
 #chat-msgs::-webkit-scrollbar{width:4px}
 #chat-msgs::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
 #chat-msgs{scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+
+/* ══ SPLASH SCREEN ══════════════════════════════════════ */
+#splash{position:fixed;inset:0;z-index:99999;background:#04070f;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .7s ease,transform .7s ease}
+#splash.hide{opacity:0;transform:scale(1.05);pointer-events:none}
+.splash-logo{width:96px;height:96px;border-radius:30px;background:linear-gradient(135deg,#4d8aff,#7c4fff);display:flex;align-items:center;justify-content:center;font-size:48px;margin-bottom:28px;animation:splashPulse 2s ease-in-out infinite;box-shadow:0 24px 60px rgba(77,138,255,.4)}
+@keyframes splashPulse{0%,100%{box-shadow:0 24px 60px rgba(77,138,255,.4),0 0 0 0 rgba(77,138,255,.3)}50%{box-shadow:0 24px 80px rgba(77,138,255,.6),0 0 0 16px rgba(77,138,255,0)}}
+.splash-title{font-family:'Fraunces',serif;font-size:34px;font-style:italic;color:#ecf2ff;margin-bottom:8px;font-weight:400;letter-spacing:-.5px}
+.splash-sub{font-size:13px;color:rgba(130,170,230,.6);margin-bottom:44px;letter-spacing:.5px;text-transform:uppercase;font-weight:600}
+.splash-bar{width:200px;height:3px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden}
+.splash-fill{height:100%;background:linear-gradient(90deg,#4d8aff,#7c4fff,#00d4ff);border-radius:4px;animation:splashLoad 2s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes splashLoad{0%{width:0%}20%{width:25%}50%{width:60%}80%{width:85%}100%{width:100%}}
+.splash-dots{display:flex;gap:8px;margin-top:22px}
+.splash-dot{width:7px;height:7px;border-radius:50%;background:rgba(77,138,255,.25);animation:sdot 1.4s ease-in-out infinite}
+.splash-dot:nth-child(2){animation-delay:.2s}.splash-dot:nth-child(3){animation-delay:.4s}
+@keyframes sdot{0%,80%,100%{transform:scale(.5);background:rgba(77,138,255,.25)}40%{transform:scale(1.1);background:#4d8aff}}
+
+/* ══ FONT VARIANTS ═══════════════════════════════════ */
+body.font-inter *{font-family:'Inter',system-ui,sans-serif!important}
+body.font-mono .rich-editor,body.font-mono .nc-p,body.font-mono .nc-content{font-family:'JetBrains Mono','Courier New',monospace!important;font-size:13px!important;line-height:1.7!important}
+body.font-rounded{font-family:'Nunito',system-ui,sans-serif}
+body.font-rounded .nb,.font-rounded .mb,.font-rounded button{font-family:'Nunito',system-ui,sans-serif}
+body.font-lora .rich-editor,body.font-lora .nc-content,body.font-lora .nc-p{font-family:'Lora',Georgia,serif!important;font-size:15px!important;line-height:1.9!important}
+
+/* ══ TTS BAR ════════════════════════════════════════ */
+#tts-bar{position:fixed;bottom:calc(var(--mbar-h) + 18px);left:50%;transform:translateX(-50%);background:rgba(8,14,28,.97);border:1px solid rgba(61,127,255,.3);border-radius:50px;padding:10px 16px;display:flex;align-items:center;gap:10px;z-index:500;box-shadow:0 16px 48px rgba(0,0,0,.6),0 0 0 1px rgba(77,138,255,.1);backdrop-filter:blur(24px);min-width:300px;max-width:440px;width:90%;animation:ttsSlide .35s cubic-bezier(.34,1.56,.64,1);display:none}
+#tts-bar.show{display:flex}
+@media(min-width:801px){#tts-bar{bottom:24px}}
+@keyframes ttsSlide{from{opacity:0;transform:translateX(-50%) translateY(24px) scale(.9)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+.tts-track{flex:1;height:4px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;cursor:pointer;position:relative}
+.tts-fill{height:100%;background:linear-gradient(90deg,#4d8aff,#7c4fff);border-radius:4px;width:0%;transition:width .3s linear;pointer-events:none}
+.tts-btn{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;flex-shrink:0;background:rgba(255,255,255,.08)}
+.tts-btn:hover{background:rgba(255,255,255,.15);transform:scale(1.1)}
+.tts-play{background:linear-gradient(135deg,#4d8aff,#7c4fff)!important;box-shadow:0 4px 14px rgba(77,138,255,.35)}
+.tts-word{background:rgba(77,138,255,.15);border-radius:3px;transition:background .15s}
+
+/* ══ NOTE COVER ══════════════════════════════════════ */
+.nc-cover-wrap{width:100%;overflow:hidden;border-radius:0;flex-shrink:0}
+.nc-cover{width:100%;height:130px;object-fit:cover;display:block;transition:transform .4s ease}
+.note-card:hover .nc-cover{transform:scale(1.04)}
+
+/* ══ CAMERA ═══════════════════════════════════════════ */
+#cam-overlay{position:fixed;inset:0;background:#000;z-index:9999;display:none;flex-direction:column}
+#cam-overlay.show{display:flex}
+#cam-video{width:100%;flex:1;object-fit:cover}
+.cam-ui{position:absolute;bottom:0;left:0;right:0;padding:28px 24px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(transparent,rgba(0,0,0,.85))}
+.cam-shutter{width:72px;height:72px;border-radius:50%;border:4px solid #fff;background:rgba(255,255,255,.9);cursor:pointer;transition:all .15s;box-shadow:0 8px 28px rgba(0,0,0,.5)}
+.cam-shutter:active{transform:scale(.88);background:#fff}
+.cam-ring{width:80px;height:80px;border-radius:50%;border:2px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center}
+.cam-side-btn{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.15);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;transition:all .2s;color:#fff}
+.cam-side-btn:hover{background:rgba(255,255,255,.25);transform:scale(1.08)}
 </style>
 
 
@@ -423,7 +472,65 @@ a{color:var(--accent)}
 </head>
 <body>
 
-<div id="topbar">
+<!-- ══ SPLASH SCREEN ══ -->
+<div id="splash">
+  <div class="splash-logo">🧠</div>
+  <div class="splash-title">MedNotepad</div>
+  <div class="splash-sub">Tibbiy talabalar platformasi</div>
+  <div class="splash-bar"><div class="splash-fill"></div></div>
+  <div class="splash-dots">
+    <div class="splash-dot"></div>
+    <div class="splash-dot"></div>
+    <div class="splash-dot"></div>
+  </div>
+</div>
+
+<!-- ══ TTS BAR ══ -->
+<div id="tts-bar">
+  <button class="tts-btn" id="tts-prev" onclick="ttsSkip(-1)" title="Oldingi">⏮</button>
+  <button class="tts-btn tts-play" id="tts-play-btn" onclick="ttsToggle()">▶</button>
+  <button class="tts-btn" id="tts-next" onclick="ttsSkip(1)" title="Keyingi">⏭</button>
+  <div class="tts-track" onclick="ttsScrub(event)">
+    <div class="tts-fill" id="tts-fill"></div>
+  </div>
+  <div id="tts-time" style="font-size:10px;color:var(--muted);white-space:nowrap;min-width:36px;text-align:right">0%</div>
+  <select id="tts-rate" onchange="ttsSetRate(this.value)" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:4px 6px;font-size:11px;color:var(--text);cursor:pointer;font-family:var(--font)">
+    <option value="0.7">0.7x</option>
+    <option value="0.9">0.9x</option>
+    <option value="1" selected>1x</option>
+    <option value="1.25">1.25x</option>
+    <option value="1.5">1.5x</option>
+  </select>
+  <button class="tts-btn" onclick="ttsStop()" title="To'xtatish" style="color:var(--red)">✕</button>
+</div>
+
+<!-- ══ CAMERA OVERLAY ══ -->
+<div id="cam-overlay">
+  <div style="position:absolute;top:0;left:0;right:0;padding:16px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(rgba(0,0,0,.7),transparent);z-index:2">
+    <button onclick="camClose()" style="background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);border-radius:50%;width:42px;height:42px;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center">←</button>
+    <span style="color:#fff;font-size:14px;font-weight:700">📷 Rasm olish</span>
+    <button id="cam-flip" onclick="camFlip()" class="cam-side-btn" style="background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);border-radius:50%;width:42px;height:42px;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">🔄</button>
+  </div>
+  <video id="cam-video" autoplay playsinline muted></video>
+  <canvas id="cam-canvas" style="display:none"></canvas>
+  <!-- Preview -->
+  <div id="cam-preview" style="display:none;position:absolute;inset:0;background:#000;flex-direction:column;align-items:center;justify-content:center;z-index:3">
+    <img id="cam-preview-img" style="max-width:100%;max-height:80vh;object-fit:contain"/>
+    <div style="display:flex;gap:16px;margin-top:20px">
+      <button onclick="camRetake()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:12px 28px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--font)">↩ Qaytarish</button>
+      <button onclick="camSave()" style="background:linear-gradient(135deg,#4d8aff,#7c4fff);border:none;border-radius:16px;padding:12px 28px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--font);box-shadow:0 6px 20px rgba(77,138,255,.4)">✅ Saqlash</button>
+    </div>
+  </div>
+  <div class="cam-ui">
+    <button onclick="camGallery()" class="cam-side-btn" title="Galereyadan tanlash">🖼</button>
+    <div class="cam-ring">
+      <button class="cam-shutter" onclick="camCapture()"></button>
+    </div>
+    <button onclick="camToggleFlash()" class="cam-side-btn" id="cam-flash-btn" title="Flash">⚡</button>
+  </div>
+</div>
+
+
   <div class="logo" onclick="go('home')">
     <div class="logo-box">🧠</div>MedNotepad
   </div>
@@ -1212,17 +1319,21 @@ function pb(p){return`<span class="pbadge ${PC[p]||'pb-new'}">${PI[p]||'○'} ${
 
 function nc(n,list){
   const bc=n.color+'28';
-  return`<div class="nc" style="border-color:${bc};border-left-color:${n.color}" onclick="go('detail','${n.id}')" onmouseenter="this.style.borderColor='${n.color}55'" onmouseleave="this.style.borderColor='${bc}'">
-    <div style="position:absolute;top:9px;right:9px;display:flex;gap:3px">${n.pinned?'<span style="font-size:11px">📌</span>':''}${n.starred?'<span style="font-size:11px">⭐</span>':''}</div>
-    <div class="nc-t">${esc(n.title)||'Nomsiz'}</div>
-    <div class="nc-p${list?' lc':''}">${esc(n.content)||"Kontent yo'q..."}</div>
-    <div class="nc-f">
-      <span class="chip" style="background:${n.color}18;color:${n.color}">${esc(n.subject)}</span>
-      ${pb(n.progress||'new')}
-      ${(n.images||[]).length?`<span class="chip" style="background:#2d3f5818;color:var(--muted)">📸${n.images.length}</span>`:''}
-      ${(n.tags||[]).slice(0,2).map(t=>`<span class="chip" style="background:#2d3f5818;color:var(--dim)">#${esc(t)}</span>`).join('')}
+  const coverHTML = getNcCoverHTML(n);
+  return`<div class="nc" style="border-color:${bc};border-left-color:${n.color};padding:0;overflow:hidden" onclick="go('detail','${n.id}')" onmouseenter="this.style.borderColor='${n.color}55'" onmouseleave="this.style.borderColor='${bc}'">
+    ${coverHTML}
+    <div style="padding:14px 14px 12px;position:relative">
+      <div style="position:absolute;top:9px;right:9px;display:flex;gap:3px">${n.pinned?'<span style="font-size:11px">📌</span>':''}${n.starred?'<span style="font-size:11px">⭐</span>':''}</div>
+      <div class="nc-t">${esc(n.title)||'Nomsiz'}</div>
+      <div class="nc-p${list?' lc':''}">${esc(n.content)||"Kontent yo'q..."}</div>
+      <div class="nc-f">
+        <span class="chip" style="background:${n.color}18;color:${n.color}">${esc(n.subject)}</span>
+        ${pb(n.progress||'new')}
+        ${(n.images||[]).length?`<span class="chip" style="background:#2d3f5818;color:var(--muted)">📸${n.images.length}</span>`:''}
+        ${(n.tags||[]).slice(0,2).map(t=>`<span class="chip" style="background:#2d3f5818;color:var(--dim)">#${esc(t)}</span>`).join('')}
+      </div>
+      <div class="nc-d">${fd(n.updatedAt)} · ${wc(n.content)} so'z</div>
     </div>
-    <div class="nc-d">${fd(n.updatedAt)} · ${wc(n.content)} so'z</div>
   </div>`;
 }
 
@@ -1363,6 +1474,8 @@ function rEditor(){
     <button class="ibtn" title="PDF eksport" onclick="saveNote();exportNotePDF('${n.id}')">📄</button>
     <button class="ibtn" title="QR kod" onclick="showQRModal('${n.id}')">🔲</button>
     <button class="ibtn" title="Birgalikda tahrirlash" onclick="startCollabSession('${n.id}')" style="color:var(--green);border-color:rgba(0,232,122,.3);font-size:12px;font-weight:700;gap:4px;padding:7px 10px">🔗 Hamkorlik</button>
+    <button class="ibtn" onclick="ttsStart('${n.id}')" title="Ovozli o'qish" style="color:#00d4ff;border-color:rgba(0,212,255,.25)">🔊</button>
+    <button class="ibtn" onclick="openCamera('${n.id}')" title="Kamera" style="color:var(--green);border-color:rgba(0,232,122,.25)">📷</button>
     <button class="ibtn" style="color:var(--red);border-color:rgba(224,85,85,.3)" onclick="showDel('${n.id}')">🗑</button>
   </div>
   <div class="ewrap">
@@ -1695,6 +1808,9 @@ function rDetail(nid){
       <button class="ibtn" onclick="exportNotePDF('${n.id}')" title="PDF yuklab olish" style="color:#ff6b6b">📄</button>
       <button class="ibtn" onclick="showQRModal('${n.id}')" title="QR kod">🔲</button>
       <button class="btn btn-s btn-sm" onclick="openPublishForm('${n.id}')">🌐 Ulashish</button>
+      <button class="ibtn" onclick="ttsStart('${n.id}')" title="Ovozli o'qish" style="color:#00d4ff;border-color:rgba(0,212,255,.3);font-size:13px">🔊</button>
+      <button class="ibtn" onclick="openCamera('${n.id}')" title="Kamera" style="color:var(--green);border-color:rgba(0,232,122,.3);font-size:13px">📷</button>
+      <button class="ibtn" onclick="showCoverPicker('${n.id}')" title="Muqova" style="color:var(--amber);border-color:rgba(255,179,64,.3);font-size:13px">🎨</button>
     </div>
   </div>
   <div style="background:var(--card);border:1px solid ${n.color}28;border-left:4px solid ${n.color};border-radius:var(--r);padding:20px 22px;margin-bottom:14px;min-height:80px">
@@ -2504,6 +2620,15 @@ function rProfile() {
   <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:18px;margin-bottom:20px">
     <div class="stitle">⚙️ Sozlamalar</div>
     <div style="display:flex;flex-direction:column;gap:10px">
+
+      <!-- Font tanlash -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid var(--border)">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#ecf2ff">🔤 Shrift va o'lcham</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${FONTS.find(f=>f.id===(localStorage.getItem('mn_font')||'inter'))?.name||'Inter'} · ${localStorage.getItem('mn_fontsize')||'14px'}</div>
+        </div>
+        <button class="btn btn-s btn-sm" onclick="showFontPicker()">Tanlash</button>
+      </div>
 
       <!-- Language -->
       <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid var(--border)">
@@ -4649,14 +4774,526 @@ function updateSubBadge(count) {
 }
 
 renderDynFans();
-rHome();
+
+// ══ SPLASH SCREEN ══════════════════════════════════════
+function initSplash() {
+  const splash = document.getElementById('splash');
+  if (!splash) { rHome(); return; }
+  // Fon yuklanish animatsiyasi
+  const minTime = 2200;
+  const startTime = Date.now();
+  function hideSplash() {
+    const elapsed = Date.now() - startTime;
+    const delay = Math.max(0, minTime - elapsed);
+    setTimeout(() => {
+      splash.classList.add('hide');
+      setTimeout(() => { splash.remove(); rHome(); }, 700);
+    }, delay);
+  }
+  // DOM tayyor bo'lsa 
+  if (document.readyState === 'complete') hideSplash();
+  else window.addEventListener('load', hideSplash);
+}
+initSplash();
+
 // Init yangi tizimlar
 setTimeout(() => {
   initNotifications();
   applyLangToUI();
+  initFontSystem();
   setInterval(checkSubscriptionUpdates, 300000);
   setTimeout(checkSubscriptionUpdates, 5000);
 }, 1000);
+
+// ════════════════════════════════════════════════════════════════
+// 🔤 FONT TANLASH TIZIMI
+// ════════════════════════════════════════════════════════════════
+const FONTS = [
+  { id:'inter', name:'Inter', desc:'Zamonaviy, aniq', preview:'Aa', class:'' },
+  { id:'rounded', name:'Nunito', desc:'Yumshoq, do\'stona', preview:'Aa', class:'font-rounded' },
+  { id:'mono', name:'Monospace', desc:'Kod uslubi, aniq', preview:'Aa', class:'font-mono' },
+  { id:'lora', name:'Lora', desc:'Klassik, kitob uslubi', preview:'Aa', class:'font-lora' }
+];
+
+function initFontSystem() {
+  // Google Fonts qo'shamiz
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap';
+  document.head.appendChild(link);
+  // Saqlangan fontni qo'llamiz
+  const saved = localStorage.getItem('mn_font') || 'inter';
+  applyFont(saved);
+}
+
+function applyFont(fontId) {
+  const font = FONTS.find(f => f.id === fontId) || FONTS[0];
+  document.body.className = document.body.className
+    .replace(/font-\w+/g, '').trim();
+  if (font.class) document.body.classList.add(font.class);
+  localStorage.setItem('mn_font', fontId);
+}
+
+function showFontPicker() {
+  const saved = localStorage.getItem('mn_font') || 'inter';
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)';
+  overlay.onclick = e => { if(e.target===overlay) overlay.remove(); };
+  overlay.innerHTML = `
+  <div style="background:#0b1222;border:1px solid rgba(61,127,255,.2);border-radius:24px;width:100%;max-width:420px;box-shadow:0 24px 72px rgba(0,0,0,.8);overflow:hidden">
+    <div style="padding:22px 24px 16px;border-bottom:1px solid rgba(61,127,255,.1);background:linear-gradient(135deg,rgba(77,138,255,.08),rgba(124,79,255,.05))">
+      <div style="font-size:11px;font-weight:800;color:rgba(77,138,255,.7);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">INTERFEYS</div>
+      <div style="font-family:'Fraunces',serif;font-size:22px;font-style:italic;color:#ecf2ff;font-weight:400">🔤 Shrift tanlash</div>
+    </div>
+    <div style="padding:16px 20px 20px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      ${FONTS.map(f => `
+      <button onclick="applyFont('${f.id}');document.querySelectorAll('.font-opt').forEach(b=>{b.style.background='rgba(255,255,255,.04)';b.style.borderColor='rgba(255,255,255,.08)'});this.style.background='rgba(77,138,255,.15)';this.style.borderColor='rgba(77,138,255,.35)';localStorage.setItem('mn_font','${f.id}')"
+        class="font-opt" style="background:${saved===f.id?'rgba(77,138,255,.15)':'rgba(255,255,255,.04)'};border:1px solid ${saved===f.id?'rgba(77,138,255,.35)':'rgba(255,255,255,.08)'};border-radius:16px;padding:18px 14px;cursor:pointer;transition:all .2s;text-align:left;font-family:var(--font)"
+        onmouseenter="this.style.background='rgba(77,138,255,.1)'" onmouseleave="this.style.background='${saved===f.id?'rgba(77,138,255,.15)':'rgba(255,255,255,.04)'}'">
+        <div style="font-size:26px;font-weight:800;color:var(--accent);margin-bottom:8px;font-family:${f.id==='mono'?'monospace':f.id==='lora'?'Lora,serif':f.id==='rounded'?'Nunito,sans-serif':'Inter,sans-serif'}">${f.preview}</div>
+        <div style="font-size:13px;font-weight:700;color:#ecf2ff;margin-bottom:3px">${f.name}</div>
+        <div style="font-size:11px;color:var(--muted)">${f.desc}</div>
+        ${saved===f.id?'<div style="margin-top:8px;font-size:10px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px">✓ Tanlangan</div>':''}
+      </button>`).join('')}
+    </div>
+    <!-- Font size -->
+    <div style="padding:0 20px 20px">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">Matn o'lchami</div>
+      <div style="display:flex;gap:8px">
+        ${[['S','12px','Kichik'],['M','14px','O\'rta'],['L','16px','Katta'],['XL','18px','Juda katta']].map(([l,s,d]) => `
+        <button onclick="document.documentElement.style.fontSize='${s}';localStorage.setItem('mn_fontsize','${s}');document.querySelectorAll('.fsz-btn').forEach(b=>b.style.background='rgba(255,255,255,.06)');this.style.background='rgba(77,138,255,.2)'"
+          class="fsz-btn" style="flex:1;background:${localStorage.getItem('mn_fontsize')===s?'rgba(77,138,255,.2)':'rgba(255,255,255,.06)'};border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:9px 4px;font-size:${s};font-weight:700;color:var(--text);cursor:pointer;font-family:var(--font);transition:.2s">${l}</button>`).join('')}
+      </div>
+      <div style="font-size:11px;color:var(--dim);text-align:center;margin-top:8px">Sahifani yangilanganda qo'llanadi</div>
+    </div>
+    <div style="padding:0 20px 20px">
+      <button onclick="this.closest('[style*=fixed]').remove()" style="width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--font)">✅ Saqlash va yopish</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  // Saqlangan font size ni qo'llamiz
+  const savedSize = localStorage.getItem('mn_fontsize');
+  if (savedSize) document.documentElement.style.fontSize = savedSize;
+}
+
+// ════════════════════════════════════════════════════════════════
+// 🔊 TEXT-TO-SPEECH (Ovozli o'qish)
+// ════════════════════════════════════════════════════════════════
+let _tts = null;
+let _ttsWords = [];
+let _ttsIdx = 0;
+let _ttsPlaying = false;
+let _ttsRate = 1;
+let _ttsNoteId = null;
+
+function ttsStart(noteId) {
+  if (!('speechSynthesis' in window)) {
+    toast('Brauzeringiz ovozli o\'qishni qo\'llab-quvvatlamaydi', 'err');
+    return;
+  }
+  const n = notes.find(x => x.id === noteId) || (editing?.id === noteId ? editing : null);
+  if (!n) return;
+
+  ttsStop();
+  _ttsNoteId = noteId;
+
+  // Matnni tozalaymiz
+  const rawText = (n.title ? n.title + '. ' : '') +
+    (n.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
+  if (!rawText.trim()) { toast('O\'qiladigan matn yo\'q', 'err'); return; }
+
+  // So'zlarga bo'lamiz
+  _ttsWords = rawText.split(/(\s+)/).filter(w => w.trim());
+  _ttsIdx = 0;
+  _ttsPlaying = true;
+
+  document.getElementById('tts-bar').classList.add('show');
+  ttsUpdateUI();
+
+  // Tilni aniqlash
+  const lang = currentLang === 'ru' ? 'ru-RU' : currentLang === 'en' ? 'en-US' : 'uz-UZ';
+  ttsSpeak(rawText, lang);
+}
+
+function ttsSpeak(text, lang) {
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = _ttsRate;
+  utter.pitch = 1;
+  utter.volume = 1;
+  // Tilni qo'yamiz
+  const voices = window.speechSynthesis.getVoices();
+  const voice = voices.find(v => v.lang.startsWith(lang.slice(0,2))) ||
+                voices.find(v => v.lang.startsWith('en')) || voices[0];
+  if (voice) utter.voice = voice;
+
+  utter.onboundary = (e) => {
+    if (e.name === 'word') {
+      _ttsIdx = Math.floor(e.charIndex / 5);
+      ttsUpdateProgress(_ttsIdx / Math.max(_ttsWords.length, 1));
+    }
+  };
+  utter.onend = () => {
+    _ttsPlaying = false;
+    ttsUpdateUI();
+    ttsUpdateProgress(1);
+    setTimeout(() => {
+      const bar = document.getElementById('tts-bar');
+      if (bar) bar.classList.remove('show');
+    }, 2000);
+  };
+  utter.onerror = (e) => {
+    if (e.error !== 'interrupted') { _ttsPlaying = false; ttsUpdateUI(); }
+  };
+  _tts = utter;
+  window.speechSynthesis.speak(utter);
+}
+
+function ttsToggle() {
+  if (!_ttsNoteId) return;
+  if (window.speechSynthesis.paused) {
+    window.speechSynthesis.resume();
+    _ttsPlaying = true;
+  } else if (window.speechSynthesis.speaking) {
+    window.speechSynthesis.pause();
+    _ttsPlaying = false;
+  }
+  ttsUpdateUI();
+}
+
+function ttsStop() {
+  window.speechSynthesis.cancel();
+  _ttsPlaying = false;
+  _ttsNoteId = null;
+  _ttsIdx = 0;
+  const bar = document.getElementById('tts-bar');
+  if (bar) bar.classList.remove('show');
+}
+
+function ttsSkip(dir) {
+  // 10 so'z oldinga/orqaga
+  const n = notes.find(x => x.id === _ttsNoteId);
+  if (!n) return;
+  const rawText = (n.title ? n.title + '. ' : '') +
+    (n.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  const words = rawText.split(/\s+/);
+  _ttsIdx = Math.max(0, Math.min(words.length - 1, _ttsIdx + dir * 10));
+  const skipText = words.slice(_ttsIdx).join(' ');
+  const lang = currentLang === 'ru' ? 'ru-RU' : currentLang === 'en' ? 'en-US' : 'uz-UZ';
+  _ttsPlaying = true;
+  ttsSpeak(skipText, lang);
+  ttsUpdateUI();
+}
+
+function ttsSetRate(rate) {
+  _ttsRate = parseFloat(rate);
+  if (_ttsNoteId && _ttsPlaying) {
+    const n = notes.find(x => x.id === _ttsNoteId);
+    if (!n) return;
+    const rawText = (n.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    const lang = currentLang === 'ru' ? 'ru-RU' : currentLang === 'en' ? 'en-US' : 'uz-UZ';
+    ttsSpeak(rawText.split(/\s+/).slice(_ttsIdx).join(' '), lang);
+  }
+}
+
+function ttsScrub(e) {
+  const track = e.currentTarget;
+  const pct = e.offsetX / track.offsetWidth;
+  const n = notes.find(x => x.id === _ttsNoteId);
+  if (!n) return;
+  const rawText = (n.title ? n.title+'. ':'')+
+    (n.content||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+  const words = rawText.split(/\s+/);
+  _ttsIdx = Math.floor(pct * words.length);
+  const skipText = words.slice(_ttsIdx).join(' ');
+  const lang = currentLang==='ru'?'ru-RU':currentLang==='en'?'en-US':'uz-UZ';
+  _ttsPlaying = true;
+  ttsSpeak(skipText, lang);
+  ttsUpdateProgress(pct);
+}
+
+function ttsUpdateProgress(pct) {
+  const fill = document.getElementById('tts-fill');
+  const time = document.getElementById('tts-time');
+  if (fill) fill.style.width = (pct * 100).toFixed(1) + '%';
+  if (time) time.textContent = Math.round(pct * 100) + '%';
+}
+
+function ttsUpdateUI() {
+  const btn = document.getElementById('tts-play-btn');
+  if (btn) btn.textContent = _ttsPlaying ? '⏸' : '▶';
+}
+
+// Voices yuklash
+window.speechSynthesis?.addEventListener('voiceschanged', () => {});
+
+// ════════════════════════════════════════════════════════════════
+// 📷 KAMERA (Camera + Gallery)
+// ════════════════════════════════════════════════════════════════
+let _camStream = null;
+let _camFacingMode = 'environment'; // back camera
+let _camFlashOn = false;
+let _camTargetNoteId = null;
+let _camPhotoBlob = null;
+
+async function openCamera(noteId) {
+  _camTargetNoteId = noteId;
+  const overlay = document.getElementById('cam-overlay');
+  if (!overlay) return;
+  overlay.classList.add('show');
+  document.getElementById('cam-preview').style.display = 'none';
+
+  try {
+    _camStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: _camFacingMode, width: { ideal: 1920 }, height: { ideal: 1080 } },
+      audio: false
+    });
+    const video = document.getElementById('cam-video');
+    if (video) { video.srcObject = _camStream; video.play(); }
+  } catch(e) {
+    overlay.classList.remove('show');
+    if (e.name === 'NotAllowedError') toast('Kamera ruxsati berilmadi', 'err');
+    else if (e.name === 'NotFoundError') toast('Kamera topilmadi', 'err');
+    else { toast('Kamera ochilmadi: ' + e.message, 'err'); camGallery(); }
+  }
+}
+
+function camCapture() {
+  const video = document.getElementById('cam-video');
+  const canvas = document.getElementById('cam-canvas');
+  if (!video || !canvas) return;
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  // Mirror front camera
+  if (_camFacingMode === 'user') {
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+  }
+  ctx.drawImage(video, 0, 0);
+  // Preview
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+  const preview = document.getElementById('cam-preview');
+  const previewImg = document.getElementById('cam-preview-img');
+  if (preview && previewImg) {
+    previewImg.src = dataUrl;
+    preview.style.display = 'flex';
+  }
+  _camPhotoBlob = dataUrl;
+  // Shutter animation
+  const overlay = document.getElementById('cam-overlay');
+  const flash = document.createElement('div');
+  flash.style.cssText = 'position:absolute;inset:0;background:#fff;z-index:10;animation:camFlash .2s ease-out forwards;pointer-events:none';
+  overlay.appendChild(flash);
+  const style = document.createElement('style');
+  style.textContent = '@keyframes camFlash{0%{opacity:.8}100%{opacity:0}}';
+  document.head.appendChild(style);
+  setTimeout(() => { flash.remove(); style.remove(); }, 300);
+}
+
+function camRetake() {
+  document.getElementById('cam-preview').style.display = 'none';
+  _camPhotoBlob = null;
+}
+
+function camSave() {
+  if (!_camPhotoBlob || !_camTargetNoteId) return;
+  addImageToNote(_camTargetNoteId, _camPhotoBlob);
+  camClose();
+  toast('✅ Rasm konspektga qo\'shildi!', 'ok');
+}
+
+function camClose() {
+  if (_camStream) { _camStream.getTracks().forEach(t => t.stop()); _camStream = null; }
+  document.getElementById('cam-overlay')?.classList.remove('show');
+  document.getElementById('cam-preview').style.display = 'none';
+  _camPhotoBlob = null;
+}
+
+async function camFlip() {
+  _camFacingMode = _camFacingMode === 'environment' ? 'user' : 'environment';
+  if (_camStream) { _camStream.getTracks().forEach(t => t.stop()); }
+  try {
+    _camStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: _camFacingMode }, audio: false
+    });
+    const video = document.getElementById('cam-video');
+    if (video) video.srcObject = _camStream;
+  } catch(e) { toast('Kamera almashtirilmadi', 'err'); }
+}
+
+function camToggleFlash() {
+  _camFlashOn = !_camFlashOn;
+  const btn = document.getElementById('cam-flash-btn');
+  if (btn) btn.style.background = _camFlashOn ? 'rgba(255,220,0,.3)' : 'rgba(0,0,0,.5)';
+  // Torch mode (mobile)
+  if (_camStream) {
+    const track = _camStream.getVideoTracks()[0];
+    if (track?.getCapabilities?.()?.torch) {
+      track.applyConstraints({ advanced: [{ torch: _camFlashOn }] }).catch(()=>{});
+    }
+  }
+}
+
+function camGallery() {
+  // Faylni input orqali tanlash
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*'; input.capture = 'environment';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast('Rasm 5MB dan kichik bo\'lsin', 'err'); return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      addImageToNote(_camTargetNoteId || editing?.id, ev.target.result);
+      toast('✅ Rasm qo\'shildi!', 'ok');
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+function addImageToNote(noteId, dataUrl) {
+  const idx = notes.findIndex(x => x.id === noteId);
+  if (idx < 0 && editing?.id !== noteId) return;
+  const target = idx >= 0 ? notes[idx] : editing;
+  if (!target.images) target.images = [];
+  target.images.push({ url: dataUrl, ts: Date.now() });
+  if (idx >= 0) notes[idx] = target;
+  if (editing?.id === noteId) editing = { ...editing, images: target.images };
+  save();
+  // Editor'da preview yangilash
+  const imgRow = document.getElementById('img-row');
+  if (imgRow) {
+    const img = document.createElement('img');
+    img.src = dataUrl; img.className = 'imt';
+    img.onclick = () => showLB(dataUrl);
+    imgRow.appendChild(img);
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// 🖼 KONSPEKT MUQOVASI (Note Cover)
+// ════════════════════════════════════════════════════════════════
+const COVER_PATTERNS = [
+  { id:'none', name:'Yo\'q', bg:'transparent' },
+  { id:'dots', name:'Nuqtalar', css:'radial-gradient(circle,rgba(255,255,255,.15) 1px,transparent 1px)',size:'20px 20px' },
+  { id:'lines', name:'Chiziqlar', css:'repeating-linear-gradient(45deg,rgba(255,255,255,.06) 0,rgba(255,255,255,.06) 1px,transparent 0,transparent 50%)',size:'8px 8px' },
+  { id:'grid', name:'To\'r', css:'linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px)',size:'24px 24px' },
+  { id:'waves', name:'To\'lqin', css:'repeating-radial-gradient(circle at 0 0,rgba(255,255,255,.08) 0,rgba(255,255,255,.08) 2px,transparent 0,transparent 50%)',size:'16px 16px' },
+  { id:'hex', name:'Geksagon', css:'radial-gradient(circle,rgba(255,255,255,.12) 2px,transparent 2px)',size:'30px 26px' }
+];
+
+function showCoverPicker(noteId) {
+  const n = notes.find(x => x.id === noteId);
+  if (!n) return;
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)';
+  overlay.onclick = e => { if(e.target===overlay) overlay.remove(); };
+
+  overlay.innerHTML = `
+  <div style="background:#0b1222;border:1px solid rgba(61,127,255,.2);border-radius:24px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;box-shadow:0 24px 72px rgba(0,0,0,.8)">
+    <!-- Preview -->
+    <div id="cover-preview" style="width:100%;height:160px;border-radius:24px 24px 0 0;background:${n.color||'#5b8dee'};display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;transition:all .3s">
+      <div id="cover-pattern-layer" style="position:absolute;inset:0;transition:all .3s"></div>
+      ${n.coverImage ? `<img src="${esc(n.coverImage)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:24px 24px 0 0"/>` : ''}
+      <div style="position:relative;font-family:'Fraunces',serif;font-size:22px;font-style:italic;color:rgba(255,255,255,.9);text-align:center;padding:20px;text-shadow:0 2px 12px rgba(0,0,0,.4)">${esc(n.title||'Mavzu sarlavhasi')}</div>
+    </div>
+
+    <div style="padding:20px 22px">
+      <div style="font-size:11px;font-weight:800;color:rgba(77,138,255,.7);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px">MUQOVA RANGI</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
+        ${['#5b8dee','#7c5cbf','#22c97a','#f0a500','#e05555','#d966a8','#20b2aa','#f97316','#06b6d4','#84cc16',
+           '#ec4899','#a855f7','#14b8a6','#f59e0b','#ef4444','#8b5cf6','#0ea5e9','#10b981'].map(c => `
+          <div onclick="document.getElementById('cover-preview').style.background='${c}';document.querySelectorAll('.cv-clr').forEach(d=>d.style.border='2px solid transparent');this.style.border='3px solid #fff';updateCoverNote('${noteId}','color','${c}')"
+            class="cv-clr" style="width:32px;height:32px;border-radius:50%;background:${c};cursor:pointer;transition:all .18s;border:${(n.color||'#5b8dee')===c?'3px solid #fff':'2px solid transparent'};box-shadow:0 2px 8px rgba(0,0,0,.3)"
+            onmouseenter="this.style.transform='scale(1.15)'" onmouseleave="this.style.transform=''"></div>`).join('')}
+      </div>
+
+      <div style="font-size:11px;font-weight:800;color:rgba(77,138,255,.7);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">NAQSH</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px">
+        ${COVER_PATTERNS.map(p => `
+        <button onclick="applyPattern('${p.id}','${noteId}');document.querySelectorAll('.cv-pat').forEach(b=>b.style.borderColor='rgba(255,255,255,.1)');this.style.borderColor='var(--accent)'"
+          class="cv-pat" style="background:${p.id==='none'?'rgba(255,255,255,.04)':p.css.includes('gradient')?'rgba(77,138,255,.1)':'rgba(255,255,255,.04)'};border:1px solid ${(n.coverPattern||'none')===p.id?'var(--accent)':'rgba(255,255,255,.1)'};border-radius:12px;padding:12px 8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text);transition:all .2s;font-family:var(--font)">
+          ${p.name}
+        </button>`).join('')}
+      </div>
+
+      <div style="font-size:11px;font-weight:800;color:rgba(77,138,255,.7);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">MUQOVA RASMI</div>
+      <div style="display:flex;gap:10px;margin-bottom:20px">
+        <button onclick="selectCoverImage('${noteId}')" style="flex:1;background:rgba(77,138,255,.1);border:1px dashed rgba(77,138,255,.3);border-radius:14px;padding:14px;font-size:13px;font-weight:700;color:var(--accent);cursor:pointer;font-family:var(--font)">🖼 Rasm tanlash</button>
+        ${n.coverImage ? `<button onclick="updateCoverNote('${noteId}','coverImage','');document.getElementById('cover-preview').querySelector('img')?.remove()" style="background:rgba(255,77,106,.1);border:1px solid rgba(255,77,106,.2);border-radius:14px;padding:14px;font-size:13px;font-weight:700;color:var(--red);cursor:pointer;font-family:var(--font)">🗑 O'chirish</button>` : ''}
+      </div>
+
+      <button onclick="this.closest('[style*=fixed]').remove();rDetail('${noteId}')" style="width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;padding:13px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--font);box-shadow:0 6px 20px rgba(77,138,255,.35)">✅ Saqlash</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+function applyPattern(patternId, noteId) {
+  const p = COVER_PATTERNS.find(x => x.id === patternId);
+  if (!p) return;
+  const layer = document.getElementById('cover-pattern-layer');
+  if (layer) {
+    if (patternId === 'none') {
+      layer.style.background = 'none';
+      layer.style.backgroundImage = 'none';
+    } else {
+      layer.style.backgroundImage = p.css;
+      layer.style.backgroundSize = p.size || '20px 20px';
+    }
+  }
+  updateCoverNote(noteId, 'coverPattern', patternId);
+}
+
+function updateCoverNote(noteId, key, val) {
+  const idx = notes.findIndex(x => x.id === noteId);
+  if (idx < 0) return;
+  notes[idx][key] = val;
+  save();
+}
+
+function selectCoverImage(noteId) {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file || file.size > 3 * 1024 * 1024) { toast('Rasm 3MB dan kichik bo\'lsin', 'err'); return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      updateCoverNote(noteId, 'coverImage', ev.target.result);
+      const preview = document.getElementById('cover-preview');
+      if (preview) {
+        let img = preview.querySelector('img');
+        if (!img) {
+          img = document.createElement('img');
+          img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:24px 24px 0 0';
+          preview.appendChild(img);
+        }
+        img.src = ev.target.result;
+      }
+      toast('✅ Muqova rasmi qo\'shildi!', 'ok');
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+// Note card'da cover ko'rsatish
+function getNcCoverHTML(n) {
+  if (n.coverImage) {
+    return `<div class="nc-cover-wrap"><img class="nc-cover" src="${esc(n.coverImage)}" loading="lazy" onerror="this.parentNode.style.display='none'"/></div>`;
+  }
+  if (n.coverPattern && n.coverPattern !== 'none') {
+    const p = COVER_PATTERNS.find(x => x.id === n.coverPattern);
+    if (p) return `<div style="height:80px;background:${n.color||'#5b8dee'};background-image:${p.css};background-size:${p.size||'20px 20px'};border-radius:0;position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(transparent,rgba(0,0,0,.2))"></div></div>`;
+  }
+  return '';
+}
+
+
 
 // ════════════════════════════════════════════════════════════════
 // 💬 GURUH CHATI (Group Chat) — Firebase Real-time
