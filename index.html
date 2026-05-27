@@ -538,9 +538,8 @@ body.font-lora .rich-editor,body.font-lora .nc-content,body.font-lora .nc-p{font
   <div class="nav-area" id="desktop-nav">
     <button class="nb on" id="nb-home" onclick="go('home')">🏠 Bosh</button>
     <button class="nb" id="nb-comm" onclick="go('comm')">🌐 Jamoat</button>
-    <button class="nb" id="nb-neuro" onclick="go('neuro')">🧠 Nevro</button>
+    <button class="nb" id="nb-groups" onclick="go('groups')">👥 Guruhlar</button>
     <button class="nb" id="nb-flash" onclick="go('flash')" style="position:relative">🃏 Flash<span id="sr-badge-d" style="display:none;position:absolute;top:2px;right:-4px;background:var(--red);border-radius:50%;width:7px;height:7px;box-shadow:0 0 6px rgba(255,77,106,.7)"></span></button>
-    <button class="nb" id="nb-groups" onclick="go('groups')" style="position:relative">👥 Guruhlar</button>
     <button class="nb" id="nb-msg" onclick="go('msg')" style="position:relative">💬 Xabarlar<span id="msg-badge-d" style="display:none;position:absolute;top:2px;right:-4px;background:var(--red);border-radius:50%;width:7px;height:7px;box-shadow:0 0 6px rgba(255,77,106,.7)"></span></button>
     <button class="nb" id="nb-stats" onclick="go('stats')">📊 Stat</button>
     <button class="nb" id="nb-profile" onclick="go('profile')">👤 Profil</button>
@@ -568,10 +567,9 @@ body.font-lora .rich-editor,body.font-lora .nc-content,body.font-lora .nc-p{font
 <div id="mbar">
   <button class="mb on" id="mb-home" onclick="go('home')"><span class="mi">🏠</span>Bosh</button>
   <button class="mb" id="mb-comm" onclick="go('comm')"><span class="mi">🌐</span>Jamoat</button>
-  <button class="mb" id="mb-neuro" onclick="go('neuro')"><span class="mi">🧠</span>Nevro</button>
-  <button class="mb" id="mb-flash" onclick="go('flash')" style="position:relative"><span class="mi">🃏</span>Flash<span id="sr-badge-m" style="display:none;position:absolute;top:4px;right:10px;background:var(--red);border-radius:50%;width:7px;height:7px;box-shadow:0 0 6px rgba(255,77,106,.7)"></span></button>
   <button class="mb" id="mb-groups" onclick="go('groups')"><span class="mi">👥</span>Guruhlar</button>
-  <button class="mb" id="mb-msg" onclick="go('msg')" style="position:relative"><span class="mi">💬</span>Xabarlar<span id="msg-badge-m" style="display:none;position:absolute;top:4px;right:6px;background:var(--red);border-radius:50%;width:7px;height:7px;box-shadow:0 0 6px rgba(255,77,106,.7)"></span></button>
+  <button class="mb" id="mb-flash" onclick="go('flash')" style="position:relative"><span class="mi">🃏</span>Flash<span id="sr-badge-m" style="display:none;position:absolute;top:4px;right:10px;background:var(--red);border-radius:50%;width:7px;height:7px;box-shadow:0 0 6px rgba(255,77,106,.7)"></span></button>
+  <button class="mb" id="mb-msg" onclick="go('msg')" style="position:relative"><span class="mi">💬</span>Xabar<span id="msg-badge-m" style="display:none;position:absolute;top:4px;right:6px;background:var(--red);border-radius:50%;width:7px;height:7px;box-shadow:0 0 6px rgba(255,77,106,.7)"></span></button>
   <button class="mb" id="mb-stats" onclick="go('stats')"><span class="mi">📊</span>Stat</button>
   <button class="mb" id="mb-profile" onclick="go('profile')"><span class="mi">👤</span>Profil</button>
 </div>
@@ -1179,7 +1177,7 @@ function newNote(subj,txt,title){
     color:COLORS[0],images:[],tags:[],pinned:false,starred:false,progress:'new',
     createdAt:Date.now(),updatedAt:Date.now()};
   notes.unshift(n);save();editing={...n};
-  ['home','comm','neuro','flash','msg','stats'].forEach(k=>{
+  ['home','comm','flash','groups','msg','stats'].forEach(k=>{
     document.getElementById('nb-'+k)?.classList.remove('on');
     document.getElementById('mb-'+k)?.classList.remove('on');
   });
@@ -3224,7 +3222,7 @@ function go(v,arg){
     });
   },100);
   view=v;
-  ['home','comm','neuro','flash','groups','msg','stats','profile'].forEach(k=>{
+  ['home','comm','flash','groups','msg','stats','profile'].forEach(k=>{
     document.getElementById('nb-'+k)?.classList.toggle('on',k===v);
     document.getElementById('mb-'+k)?.classList.toggle('on',k===v);
   });
@@ -4268,7 +4266,7 @@ document.addEventListener('keydown', e => {
 // ════════════════════════════════════════════════════════════════
 const I18N = {
   uz: {
-    home:'Bosh', community:'Jamoat', neuro:'Nevro', flash:'Flash',
+    home:'Bosh', community:'Jamoat', groups:'Guruhlar', flash:'Flash',
     messages:'Xabarlar', stats:'Stat', profile:'Profil',
     newNote:'+ Yangi', login:'🔐 Kirish', logout:'🚪 Chiqish',
     search:'Qidirish...', save:'💾 Saqlash', delete:'O\'chirish',
@@ -4297,7 +4295,7 @@ const I18N = {
     unsubAuthor:'Obunani bekor qildingiz',
   },
   ru: {
-    home:'Главная', community:'Сообщество', neuro:'Невро', flash:'Флэш',
+    home:'Главная', community:'Сообщество', groups:'Группы', flash:'Флэш',
     messages:'Сообщения', stats:'Статистика', profile:'Профиль',
     newNote:'+ Новый', login:'🔐 Войти', logout:'🚪 Выйти',
     search:'Поиск...', save:'💾 Сохранить', delete:'Удалить',
@@ -4326,7 +4324,7 @@ const I18N = {
     unsubAuthor:'Вы отписались',
   },
   en: {
-    home:'Home', community:'Community', neuro:'Neuro', flash:'Flash',
+    home:'Home', community:'Community', groups:'Groups', flash:'Flash',
     messages:'Messages', stats:'Stats', profile:'Profile',
     newNote:'+ New', login:'🔐 Sign In', logout:'🚪 Sign Out',
     search:'Search...', save:'💾 Save', delete:'Delete',
@@ -4369,9 +4367,9 @@ function setLang(lang) {
 function applyLangToUI() {
   // Nav buttons
   const navMap = {
-    'nb-home':'home','nb-comm':'community','nb-neuro':'neuro',
+    'nb-home':'home','nb-comm':'community','nb-groups':'groups',
     'nb-flash':'flash','nb-msg':'messages','nb-stats':'stats','nb-profile':'profile',
-    'mb-home':'home','mb-comm':'community','mb-neuro':'neuro',
+    'mb-home':'home','mb-comm':'community','mb-groups':'groups',
     'mb-flash':'flash','mb-msg':'messages','mb-stats':'stats','mb-profile':'profile'
   };
   Object.entries(navMap).forEach(([id, key]) => {
